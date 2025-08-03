@@ -21,10 +21,10 @@ export default function Home() {
               alt="Prêmio"
               fill
               priority
-              className="object-cover object-bottom"
+              className="object-cover object-center"
             />
-            {/* Gradiente sutil vindo de baixo para cima */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            {/* Gradiente que cobre a metade inferior */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black to-transparent"></div>
           </div>
         </div>
         {/* Texto da campanha sobreposto */}
