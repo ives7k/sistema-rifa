@@ -52,7 +52,7 @@ const PurchaseSection = () => {
             </div>
             
             <div className="text-center bg-gray-100 p-1 rounded-md mb-2">
-                <p className="text-xs text-gray-600 font-semibold">QUANTO MAIS TÍTULOS, MAIS VOCÊ AJUDA E MAIS CHANCES DE GANHAR!</p>
+                <p className="text-xs text-gray-600 font-semibold">QUANTO MAIS TÍTULOS, MAIS VOCÊ AJUDA E MAIS CHANCES VOCÊ TEM DE GANHAR!</p>
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-2 text-center">
@@ -67,7 +67,7 @@ const PurchaseSection = () => {
                         )}
                         <button
                         onClick={() => handleAddQuantity(num)}
-                        className={`transition-all text-white flex flex-col justify-center items-center w-full h-full rounded-lg ${isPopular ? 'bg-[#28a745] pt-3' : 'bg-black'}`}
+                        className={`transition-all text-white flex flex-col justify-center items-center w-full h-full rounded-lg ${isPopular ? 'bg-[#28a745]' : 'bg-black'}`}
                         >
                         <p className="font-bold text-xl leading-tight">+{num}</p>
                         <p className="uppercase" style={{ fontSize: '0.6rem' }}>Selecionar</p>
@@ -79,15 +79,17 @@ const PurchaseSection = () => {
                 
             <div className="grid grid-cols-2 gap-2 items-center">
                 {/* Seletor de Quantidade */}
-                <div className="col-span-1 bg-gray-100 rounded-lg p-1 flex justify-between items-center h-full">
-                    <button onClick={resetQuantity} className="text-gray-500 hover:text-black text-lg px-1">
-                        <i className="bi bi-x-circle"></i>
-                    </button>
-                    <button onClick={() => handleAddQuantity(-1)} className="text-gray-500 hover:text-black text-xl px-1">
-                        <i className="bi bi-dash-circle"></i>
-                    </button>
-                    <input type="text" value={quantity} readOnly className="bg-transparent text-black text-center w-8 font-bold"/>
-                    <button onClick={() => handleAddQuantity(1)} className="text-green-500 hover:text-green-400 text-xl px-1">
+                <div className="col-span-1 bg-gray-100 rounded-lg p-1 flex items-center h-full">
+                    <div className="flex items-center space-x-2">
+                        <button onClick={resetQuantity} className="text-gray-500 hover:text-black text-lg px-2">
+                            <i className="bi bi-x-circle"></i>
+                        </button>
+                        <button onClick={() => handleAddQuantity(-1)} className="text-gray-500 hover:text-black text-xl px-2">
+                            <i className="bi bi-dash-circle"></i>
+                        </button>
+                    </div>
+                    <input type="text" value={quantity} readOnly className="flex-1 bg-transparent text-black text-center font-bold w-full"/>
+                    <button onClick={() => handleAddQuantity(1)} className="text-green-500 hover:text-green-400 text-xl px-2">
                         <i className="bi bi-plus-circle-fill"></i>
                     </button>
                 </div>

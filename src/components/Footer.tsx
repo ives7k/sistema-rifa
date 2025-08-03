@@ -13,7 +13,7 @@ const Footer = () => {
         {/* Logos parceiros */}
         <div className="flex justify-center items-center space-x-6">
           <Image src='https://incs-bucket.s3.amazonaws.com/via-cap-colorido.png' alt='VIACAP Capitalização' width={80} height={40} />
-          <Image src='https://incs-bucket.s3.amazonaws.com/instituto-plural.png' alt='Instituto Plural' width={120} height={60} />
+          <Image src='https://incs-bucket.s3.amazonaws.com/instituto-plural.png' alt='Instituto Plural' width={80} height={40} />
         </div>
         
         {/* Texto Legal */}
