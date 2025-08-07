@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic'; // Impede o cache da rota
+export const dynamic = 'force-dynamic';
+export const revalidate = 0; // Nunca usar o cache para esta rota
 
 const SKALEPAY_API_URL = 'https://api.conta.skalepay.com.br/v1';
 
@@ -27,9 +28,7 @@ export async function GET(request: Request) {
 
     const authString = `${secretKey}:x`;
     const authHeader = `Basic ${Buffer.from(authString).toString('base64')}`;
-
-    // A adição de { cache: 'no-store' } aqui é a correção crucial.
-    // Isso força o servidor da Vercel a não usar o cache para esta chamada fetch específica.
+    
     const response = await fetch(`${SKALEPAY_API_URL}/transactions/${transactionId}`, {
       method: 'GET',
       headers: {
@@ -46,21 +45,18 @@ export async function GET(request: Request) {
 
     const result = await response.json();
     const titles: string[] = [];
-
-    // Se o pagamento foi confirmado, geramos os títulos.
+    
     if (result.status === 'paid' && result.items && result.items.length > 0) {
       const quantity = result.items[0].quantity || 0;
       for (let i = 0; i < quantity; i++) {
-        // Gera um número aleatório de 6 dígitos
         const title = Math.floor(100000 + Math.random() * 900000).toString();
         titles.push(title);
       }
     }
-
-    // Retornamos o status e os títulos (se houver) para o frontend
+    
     return NextResponse.json({
       success: true,
-      status: result.status, // Ex: 'paid', 'pending', 'expired'
+      status: result.status,
       data: result,
       titles: titles,
     });
