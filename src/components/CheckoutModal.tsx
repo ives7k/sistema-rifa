@@ -40,7 +40,14 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
-  const [phone, setPhone] = useState('');
+  const [step, setStep] = useState(1); // 1: Telefone, 2: Cadastro, 3: Pagamento
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    cpf: '',
+    telefone: ''
+  });
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixData | null>(null);
@@ -52,10 +59,11 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       // Resetar estados quando o modal for reaberto
+      setStep(1);
+      setFormData({ nome: '', email: '', cpf: '', telefone: '' });
       setPixData(null);
       setTimeLeft(600);
       setShowQr(false);
-      setPhone('');
       setError(null);
     } else {
       document.body.style.overflow = 'auto';
@@ -78,6 +86,18 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   if (!isOpen) {
     return null;
   }
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+
+  const handlePhoneSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aqui teríamos a lógica para verificar o telefone.
+    // Como não temos DB, vamos sempre para a etapa de cadastro.
+    setStep(2); 
+  }
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,7 +113,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         },
         body: JSON.stringify({ 
           valor: quantity * TICKET_PRICE,
-          telefone: phone,
+          ...formData
         }),
       });
 
@@ -104,10 +124,20 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       }
       
       setPixData(data);
+      setStep(3); // Mudar para a etapa de pagamento
       // Ocultar QR Code por padrão em telas menores (mobile)
       setShowQr(window.innerWidth >= 768);
 
     } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Ocorreu um erro desconhecido.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -126,33 +156,48 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  return (
-    <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4 overflow-y-auto ${inter.className}`}>
-      {/* Aplicando o mesmo padrão de container da página */}
-      <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg mx-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="relative text-center p-3 border-b border-gray-200">
-          <h5 className="font-semibold text-gray-800">Checkout</h5>
-          <button onClick={onClose} className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <i className="bi bi-x text-2xl"></i>
-          </button>
-        </div>
-
-        <div className="p-2 space-y-2">
-            <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
-                <div className="relative w-24 h-16 shrink-0">
-                    <Image
-                        src="https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg"
-                        alt="Prêmio"
-                        fill
-                        className="rounded-md object-cover"
-                    />
+  const renderStep = () => {
+    switch (step) {
+      case 1: // Etapa do Telefone
+        return (
+          <form className="space-y-2" onSubmit={handlePhoneSubmit}>
+              <div>
+                  <label htmlFor="telefone" className="block text-sm font-semibold text-gray-800 mb-1">Informe seu telefone</label>
+                  <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="(00) 00000-0000" />
+              </div>
+              {!formData.telefone && <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-2 text-sm rounded-r-md"><i className="bi bi-exclamation-circle-fill mr-2"></i>Informe seu telefone para continuar.</div>}
+              <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={!formData.telefone}>
+                  <span>Continuar</span><i className="bi bi-arrow-right"></i>
+              </button>
+          </form>
+        );
+      case 2: // Etapa de Cadastro
+        return (
+            <form className="space-y-2" onSubmit={handlePayment}>
+                <div>
+                    <label htmlFor="nome" className="block text-sm font-semibold text-gray-800 mb-1">Nome Completo</label>
+                    <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="Seu nome completo" />
                 </div>
-                <p>
-                    <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">EDIÇÃO 76 - NOVO TERA 2026 0KM</b>
-                </p>
-            </div>
-
-            {pixData ? (
+                <div>
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">E-mail</label>
+                    <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="seu@email.com" />
+                </div>
+                <div>
+                    <label htmlFor="cpf" className="block text-sm font-semibold text-gray-800 mb-1">CPF</label>
+                    <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="000.000.000-00" />
+                </div>
+                {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
+                <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !formData.nome || !formData.email || !formData.cpf}>
+                    {isLoading ? (
+                        <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Gerando Pagamento...</span></>
+                    ) : (
+                        <><span>Finalizar e Pagar</span><i className="bi bi-arrow-right"></i></>
+                    )}
+                </button>
+            </form>
+        );
+      case 3: // Etapa de Pagamento
+        return (
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                 <div className="text-center p-2">
                     <p className="text-sm text-gray-600">Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
@@ -167,7 +212,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
                 {showQr && (
                 <div className="flex justify-center">
-                    <Image src={pixData.qrCodeUrl} alt="QR Code PIX" width={200} height={200} className="border-4 border-green-400 rounded-lg"/>
+                    <Image src={pixData!.qrCodeUrl} alt="QR Code PIX" width={200} height={200} className="border-4 border-green-400 rounded-lg"/>
                 </div>
                 )}
                 
@@ -177,8 +222,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         <p className="font-semibold text-gray-700">Copie o código PIX abaixo.</p>
                     </div>
                     <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
-                        <span className="text-xs font-mono text-green-700 truncate mr-2">{pixData.pixCopiaECola}</span>
-                        <button onClick={() => copyToClipboard(pixData.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
+                        <span className="text-xs font-mono text-green-700 truncate mr-2">{pixData!.pixCopiaECola}</span>
+                        <button onClick={() => copyToClipboard(pixData!.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
                         <i className="bi bi-clipboard-check"></i>
                         <span>Copiar</span>
                         </button>
@@ -206,36 +251,48 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
                 <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-1 text-sm">
                     <h4 className="font-bold text-gray-800 border-b pb-1 mb-2">Detalhes da sua compra</h4>
-                    <p className="text-xs text-gray-500 break-words"><b>ID:</b> {pixData.token}</p>
-                    <p className="text-xs text-gray-700"><b>Comprador:</b> {pixData.comprador.nome}</p>
-                    <p className="text-xs text-gray-700"><b>CPF:</b> {formatCPF(pixData.comprador.cpf)}</p>
-                    <p className="text-xs text-gray-700"><b>Telefone:</b> {formatPhone(pixData.comprador.telefone)}</p>
+                    <p className="text-xs text-gray-500 break-words"><b>ID:</b> {pixData!.token}</p>
+                    <p className="text-xs text-gray-700"><b>Comprador:</b> {pixData!.comprador.nome}</p>
+                    <p className="text-xs text-gray-700"><b>CPF:</b> {formatCPF(pixData!.comprador.cpf)}</p>
+                    <p className="text-xs text-gray-700"><b>Telefone:</b> {formatPhone(pixData!.comprador.telefone)}</p>
                     <p className="text-xs text-gray-700"><b>Situação:</b> <span className="font-semibold text-yellow-600">Aguardando pagamento</span></p>
                     <p className="text-xs text-gray-700"><b>Quantidade:</b> {quantity}</p>
-                    <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                    <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData!.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </div>
 
             </div>
-            ) : (
-            <form className="space-y-2" onSubmit={handlePayment}>
-                <div>
-                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-800 mb-1">Informe seu telefone</label>
-                    <input type="tel" id="phone" name="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="(00) 00000-0000" disabled={isLoading} />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4 overflow-y-auto ${inter.className}`}>
+      {/* Aplicando o mesmo padrão de container da página */}
+      <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg mx-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="relative text-center p-3 border-b border-gray-200">
+          <h5 className="font-semibold text-gray-800">Checkout</h5>
+          <button onClick={onClose} className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+            <i className="bi bi-x text-2xl"></i>
+          </button>
+        </div>
+
+        <div className="p-2 space-y-2">
+            <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
+                <div className="relative w-24 h-16 shrink-0">
+                    <Image
+                        src="https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg"
+                        alt="Prêmio"
+                        fill
+                        className="rounded-md object-cover"
+                    />
                 </div>
-
-                {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
-                
-                {!phone && <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-2 text-sm rounded-r-md"><i className="bi bi-exclamation-circle-fill mr-2"></i>Informe seu telefone para continuar.</div>}
-
-                <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !phone}>
-                    {isLoading ? (
-                        <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Processando...</span></>
-                    ) : (
-                        <><span>Continuar</span><i className="bi bi-arrow-right"></i></>
-                    )}
-                </button>
-            </form>
-            )}
+                <p>
+                    <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">EDIÇÃO 76 - NOVO TERA 2026 0KM</b>
+                </p>
+            </div>
+            {renderStep()}
         </div>
       </div>
     </div>

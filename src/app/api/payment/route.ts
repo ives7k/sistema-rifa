@@ -31,82 +31,23 @@ function limparTelefone(telefone: string | null): string {
 }
 
 // Função para gerar CPF válido
-function gerarCPF(): string {
-    let cpf = '';
-    for (let i = 0; i < 9; i++) {
-        cpf += Math.floor(Math.random() * 10);
-    }
-
-    let soma = 0;
-    for (let i = 0; i < 9; i++) {
-        soma += parseInt(cpf[i]) * (10 - i);
-    }
-    let resto = soma % 11;
-    const digito1 = (resto < 2) ? 0 : 11 - resto;
-    cpf += digito1;
-
-    soma = 0;
-    for (let i = 0; i < 10; i++) {
-        soma += parseInt(cpf[i]) * (11 - i);
-    }
-    resto = soma % 11;
-    const digito2 = (resto < 2) ? 0 : 11 - resto;
-    cpf += digito2;
-
-    const invalidos = [
-        '00000000000', '11111111111', '22222222222', '33333333333',
-        '44444444444', '55555555555', '66666666666', '77777777777',
-        '88888888888', '99999999999'
-    ];
-
-    if (invalidos.includes(cpf)) {
-        return gerarCPF();
-    }
-
-    return cpf;
-}
-
-function gerarNomeAleatorio(): string {
-    const nomes_masculinos = [
-        'João', 'Pedro', 'Lucas', 'Miguel', 'Arthur', 'Gabriel', 'Bernardo', 'Rafael',
-        'Gustavo', 'Felipe', 'Daniel', 'Matheus', 'Bruno', 'Thiago', 'Carlos'
-    ];
-    const nomes_femininos = [
-        'Maria', 'Ana', 'Julia', 'Sofia', 'Isabella', 'Helena', 'Valentina', 'Laura',
-        'Alice', 'Manuela', 'Beatriz', 'Clara', 'Luiza', 'Mariana', 'Sophia'
-    ];
-    const sobrenomes = [
-        'Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves',
-        'Pereira', 'Lima', 'Gomes', 'Costa', 'Ribeiro', 'Martins', 'Carvalho',
-        'Almeida', 'Lopes', 'Soares', 'Fernandes', 'Vieira', 'Barbosa'
-    ];
-
-    const genero = Math.round(Math.random());
-    const nome = genero ?
-        nomes_masculinos[Math.floor(Math.random() * nomes_masculinos.length)] :
-        nomes_femininos[Math.floor(Math.random() * nomes_femininos.length)];
-
-    const sobrenome1 = sobrenomes[Math.floor(Math.random() * sobrenomes.length)];
-    const sobrenome2 = sobrenomes[Math.floor(Math.random() * sobrenomes.length)];
-
-    return `${nome} ${sobrenome1} ${sobrenome2}`;
-}
-
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { valor, nome, telefone } = body;
+        const { valor, nome, email, cpf, telefone } = body;
 
         if (!valor || valor <= 0) {
             throw new Error('Valor inválido');
         }
+        if (!nome || !email || !cpf || !telefone) {
+            throw new Error('Todos os campos são obrigatórios: nome, email, cpf e telefone.');
+        }
 
         const valor_centavos = Math.round(valor * 100);
-
-        const nome_cliente = nome || gerarNomeAleatorio();
-        const email = `${nome_cliente.toLowerCase().replace(/\s/g, '.')}@email.com`;
-        const cpf = gerarCPF();
         const telefone_cliente = limparTelefone(telefone);
+
+        // Limpar CPF
+        const cpf_limpo = cpf.replace(/[^0-9]/g, '');
 
         const apiUrl = 'https://api.conta.skalepay.com.br/v1';
         const secretKey = process.env.SKALEPLAY_SECRET_KEY;
@@ -122,11 +63,11 @@ export async function POST(request: Request) {
             "amount": valor_centavos,
             "paymentMethod": "pix",
             "customer": {
-                "name": nome_cliente,
+                "name": nome,
                 "email": email,
                 "document": {
                     "type": "cpf",
-                    "number": cpf
+                    "number": cpf_limpo
                 },
                 "phone": telefone_cliente,
                 "ip": request.headers.get('x-forwarded-for') ?? '127.0.0.1'
@@ -178,8 +119,8 @@ export async function POST(request: Request) {
             qrCodeUrl: qrCodeUrl,
             valor: valor,
             comprador: {
-                nome: nome_cliente,
-                cpf: cpf,
+                nome: nome,
+                cpf: cpf_limpo,
                 telefone: telefone_cliente
             }
         });
