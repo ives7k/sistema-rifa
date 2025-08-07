@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 
 /**
  * Endpoint para receber notificações de postback da SkalePay.
@@ -11,9 +10,10 @@ export async function POST(request: Request) {
   console.log('Endpoint /webhook/paguesafe foi chamado.');
 
   try {
-    // Log dos cabeçalhos para depuração
-    const headersList = headers();
-    console.log('Headers recebidos:', JSON.stringify(Object.fromEntries(headersList.entries()), null, 2));
+    // Log dos cabeçalhos para depuração (usando request.headers)
+    const headersList = request.headers;
+    // O objeto Headers é diretamente iterável, então podemos usar Object.fromEntries
+    console.log('Headers recebidos:', JSON.stringify(Object.fromEntries(headersList), null, 2));
 
     // Lê o corpo como texto para evitar erros de parse
     const bodyAsText = await request.text();
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         payload = JSON.parse(bodyAsText);
     } catch (parseError) {
         console.error('Erro ao fazer o parse do JSON do webhook:', parseError);
-        // Responde com erro, mas a SkalePay não deve tentar novamente.
+        // Responde com erro 400 para indicar um problema com a requisição
         return new NextResponse(JSON.stringify({ success: false, message: 'Erro de parse do JSON.' }), {
             status: 400,
             headers: { "Content-Type": "application/json" },
