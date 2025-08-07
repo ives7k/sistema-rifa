@@ -11,13 +11,11 @@ interface CheckoutModalProps {
   onClose: () => void;
   quantity: number;
 }
-
 interface CompradorData {
     nome: string;
     cpf: string;
     telefone: string;
 }
-
 interface PixData {
     token: string;
     qrCodeUrl: string;
@@ -33,20 +31,15 @@ const inter = Inter({ subsets: ["latin"] });
 const formatCPF = (cpf: string) => {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-**');
 };
-
 const formatPhone = (phone: string) => {
     return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) *****-**$3');
 };
-
 
 const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   // --- Estados do Componente ---
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    cpf: '',
-    telefone: ''
+    nome: '', email: '', cpf: '', telefone: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,51 +51,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
 
-  // Ref para a função de verificação, garantindo que o setInterval use a versão mais recente
-  const checkStatusCallbackRef = useRef(handleCheckPaymentStatus);
-  useEffect(() => {
-    checkStatusCallbackRef.current = handleCheckPaymentStatus;
-  });
-
   // --- Funções de Manipulação de Eventos (com useCallback) ---
-  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
-    if (!pixData?.token) return;
-    if (!isSilent) {
-      setIsVerifying(true);
-      setError(null);
-    }
-    try {
-        const uniqueUrl = `/api/payment/status?id=${pixData.token}&t=${new Date().getTime()}`;
-        const response = await fetch(uniqueUrl, { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-            if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
-            return; 
-        }
-        setPaymentStatus(data.status);
-        if (data.status === 'paid') {
-            setError(null);
-            if (data.titles && data.titles.length > 0) setTitles(data.titles);
-            if (data.data?.paidAt) {
-                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit',
-                });
-                setPaidAt(formattedDate);
-            }
-        } else if (!isSilent) {
-            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
-        }
-    } catch (err: unknown) {
-        if (!isSilent) {
-            if (err instanceof Error) setError(err.message);
-            else setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
-        }
-    } finally {
-        if (!isSilent) setIsVerifying(false);
-    }
-  }, [pixData?.token]);
-
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
     const { name, value } = e.target;
@@ -158,12 +107,55 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setIsLoading(false);
     }
   }, [formData, quantity]);
-
+  
+  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
+    if (!pixData?.token) return;
+    if (!isSilent) {
+      setIsVerifying(true);
+      setError(null);
+    }
+    try {
+        const uniqueUrl = `/api/payment/status?id=${pixData.token}&t=${new Date().getTime()}`;
+        const response = await fetch(uniqueUrl, { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
+            return; 
+        }
+        setPaymentStatus(data.status);
+        if (data.status === 'paid') {
+            setError(null);
+            if (data.titles && data.titles.length > 0) setTitles(data.titles);
+            if (data.data?.paidAt) {
+                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                });
+                setPaidAt(formattedDate);
+            }
+        } else if (!isSilent) {
+            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+        }
+    } catch (err: unknown) {
+        if (!isSilent) {
+            if (err instanceof Error) setError(err.message);
+            else setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
+        }
+    } finally {
+        if (!isSilent) setIsVerifying(false);
+    }
+  }, [pixData?.token]);
+  
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
     alert('Código PIX copiado para a área de transferência!');
   }, []);
 
+  // --- Refs ---
+  const checkStatusCallbackRef = useRef(handleCheckPaymentStatus);
+  useEffect(() => {
+    checkStatusCallbackRef.current = handleCheckPaymentStatus;
+  });
 
   // --- Efeitos (useEffect) ---
   useEffect(() => {
@@ -198,7 +190,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       return () => clearInterval(interval);
     }
   }, [step, paymentStatus, timeLeft]);
-
 
   // --- Lógica de Renderização ---
   if (!isOpen) {
