@@ -1,7 +1,7 @@
 // src/components/CheckoutModal.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { Inter } from "next/font/google";
 
@@ -57,6 +57,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
+
+  // Ref para a função de verificação, garantindo que o setInterval use a versão mais recente
+  const checkStatusCallbackRef = useRef(handleCheckPaymentStatus);
+  useEffect(() => {
+    checkStatusCallbackRef.current = handleCheckPaymentStatus;
+  });
 
   // --- Funções de Manipulação de Eventos (com useCallback) ---
   const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
@@ -188,10 +194,10 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
   useEffect(() => {
     if (step === 3 && paymentStatus === 'pending' && timeLeft > 0) {
-      const interval = setInterval(() => handleCheckPaymentStatus(true), 5000);
+      const interval = setInterval(() => checkStatusCallbackRef.current(true), 5000);
       return () => clearInterval(interval);
     }
-  }, [step, paymentStatus, timeLeft, handleCheckPaymentStatus]);
+  }, [step, paymentStatus, timeLeft]);
 
 
   // --- Lógica de Renderização ---
