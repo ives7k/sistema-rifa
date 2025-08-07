@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         }
 
         const authString = `${secretKey}:x`;
-        const authHeader = `Basic ${btoa(authString)}`;
+        const authHeader = `Basic ${Buffer.from(authString).toString('base64')}`;
 
         const data = {
             "amount": valor_centavos,

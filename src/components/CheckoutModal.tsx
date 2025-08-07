@@ -353,7 +353,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   };
 
   return (
-    <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4 overflow-y-auto ${inter.className}`}>
+    <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4 overflow-y-auto h-screen w-screen ${inter.className}`}>
       <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg mx-auto" onClick={(e) => e.stopPropagation()}>
         <div className="relative text-center p-3 border-b border-gray-200">
           <h5 className="font-semibold text-gray-800">Checkout</h5>

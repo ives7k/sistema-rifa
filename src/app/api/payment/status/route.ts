@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
 
     try {
-        const authString = btoa(`${secretKey}:x`);
+        const authString = `Basic ${Buffer.from(`${secretKey}:x`).toString('base64')}`;
         
         // ULTIMA TENTATIVA: Adicionar um parâmetro de cache-busting aleatório na URL
         const cacheBuster = `_=${new Date().getTime()}`;
