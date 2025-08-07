@@ -66,7 +66,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setError(null);
     }
     try {
-        const response = await fetch(`/api/payment/status?id=${pixData.token}`);
+        const response = await fetch(`/api/payment/status?id=${pixData.token}`, { cache: 'no-store' });
         const data = await response.json();
         if (!response.ok || !data.success) {
             if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
