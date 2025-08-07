@@ -177,6 +177,11 @@ export async function POST(request: Request) {
             pixCopiaECola: result.pix.qrcode,
             qrCodeUrl: qrCodeUrl,
             valor: valor,
+            comprador: {
+                nome: nome_cliente,
+                cpf: cpf,
+                telefone: telefone_cliente
+            }
         });
 
     } catch (error) {
