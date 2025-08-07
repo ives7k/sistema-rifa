@@ -202,7 +202,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       const interval = setInterval(() => {
         // Usa a função da ref para garantir que está sempre chamando a última versão
         checkStatusCallbackRef.current?.(true); // true para chamada "silenciosa"
-      }, 2000); // Verifica a cada 2 segundos
+      }, 3000); // Verifica a cada 3 segundos
 
       return () => clearInterval(interval);
     }
