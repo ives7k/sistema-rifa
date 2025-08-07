@@ -229,7 +229,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 </div>
                 <div>
                     <label htmlFor="cpf" className="block text-sm font-semibold text-gray-800 mb-1">CPF</label>
-                    <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="000.000.000-00" inputMode="numeric" pattern="[0-9.-]*" maxLength={14} />
+                    <input type="text" id="cpf" name="cpf" value={formData.cpf} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-sm" placeholder="000.000.000-00" inputMode="numeric" maxLength={14} />
                 </div>
                 {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
                 <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !formData.nome || !formData.email || !formData.cpf}>
