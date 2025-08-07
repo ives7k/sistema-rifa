@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -55,8 +56,12 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             pixCopiaECola: data.pixCopiaECola,
         });
 
-    } catch (err: any) {
-        setError(err.message || 'Ocorreu um erro desconhecido.');
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            setError(err.message);
+        } else {
+            setError('Ocorreu um erro desconhecido.');
+        }
     } finally {
         setIsLoading(false);
     }
@@ -96,7 +101,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             {pixData ? (
                 <div className="text-center space-y-4">
                     <h3 className="font-bold text-lg text-gray-800">Pague com PIX para finalizar</h3>
-                    <img src={pixData.qrCodeUrl} alt="QR Code PIX" className="mx-auto border-4 border-green-500 rounded-lg"/>
+                    <Image src={pixData.qrCodeUrl} alt="QR Code PIX" width={250} height={250} className="mx-auto border-4 border-green-500 rounded-lg"/>
                     <button 
                         onClick={copyToClipboard}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors"
