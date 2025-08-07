@@ -85,6 +85,19 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   }, [pixData, timeLeft, paymentStatus]);
 
+  // Efeito para verificação automática (polling)
+  useEffect(() => {
+    if (step === 3 && paymentStatus === 'pending' && timeLeft > 0) {
+      const interval = setInterval(() => {
+        // Não mostra o ícone de 'loading' na verificação automática
+        // para não poluir a interface do usuário. Apenas verifica.
+        handleCheckPaymentStatus(true); 
+      }, 5000); // Verifica a cada 5 segundos
+
+      return () => clearInterval(interval);
+    }
+  }, [step, paymentStatus, timeLeft]);
+
   if (!isOpen) {
     return null;
   }
@@ -168,36 +181,46 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   };
   
-  const handleCheckPaymentStatus = async () => {
+  const handleCheckPaymentStatus = async (isSilent = false) => {
     if (!pixData?.token) return;
 
-    setIsVerifying(true);
-    setError(null);
+    if (!isSilent) {
+      setIsVerifying(true);
+      setError(null);
+    }
 
     try {
         const response = await fetch(`/api/payment/status?id=${pixData.token}`);
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Não foi possível verificar o pagamento.');
+            // Em modo silencioso, não mostramos o erro para não interromper o usuário
+            if (!isSilent) {
+                throw new Error(data.message || 'Não foi possível verificar o pagamento.');
+            }
+            return; 
         }
 
         setPaymentStatus(data.status);
 
-        if (data.status === 'paid') {
-            // Ação opcional: fechar o modal, mostrar mensagem de sucesso, etc.
-        } else {
+        if (data.status !== 'paid' && !isSilent) {
             setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+        } else if(data.status === 'paid') {
+            setError(null); // Limpa qualquer erro anterior se o pagamento for confirmado
         }
 
     } catch (err: unknown) {
-        if (err instanceof Error) {
-            setError(err.message);
-        } else {
-            setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
+        if (!isSilent) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
+            }
         }
     } finally {
-        setIsVerifying(false);
+        if (!isSilent) {
+            setIsVerifying(false);
+        }
     }
   };
 
