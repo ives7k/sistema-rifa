@@ -41,7 +41,7 @@ function gerarCPF(): string {
     for (let i = 0; i < 9; i++) {
         soma += parseInt(cpf[i]) * (10 - i);
     }
-    const resto = soma % 11;
+    let resto = soma % 11;
     const digito1 = (resto < 2) ? 0 : 11 - resto;
     cpf += digito1;
 
