@@ -86,7 +86,7 @@ const MeusTitulosPage = () => {
               type="text"
               value={cpf}
               onChange={handleCpfChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base"
               placeholder="000.000.000-00"
               maxLength={14}
               required
