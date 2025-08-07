@@ -45,8 +45,12 @@ export async function POST(request: Request) {
 
     try {
         const authString = Buffer.from(`${secretKey}:`).toString('base64');
+        
+        // ULTIMA TENTATIVA: Adicionar um parâmetro de cache-busting aleatório na URL
+        const cacheBuster = `_=${new Date().getTime()}`;
+        const apiUrl = `https://api.skalepay.com/transactions/${transactionId}?${cacheBuster}`;
 
-        const response = await fetch(`https://api.skalepay.com/transactions/${transactionId}`, {
+        const response = await fetch(apiUrl, {
             method: 'GET',
             headers: {
                 'Authorization': `Basic ${authString}`,
