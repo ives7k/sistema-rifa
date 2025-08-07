@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Importa o Link
 import MobileMenu from './MobileMenu';
 
 const Header = () => {
@@ -23,15 +24,17 @@ const Header = () => {
 
             {/* Logo Centralizado */}
             <div className="flex-shrink-0">
-              <div className="w-[140px]">
-                <Image
-                  src="https://incs-bucket.s3.amazonaws.com/20250131_679d39cec9e99.png"
-                  alt="Wesley Alemão"
-                  width={150}
-                  height={40}
-                  priority
-                />
-              </div>
+              <Link href="/" passHref>
+                <div className="w-[140px] cursor-pointer">
+                  <Image
+                    src="https://incs-bucket.s3.amazonaws.com/20250131_679d39cec9e99.png"
+                    alt="Wesley Alemão"
+                    width={150}
+                    height={40}
+                    priority
+                  />
+                </div>
+              </Link>
             </div>
 
             {/* Espaço vazio para manter o logo centralizado */}
