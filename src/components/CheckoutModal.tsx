@@ -3,7 +3,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { Inter } from "next/font/google";
 
+// --- Interfaces ---
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,9 +26,10 @@ interface PixData {
     comprador: CompradorData;
 }
 
+// --- Constantes e Funções de Utilitário ---
 const TICKET_PRICE = 0.11;
+const inter = Inter({ subsets: ["latin"] });
 
-// Funções de formatação
 const formatCPF = (cpf: string) => {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.***.***-**');
 };
@@ -35,30 +38,127 @@ const formatPhone = (phone: string) => {
     return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) *****-**$3');
 };
 
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
-  const [step, setStep] = useState(1); // 1: Telefone, 2: Cadastro, 3: Pagamento
+  // --- Estados do Componente ---
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     cpf: '',
     telefone: ''
   });
-  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [showQr, setShowQr] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutos em segundos
-
-    const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid' | 'expired' | null>('pending');
+  const [timeLeft, setTimeLeft] = useState(600);
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid' | 'expired' | null>('pending');
   const [isVerifying, setIsVerifying] = useState(false);
   const [paidAt, setPaidAt] = useState<string | null>(null);
   const [titles, setTitles] = useState<string[]>([]);
 
+  // --- Funções de Manipulação de Eventos (com useCallback) ---
+  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
+    if (!pixData?.token) return;
+    if (!isSilent) {
+      setIsVerifying(true);
+      setError(null);
+    }
+    try {
+        const response = await fetch(`/api/payment/status?id=${pixData.token}`);
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            if (!isSilent) throw new Error(data.message || 'Não foi possível verificar o pagamento.');
+            return; 
+        }
+        setPaymentStatus(data.status);
+        if (data.status === 'paid') {
+            setError(null);
+            if (data.titles && data.titles.length > 0) setTitles(data.titles);
+            if (data.data?.paidAt) {
+                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                });
+                setPaidAt(formattedDate);
+            }
+        } else if (!isSilent) {
+            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+        }
+    } catch (err: unknown) {
+        if (!isSilent) {
+            if (err instanceof Error) setError(err.message);
+            else setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
+        }
+    } finally {
+        if (!isSilent) setIsVerifying(false);
+    }
+  }, [pixData?.token]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
+    const { name, value } = e.target;
+    let maskedValue = value;
+    if (name === 'cpf') {
+      maskedValue = value.replace(/\D/g, '').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else if (name === 'telefone') {
+      maskedValue = value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
+    }
+    setFormData(prev => ({ ...prev, [name]: maskedValue }));
+  }, []);
+
+  const handlePhoneSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const phoneDigits = formData.telefone.replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+        setError('Telefone inválido. Por favor, insira um número com 10 ou 11 dígitos, incluindo o DDD.');
+        return;
+    }
+    setError(null);
+    setStep(2); 
+  }, [formData.telefone]);
+
+  const handlePayment = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    const nameParts = formData.nome.trim().split(/\s+/);
+    if (nameParts.length < 2) {
+      setError('Por favor, insira seu nome completo (nome e sobrenome).');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    setPixData(null);
+    try {
+      const response = await fetch('/api/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          valor: quantity * TICKET_PRICE,
+          quantity: quantity,
+          ...formData
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || 'Erro ao processar o pagamento.');
+      setPixData(data);
+      setStep(3);
+      setShowQr(window.innerWidth >= 768);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Ocorreu um erro desconhecido.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [formData, quantity]);
+
+  const copyToClipboard = useCallback((text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Código PIX copiado para a área de transferência!');
+  }, []);
+
+
+  // --- Efeitos (useEffect) ---
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -75,174 +175,27 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     } else {
       document.body.style.overflow = 'auto';
     }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    return () => { document.body.style.overflow = 'auto'; };
   }, [isOpen]);
 
   useEffect(() => {
     if (pixData && timeLeft > 0 && paymentStatus !== 'paid') {
-      const timer = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
+      const timer = setInterval(() => setTimeLeft((prevTime) => prevTime - 1), 1000);
       return () => clearInterval(timer);
     }
   }, [pixData, timeLeft, paymentStatus]);
 
-  // Efeito para verificação automática (polling)
   useEffect(() => {
     if (step === 3 && paymentStatus === 'pending' && timeLeft > 0) {
-      const interval = setInterval(() => {
-        handleCheckPaymentStatus(true); 
-      }, 5000);
-
+      const interval = setInterval(() => handleCheckPaymentStatus(true), 5000);
       return () => clearInterval(interval);
     }
   }, [step, paymentStatus, timeLeft, handleCheckPaymentStatus]);
 
+
+  // --- Lógica de Renderização ---
   if (!isOpen) {
     return null;
-  }
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    const { name, value } = e.target;
-    let maskedValue = value;
-
-    if (name === 'cpf') {
-      maskedValue = value
-        .replace(/\D/g, '') // Remove tudo o que não é dígito
-        .replace(/(\d{3})(\d)/, '$1.$2') // Coloca um ponto entre o terceiro e o quarto dígitos
-        .replace(/(\d{3})(\d)/, '$1.$2') // Coloca um ponto entre o terceiro e o quarto dígitos de novo (para o segundo bloco de 3)
-        .replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Coloca um hífen entre o terceiro e o quarto dígitos
-    } else if (name === 'telefone') {
-      maskedValue = value
-        .replace(/\D/g, '')
-        .replace(/(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2')
-        .replace(/(-\d{4})\d+?$/, '$1');
-    }
-    
-    setFormData(prev => ({ ...prev, [name]: maskedValue }));
-  }
-
-  const handlePhoneSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const phoneDigits = formData.telefone.replace(/\D/g, '');
-    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
-        setError('Telefone inválido. Por favor, insira um número com 10 ou 11 dígitos, incluindo o DDD.');
-        return;
-    }
-    setError(null);
-    setStep(2); 
-  }
-
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const nameParts = formData.nome.trim().split(/\s+/);
-    if (nameParts.length < 2) {
-      setError('Por favor, insira seu nome completo (nome e sobrenome).');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    setPixData(null);
-
-    try {
-      const response = await fetch('/api/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          valor: quantity * TICKET_PRICE,
-          quantity: quantity,
-          ...formData
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Erro ao processar o pagamento.');
-      }
-      
-      setPixData(data);
-      setStep(3);
-      setShowQr(window.innerWidth >= 768);
-
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Ocorreu um erro desconhecido.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
-    if (!pixData?.token) return;
-
-    if (!isSilent) {
-      setIsVerifying(true);
-      setError(null);
-    }
-
-    try {
-        const response = await fetch(`/api/payment/status?id=${pixData.token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            if (!isSilent) {
-                throw new Error(data.message || 'Não foi possível verificar o pagamento.');
-            }
-            return; 
-        }
-
-        setPaymentStatus(data.status);
-
-        if (data.status === 'paid') {
-            setError(null);
-            if (data.titles && data.titles.length > 0) {
-                setTitles(data.titles);
-            }
-            if (data.data?.paidAt) {
-                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                });
-                setPaidAt(formattedDate);
-            }
-        } else if (!isSilent) {
-            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
-        }
-
-    } catch (err: unknown) {
-        if (!isSilent) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
-            }
-        }
-    } finally {
-        if (!isSilent) {
-            setIsVerifying(false);
-        }
-    }
-  }, [pixData?.token, setPaymentStatus, setTitles, setPaidAt, setError, setIsVerifying]);
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('Código PIX copiado para a área de transferência!');
   }
   
   const minutes = Math.floor(timeLeft / 60);
@@ -291,34 +244,28 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       case 3:
         return (
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
-
                 {paymentStatus === 'paid' ? (
-                    // Tela de Pagamento Confirmado
                     <div className="p-4 flex flex-col items-center text-center space-y-3">
                         <i className="bi bi-check-circle-fill text-5xl text-green-500"></i>
                         <h3 className="text-xl font-bold text-gray-800">Pagamento Confirmado!</h3>
                         <p className="text-sm text-gray-600">Seu pagamento foi recebido com sucesso. Em breve você receberá seus números da sorte.</p>
                     </div>
                 ) : (
-                    // Tela para realizar o pagamento
                     <>
                         <div className="text-center p-2">
                             <p className="text-sm text-gray-600">Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar</p>
                         </div>
-                        
                         <div className="text-center">
                             <button onClick={() => setShowQr(!showQr)} className="text-sm text-gray-600 font-semibold hover:text-black">
                                 <i className={`bi ${showQr ? 'bi-eye-slash' : 'bi-qr-code'}`}></i>
                                 {showQr ? ' Ocultar QR Code' : ' Exibir QR Code'}
                             </button>
                         </div>
-
                         {showQr && (
                         <div className="flex justify-center">
                             <Image src={pixData!.qrCodeUrl} alt="QR Code PIX" width={200} height={200} className="border-4 border-green-400 rounded-lg"/>
                         </div>
                         )}
-                        
                         <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-3 text-sm">
                             <div className="flex items-center space-x-2">
                                 <span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs shrink-0">1</span>
@@ -332,22 +279,16 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                                 </button>
                             </div>
                         </div>
-                        
                         <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-2 text-xs text-gray-600">
-                            <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX, como se fosse fazer uma transferência.</p></div>
-                            <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione a opção PIX cópia e cola, cole a chave copiada e confirme o pagamento.</p></div>
+                            <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX.</p></div>
+                            <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione PIX cópia e cola, cole a chave e confirme.</p></div>
                         </div>
-
                         {paymentStatus === 'pending' && timeLeft === 0 && (
                              <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">
                                 O tempo para pagamento expirou. Por favor, gere um novo pedido.
                              </div>
                         )}
-
-                        {/* Mensagem de erro da verificação */}
                         {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
-
-
                         {paymentStatus === 'pending' && timeLeft > 0 && (
                             <button onClick={() => handleCheckPaymentStatus()} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
                                 {isVerifying ? (
@@ -359,7 +300,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         )}
                     </>
                 )}
-
                 <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-1 text-sm">
                     <h4 className="font-bold text-gray-800 border-b pb-1 mb-2">Detalhes da sua compra</h4>
                     <p className="text-xs text-gray-500 break-words"><b>ID:</b> {pixData!.token}</p>
@@ -389,7 +329,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                         )}
                     </div>
                 </div>
-
             </div>
         );
       default:
@@ -399,7 +338,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
   return (
     <div className={`fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4 overflow-y-auto ${inter.className}`}>
-      {/* Aplicando o mesmo padrão de container da página */}
       <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg mx-auto" onClick={(e) => e.stopPropagation()}>
         <div className="relative text-center p-3 border-b border-gray-200">
           <h5 className="font-semibold text-gray-800">Checkout</h5>
@@ -407,7 +345,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             <i className="bi bi-x text-2xl"></i>
           </button>
         </div>
-
         <div className="p-2 space-y-2">
             <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
                 <div className="relative w-24 h-16 shrink-0">
