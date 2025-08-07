@@ -44,16 +44,16 @@ export async function POST(request: Request) {
 
 
     try {
-        const authString = `Basic ${Buffer.from(`${secretKey}:x`).toString('base64')}`;
+        const authString = btoa(`${secretKey}:x`);
         
         // ULTIMA TENTATIVA: Adicionar um parâmetro de cache-busting aleatório na URL
         const cacheBuster = `_=${new Date().getTime()}`;
         const apiUrl = `https://api.conta.skalepay.com.br/v1/transactions/${transactionId}?${cacheBuster}`;
 
         const response = await fetch(apiUrl, {
-            method: 'GET',
+            method: 'GET', // CORRETO: A API da SkalePay usa GET para buscar transações
             headers: {
-                'Authorization': `Basic ${authString}`,
+                'Authorization': `Basic ${authString}`, // CORRETO: `Basic` + base64
                 'Content-Type': 'application/json',
             },
             cache: 'no-store',
