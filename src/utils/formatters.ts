@@ -33,6 +33,6 @@ export function limparTelefone(telefone: string | null): string {
  */
 export function limparCpf(cpf: string | null): string {
     if (!cpf) return "";
-    return cpf.replace(/[^0-g]/g, '');
+    return cpf.replace(/\D/g, '');
 }
 
