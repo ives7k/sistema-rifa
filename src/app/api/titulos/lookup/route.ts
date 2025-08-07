@@ -1,4 +1,4 @@
-// src/app/api/bilhetes/lookup/route.ts
+// src/app/api/titulos/lookup/route.ts
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
