@@ -85,6 +85,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   }
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     const { name, value } = e.target;
     let maskedValue = value;
 
@@ -118,6 +119,13 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const nameParts = formData.nome.trim().split(/\s+/);
+    if (nameParts.length < 2) {
+      setError('Por favor, insira seu nome completo (nome e sobrenome).');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setPixData(null);
