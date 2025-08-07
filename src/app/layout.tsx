@@ -22,6 +22,18 @@ export default function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.addEventListener('gesturestart', function (e) {
+                e.preventDefault();
+              });
+              document.addEventListener('dblclick', function (e) {
+                e.preventDefault();
+              });
+            `,
+          }}
+        />
       </body>
     </html>
   );
