@@ -83,14 +83,16 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         setPaymentStatus(data.status);
 
         if (data.status === 'paid') {
-            setError(null);
             if (data.titles && data.titles.length > 0) setTitles(data.titles);
-            if (data.data?.paidAt) {
-                const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
-                    day: '2-digit', month: '2-digit', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit',
-                });
-                setPaidAt(formattedDate);
+            if (!isSilent) {
+                setError(null);
+                if (data.data?.paidAt) {
+                    const formattedDate = new Date(data.data.paidAt).toLocaleString('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    });
+                    setPaidAt(formattedDate);
+                }
             }
         } else {
             if (!isSilent) setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
