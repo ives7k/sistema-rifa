@@ -81,10 +81,6 @@ export async function POST(request: Request) {
                     "tangible": false
                 }
             ],
-            "pix": {
-                "expiresIn": 3600 // 1 hora de expiração
-            },
-            "traceable": true,
             "postbackUrl": `https://${request.headers.get('host')}/webhook/paguesafe`
         };
 
