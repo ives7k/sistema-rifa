@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         
         // ULTIMA TENTATIVA: Adicionar um parâmetro de cache-busting aleatório na URL
         const cacheBuster = `_=${new Date().getTime()}`;
-        const apiUrl = `https://api.skalepay.com/transactions/${transactionId}?${cacheBuster}`;
+        const apiUrl = `https://api.conta.skalepay.com.br/v1/transactions/${transactionId}?${cacheBuster}`;
 
         const response = await fetch(apiUrl, {
             method: 'GET',
