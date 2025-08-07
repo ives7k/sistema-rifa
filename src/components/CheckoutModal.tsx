@@ -54,6 +54,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [showQr, setShowQr] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutos em segundos
 
+    const [paymentStatus, setPaymentStatus] = useState<'pending' | 'paid' | 'expired' | null>('pending');
+  const [isVerifying, setIsVerifying] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -63,6 +66,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setTimeLeft(600);
       setShowQr(false);
       setError(null);
+      setPaymentStatus('pending');
+      setIsVerifying(false);
     } else {
       document.body.style.overflow = 'auto';
     }
@@ -72,13 +77,13 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   }, [isOpen]);
 
   useEffect(() => {
-    if (pixData && timeLeft > 0) {
+    if (pixData && timeLeft > 0 && paymentStatus !== 'paid') {
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [pixData, timeLeft]);
+  }, [pixData, timeLeft, paymentStatus]);
 
   if (!isOpen) {
     return null;
@@ -163,6 +168,39 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   };
   
+  const handleCheckPaymentStatus = async () => {
+    if (!pixData?.token) return;
+
+    setIsVerifying(true);
+    setError(null);
+
+    try {
+        const response = await fetch(`/api/payment/status?id=${pixData.token}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Não foi possível verificar o pagamento.');
+        }
+
+        setPaymentStatus(data.status);
+
+        if (data.status === 'paid') {
+            // Ação opcional: fechar o modal, mostrar mensagem de sucesso, etc.
+        } else {
+            setError("O pagamento ainda está pendente. Tente novamente em alguns instantes.");
+        }
+
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            setError(err.message);
+        } else {
+            setError('Ocorreu um erro desconhecido ao verificar o pagamento.');
+        }
+    } finally {
+        setIsVerifying(false);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     alert('Código PIX copiado para a área de transferência!');
@@ -251,17 +289,28 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 </div>
 
                 <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-2 text-xs rounded-r-md">
-                    Este pagamento só pode ser realizado dentro do tempo, após este período, caso o pagamento não for confirmado os números voltam a ficar disponíveis.
+                    {paymentStatus === 'pending' && timeLeft > 0 && "Este pagamento só pode ser realizado dentro do tempo, após este período, caso o pagamento não for confirmado os números voltam a ficar disponíveis."}
+                    {paymentStatus === 'pending' && timeLeft === 0 && "O tempo para pagamento expirou. Por favor, gere um novo pedido."}
+                    {paymentStatus === 'paid' && "Seu pagamento foi confirmado com sucesso! Verifique seus números da sorte em breve."}
                 </div>
 
-                <button className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm">
-                    <i className="bi bi-check-circle-fill"></i>
-                    <span>Já fiz o pagamento</span>
-                </button>
+                {/* Mensagem de erro da verificação */}
+                {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
+
+
+                {paymentStatus === 'pending' && timeLeft > 0 && (
+                    <button onClick={handleCheckPaymentStatus} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
+                        {isVerifying ? (
+                            <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Verificando...</span></>
+                        ) : (
+                            <><i className="bi bi-check-circle-fill"></i><span>Já fiz o pagamento</span></>
+                        )}
+                    </button>
+                )}
                 
                 <div className="bg-blue-100 border-l-4 border-blue-400 text-blue-800 p-2 text-xs rounded-r-md text-center">
                     <i className="bi bi-info-circle-fill mr-1"></i>
-                    Aguarde até 5 minutos para a confirmação.
+                    Aguarde até 5 minutos para a confirmação via sistema.
                 </div>
 
                 <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-1 text-sm">
@@ -270,7 +319,11 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                     <p className="text-xs text-gray-700"><b>Comprador:</b> {pixData!.comprador.nome}</p>
                     <p className="text-xs text-gray-700"><b>CPF:</b> {formatCPF(pixData!.comprador.cpf)}</p>
                     <p className="text-xs text-gray-700"><b>Telefone:</b> {formatPhone(pixData!.comprador.telefone)}</p>
-                    <p className="text-xs text-gray-700"><b>Situação:</b> <span className="font-semibold text-yellow-600">Aguardando pagamento</span></p>
+                    <p className="text-xs text-gray-700"><b>Situação:</b> 
+                        {paymentStatus === 'pending' && <span className="font-semibold text-yellow-600"> Aguardando pagamento</span>}
+                        {paymentStatus === 'paid' && <span className="font-semibold text-green-600"> Pagamento confirmado</span>}
+                        {paymentStatus === 'expired' && <span className="font-semibold text-red-600"> Expirado</span>}
+                    </p>
                     <p className="text-xs text-gray-700"><b>Quantidade:</b> {quantity}</p>
                     <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData!.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </div>
