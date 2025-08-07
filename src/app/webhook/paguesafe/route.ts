@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
 /**
  * Endpoint para receber notificações de postback da SkalePay.
@@ -6,31 +7,56 @@ import { NextResponse } from 'next/server';
  * o status de uma transação for alterado.
  */
 export async function POST(request: Request) {
-  try {
-    const payload = await request.json();
+  // Log para confirmar que a função foi invocada
+  console.log('Endpoint /webhook/paguesafe foi chamado.');
 
-    // Por enquanto, apenas registramos o payload recebido no console.
-    // Em uma implementação futura, aqui é onde você atualizaria
-    // o status do pedido em seu banco de dados.
-    console.log('--- Webhook da SkalePay Recebido ---');
+  try {
+    // Log dos cabeçalhos para depuração
+    const headersList = headers();
+    console.log('Headers recebidos:', JSON.stringify(Object.fromEntries(headersList.entries()), null, 2));
+
+    // Lê o corpo como texto para evitar erros de parse
+    const bodyAsText = await request.text();
+    console.log('Corpo (raw) recebido:', bodyAsText);
+
+    // Se o corpo estiver vazio, não há o que processar.
+    if (!bodyAsText) {
+        console.log('Webhook recebido com corpo vazio.');
+        return NextResponse.json({ success: true, message: 'Webhook com corpo vazio recebido.' });
+    }
+
+    let payload;
+    try {
+        // Tenta fazer o parse do corpo como JSON
+        payload = JSON.parse(bodyAsText);
+    } catch (parseError) {
+        console.error('Erro ao fazer o parse do JSON do webhook:', parseError);
+        // Responde com erro, mas a SkalePay não deve tentar novamente.
+        return new NextResponse(JSON.stringify({ success: false, message: 'Erro de parse do JSON.' }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+        });
+    }
+
+    console.log('--- Webhook da SkalePay Recebido e Processado ---');
     console.log('Payload:', JSON.stringify(payload, null, 2));
-    console.log('------------------------------------');
+    console.log('-------------------------------------------------');
     
-    // É crucial responder à SkalePay com um status 200 OK para confirmar o recebimento.
-    // Se não respondermos corretamente, a SkalePay pode tentar reenviar a notificação.
+    // Futuramente, aqui você processaria o payload para atualizar o banco de dados.
+    // Ex: const { id, status } = payload; if (status === 'paid') { ... }
+    
+    // Responde à SkalePay com sucesso para confirmar o recebimento.
     return NextResponse.json({ success: true, message: 'Webhook recebido com sucesso.' });
 
   } catch (error) {
-    console.error('Erro ao processar webhook da SkalePay:', error);
+    console.error('Erro inesperado ao processar webhook da SkalePay:', error);
     let errorMessage = 'Ocorreu um erro desconhecido.';
     if (error instanceof Error) {
         errorMessage = error.message;
     }
-    // Retorna uma resposta de erro, mas ainda com um status que o servidor conseguiu tratar.
     return new NextResponse(JSON.stringify({ success: false, message: errorMessage }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
     });
   }
 }
-
