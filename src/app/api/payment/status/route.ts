@@ -38,7 +38,7 @@ export async function POST(request: Request) {
         if (!transactionId) {
             return NextResponse.json({ success: false, message: 'ID da transação não fornecido.' }, { status: 400 });
         }
-    } catch (_error) { // FIX: Renamed 'error' to '_error' as it is not used.
+    } catch { // A variável de erro não é necessária aqui.
         return NextResponse.json({ success: false, message: 'Corpo da requisição inválido.' }, { status: 400 });
     }
 
