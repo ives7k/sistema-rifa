@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { limparTelefone, limparCpf } from '@/utils/formatters';
 import { TICKET_PRICE } from '@/config/pricing';
+import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 
 export async function POST(request: Request) {
     try {
@@ -21,6 +22,9 @@ export async function POST(request: Request) {
 
         // --- Cálculo de valor no SERVIDOR (fonte de verdade) ---
         const valor = quantity * TICKET_PRICE;
+        if (valor > MAX_PIX_TOTAL_BR) {
+            throw new Error(`Valor máximo por Pix é R$ ${MAX_PIX_TOTAL_BR.toFixed(2)}. Reduza a quantidade ou realize múltiplas compras.`);
+        }
 
         // --- Lógica de Cliente (Upsert) ---
         const { data: cliente, error: clienteError } = await supabaseAdmin

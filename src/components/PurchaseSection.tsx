@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import CheckoutModal from './CheckoutModal'; // Importando o modal
 import { TICKET_PRICE } from '@/config/pricing';
+import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 
 const PurchaseSection = () => {
   const [quantity, setQuantity] = useState(120);
@@ -29,11 +30,15 @@ const PurchaseSection = () => {
   }
 
   const handleOpenModal = () => {
-    if (quantity > 0) {
-        setIsModalOpen(true);
-    } else {
+    if (quantity <= 0) {
         alert("Por favor, selecione pelo menos um título para participar.");
+        return;
     }
+    if (totalPrice > MAX_PIX_TOTAL_BR) {
+        alert(`Valor máximo por Pix é R$ ${MAX_PIX_TOTAL_BR.toFixed(2)}. Diminua a quantidade ou faça várias compras.`);
+        return;
+    }
+    setIsModalOpen(true);
   }
 
   return (
