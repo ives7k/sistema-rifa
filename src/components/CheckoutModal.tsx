@@ -364,7 +364,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
                         {USE_WEBHOOK_ONLY ? (
                           <div className="text-center text-xs text-gray-600 mt-2">
-                            Aguardando confirmação automática do pagamento. Você também verá seus títulos em "Meus títulos" assim que for aprovado.
+                            Aguardando confirmação automática do pagamento. Você também verá seus títulos em &quot;Meus títulos&quot; assim que for aprovado.
                           </div>
                         ) : (
                           timeLeft > 0 && (
