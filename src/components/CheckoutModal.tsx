@@ -354,10 +354,15 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         return (
             <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                 {paymentStatus === 'paid' ? (
-                    <div className="p-4 flex flex-col items-center text-center space-y-3">
-                        <i className="bi bi-check-circle-fill text-5xl text-green-500"></i>
-                        <h3 className="text-xl font-bold text-gray-800">Pagamento Confirmado!</h3>
-                        <p className="text-sm text-gray-600">Seu pagamento foi recebido com sucesso. Em breve você receberá seus números da sorte.</p>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex flex-col items-center text-center space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                          <i className="bi bi-check-lg text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 className="text-base font-bold text-gray-800">Pagamento confirmado</h3>
+                        <p className="text-xs text-gray-600">Seu pagamento foi aprovado. Os títulos aparecem abaixo nos detalhes.</p>
+                        {paidAt && (
+                          <p className="text-[11px] text-gray-500">Confirmado em: {paidAt}</p>
+                        )}
                     </div>
                 ) : (
                     <>
