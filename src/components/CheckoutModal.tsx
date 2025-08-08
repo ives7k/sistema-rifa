@@ -254,6 +254,30 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     }
   }, [pixData, paymentStatus, timeLeft]);
 
+  // SSE: escuta confirmação push do servidor para esta transação
+  useEffect(() => {
+    if (!pixData?.token || paymentStatus === 'paid') return;
+    const es = new EventSource(`/api/payment/stream?id=${encodeURIComponent(pixData.token)}`);
+    es.addEventListener('paid', (event) => {
+      try {
+        const payload = JSON.parse((event as MessageEvent).data);
+        setPaymentStatus('paid');
+        if (payload?.titles?.length) setTitles(payload.titles);
+        if (payload?.paidAt) {
+          const formattedDate = new Date(payload.paidAt).toLocaleString('pt-BR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+          });
+          setPaidAt(formattedDate);
+        }
+      } catch {}
+      es.close();
+    });
+    es.addEventListener('timeout', () => es.close());
+    es.addEventListener('error', () => es.close());
+    return () => es.close();
+  }, [pixData?.token, paymentStatus]);
+
 
   // --- Lógica de Renderização ---
   if (!isOpen) {

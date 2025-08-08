@@ -5,6 +5,7 @@ export interface ProcessPaymentResult {
   updated: boolean;
   status: string;
   raw?: unknown;
+  transactionIdUsed?: string;
 }
 
 export interface SkalePayTransactionStatus {
@@ -270,7 +271,7 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
     }
   }
 
-  return { titles, updated, status: skalePayStatus, raw: payload };
+  return { titles, updated, status: skalePayStatus, raw: payload, transactionIdUsed: (compra as any).transaction_id };
 }
 
 
