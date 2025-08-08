@@ -50,6 +50,10 @@ export async function POST(request: Request) {
         const apiUrl = 'https://api.conta.skalepay.com.br/v1';
         const authHeader = `Basic ${Buffer.from(`${secretKey}:x`).toString('base64')}`;
 
+        const webhookToken = process.env.WEBHOOK_TOKEN;
+        const baseWebhookUrl = `https://${request.headers.get('host')}/webhook/paguesafe`;
+        const postbackUrl = webhookToken ? `${baseWebhookUrl}?t=${encodeURIComponent(webhookToken)}` : baseWebhookUrl;
+
         const payloadSkalePay = {
             "amount": valor_centavos,
             "paymentMethod": "pix",
@@ -67,7 +71,7 @@ export async function POST(request: Request) {
                 "unitPrice": Math.round(valor_centavos / quantity),
                 "tangible": false
             }],
-            "postbackUrl": `https://${request.headers.get('host')}/webhook/paguesafe`
+            "postbackUrl": postbackUrl
         };
 
         const responseSkalePay = await fetch(`${apiUrl}/transactions`, {
