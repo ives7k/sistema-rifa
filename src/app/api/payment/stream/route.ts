@@ -77,7 +77,7 @@ export async function GET(request: Request) {
             // Status ainda pendente
             send(sseFormat({ success: true, status: compra.status }, 'status'));
           }
-        } catch (e) {
+        } catch (_e) {
           send(sseFormat({ success: false, message: 'internal error' }, 'error'));
         }
 

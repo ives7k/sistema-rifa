@@ -271,7 +271,8 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
     }
   }
 
-  return { titles, updated, status: skalePayStatus, raw: payload, transactionIdUsed: (compra as any).transaction_id };
+  const transactionIdUsed = (compra as unknown as { transaction_id?: string }).transaction_id;
+  return { titles, updated, status: skalePayStatus, raw: payload, transactionIdUsed };
 }
 
 
