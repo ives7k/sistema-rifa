@@ -112,7 +112,6 @@ export default function AdminPage() {
                   <h1 className="text-2xl font-extrabold text-gray-900">Painel Administrativo</h1>
                   <p className="text-sm text-gray-600">Gerencie as configurações da campanha e integrações.</p>
                 </div>
-                <button onClick={async()=>{await fetch('/api/admin/logout',{method:'POST'}); location.reload();}} className="text-sm font-semibold text-gray-600 hover:text-black">Sair</button>
               </div>
 
               <form className="space-y-5" onSubmit={handleSave}>
