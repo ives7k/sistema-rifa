@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       .single();
 
     if (clienteError || !cliente) {
-      if (clienteError && clienteError.code !== 'PGRST116') { // Ignora erro de 'não encontrado'
+      if (clienteError && (clienteError as any).code !== 'PGRST116') { // Ignora erro de 'não encontrado'
           console.error('Erro ao buscar cliente:', clienteError);
           throw new Error('Erro ao consultar dados do cliente.');
       }

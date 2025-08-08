@@ -33,7 +33,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
             {/* Usando o componente Link do Next.js */}
             <li><Link href="/" className="hover:text-yellow-400">Início</Link></li>
             <li><Link href="/campanhas" className="hover:text-yellow-400">Campanhas</Link></li>
-            <li><Link href="/meus-numeros" className="hover:text-yellow-400">Meus títulos</Link></li>
+            <li><Link href="/meus-titulos" className="hover:text-yellow-400">Meus títulos</Link></li>
             <li><Link href="/ganhadores" className="hover:text-yellow-400">Ganhadores</Link></li>
             <li><Link href="/contato" className="hover:text-yellow-400">Suporte</Link></li>
           </ul>

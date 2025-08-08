@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import CheckoutModal from './CheckoutModal'; // Importando o modal
-
-const TICKET_PRICE = 0.11;
+import { TICKET_PRICE } from '@/config/pricing';
 
 const PurchaseSection = () => {
   const [quantity, setQuantity] = useState(120);

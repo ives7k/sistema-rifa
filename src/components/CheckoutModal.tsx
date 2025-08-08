@@ -25,7 +25,6 @@ interface PixData {
 }
 
 // --- Constantes e Funções de Utilitário ---
-const TICKET_PRICE = 0.11;
 const inter = Inter({ subsets: ["latin"] });
 
 const formatCPF = (cpf: string) => {
@@ -191,7 +190,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          valor: quantity * TICKET_PRICE,
           quantity: quantity,
           ...formData
         }),

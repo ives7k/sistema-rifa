@@ -1,6 +1,7 @@
 // src/app/api/clients/lookup/route.ts
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { limparTelefone } from '@/utils/formatters';
 
 export async function POST(request: Request) {
   try {
@@ -11,8 +12,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Telefone não fornecido.' }, { status: 400 });
     }
 
-    // Limpa a máscara do telefone para buscar no banco
-    telefone = telefone.replace(/\D/g, '');
+    // Limpa a máscara do telefone para buscar no banco (usa util compartilhado)
+    telefone = limparTelefone(telefone);
 
     const { data: cliente, error } = await supabaseAdmin
       .from('clientes')
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
       .eq('telefone', telefone)
       .single(); // .single() para pegar apenas um resultado ou null
 
-    if (error && error.code !== 'PGRST116') { // PGRST116: significa 'nenhuma linha encontrada', o que não é um erro para nós
+    if (error && (error as any).code !== 'PGRST116') { // PGRST116: significa 'nenhuma linha encontrada', o que não é um erro para nós
       console.error('Erro ao buscar cliente no Supabase:', error);
       throw new Error('Erro ao consultar o banco de dados.');
     }

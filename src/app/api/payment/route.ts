@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { limparTelefone, limparCpf } from '@/utils/formatters';
+import { TICKET_PRICE } from '@/config/pricing';
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { valor, nome, email, cpf, telefone, quantity } = body;
+        const { nome, email, cpf, telefone, quantity } = body;
 
         // --- Validação de Entrada ---
-        if (!valor || valor <= 0 || !quantity || quantity <= 0) {
-            throw new Error('Valor e quantidade são obrigatórios e devem ser maiores que zero.');
+        if (!quantity || typeof quantity !== 'number' || quantity <= 0) {
+            throw new Error('Quantidade é obrigatória e deve ser maior que zero.');
         }
         if (!nome || !email || !cpf || !telefone) {
             throw new Error('Todos os campos são obrigatórios: nome, email, cpf e telefone.');
@@ -17,6 +18,9 @@ export async function POST(request: Request) {
 
         const telefone_limpo = limparTelefone(telefone);
         const cpf_limpo = limparCpf(cpf);
+
+        // --- Cálculo de valor no SERVIDOR (fonte de verdade) ---
+        const valor = quantity * TICKET_PRICE;
 
         // --- Lógica de Cliente (Upsert) ---
         const { data: cliente, error: clienteError } = await supabaseAdmin
@@ -44,7 +48,7 @@ export async function POST(request: Request) {
         }
 
         const apiUrl = 'https://api.conta.skalepay.com.br/v1';
-        const authHeader = `Basic ${btoa(`${secretKey}:x`)}`;
+        const authHeader = `Basic ${Buffer.from(`${secretKey}:x`).toString('base64')}`;
 
         const payloadSkalePay = {
             "amount": valor_centavos,

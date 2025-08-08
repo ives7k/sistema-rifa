@@ -23,7 +23,7 @@ async function getSkalePayTransactionStatus(transactionId: string) {
         throw new Error('Chave da API não configurada.');
     }
 
-    const authString = btoa(`${secretKey}:x`);
+    const authString = Buffer.from(`${secretKey}:x`).toString('base64');
     const cacheBuster = `_=${new Date().getTime()}`;
     const apiUrl = `https://api.conta.skalepay.com.br/v1/transactions/${transactionId}?${cacheBuster}`;
 
@@ -117,7 +117,33 @@ export async function POST(request: Request) {
                 if (existingTitlesError) {
                     throw new Error("Erro ao buscar seus bilhetes já existentes.");
                 }
-                titles = existingTitles.map(t => t.numero);
+                const currentTitles = (existingTitles || []).map(t => t.numero);
+
+                // Idempotência: se houver menos bilhetes do que o esperado, gera o delta
+                if (currentTitles.length < compra.quantidade_bilhetes) {
+                    const missing = compra.quantidade_bilhetes - currentTitles.length;
+                    const newUnique = new Set(currentTitles);
+                    while (newUnique.size < compra.quantidade_bilhetes) {
+                        const candidate = Math.floor(100000 + Math.random() * 900000).toString();
+                        newUnique.add(candidate);
+                    }
+                    const newOnes = Array.from(newUnique).filter(t => !currentTitles.includes(t)).slice(0, missing);
+                    if (newOnes.length > 0) {
+                        const insertRows = newOnes.map(numero => ({ compra_id: compra.id, numero }));
+                        const { error: insertMissingError } = await supabaseAdmin
+                            .from('bilhetes')
+                            .insert(insertRows);
+                        if (insertMissingError) {
+                            console.error('Erro ao inserir bilhetes faltantes:', insertMissingError);
+                            throw new Error('Erro ao completar seus bilhetes.');
+                        }
+                        titles = [...currentTitles, ...newOnes];
+                    } else {
+                        titles = currentTitles;
+                    }
+                } else {
+                    titles = currentTitles;
+                }
             }
         }
         
