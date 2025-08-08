@@ -25,6 +25,7 @@ interface PixData {
 }
 
 // --- Constantes e Funções de Utilitário ---
+const USE_WEBHOOK_ONLY = true;
 const inter = Inter({ subsets: ["latin"] });
 
 const formatCPF = (cpf: string) => {
@@ -58,6 +59,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   
   // --- Funções de Manipulação de Eventos (com useCallback) ---
   const handleCheckPaymentStatus = useCallback(async (isSilent = false) => {
+    if (USE_WEBHOOK_ONLY) return; // Modo teste: somente webhook
     if (!pixData?.token) return;
 
     if (!isSilent) {
@@ -243,12 +245,11 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
 
   // Polling para verificação de pagamento automático
   useEffect(() => {
+    if (USE_WEBHOOK_ONLY) return; // Sem polling no modo webhook-only
     if (pixData && paymentStatus === 'pending' && timeLeft > 0) {
       const interval = setInterval(() => {
-        // Usa a função da ref para garantir que está sempre chamando a última versão
-        checkStatusCallbackRef.current?.(true); // true para chamada "silenciosa"
-      }, 3000); // Verifica a cada 3 segundos
-
+        checkStatusCallbackRef.current?.(true);
+      }, 3000);
       return () => clearInterval(interval);
     }
   }, [pixData, paymentStatus, timeLeft]);
@@ -359,9 +360,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                                 O tempo para pagamento expirou. Por favor, gere um novo pedido.
                              </div>
                         )}
-                        {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md mb-2"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
+                        {error && !USE_WEBHOOK_ONLY && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md mb-2"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
 
-                        {timeLeft > 0 && (
+                        {USE_WEBHOOK_ONLY ? (
+                          <div className="text-center text-xs text-gray-600 mt-2">
+                            Aguardando confirmação automática do pagamento. Você também verá seus títulos em "Meus títulos" assim que for aprovado.
+                          </div>
+                        ) : (
+                          timeLeft > 0 && (
                             <button onClick={() => handleCheckPaymentStatus(false)} disabled={isVerifying} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg flex items-center justify-center space-x-2 text-sm transition-colors disabled:bg-green-800">
                                 {isVerifying ? (
                                     <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Verificando...</span></>
@@ -369,6 +375,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                                     <><i className="bi bi-check-circle-fill"></i><span>Já fiz o pagamento</span></>
                                 )}
                             </button>
+                          )
                         )}
                     </>
                 )}
