@@ -37,6 +37,7 @@ export default function Home() {
               alt="Prêmio"
               fill
               priority
+              unoptimized={banner.startsWith('http') && !banner.includes('s3.incrivelsorteios.com')}
               className="object-cover object-center"
             />
             {/* Gradiente que cobre a metade inferior */}
