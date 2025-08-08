@@ -1,5 +1,6 @@
 // src/components/Campaign.tsx
 import { useEffect, useState } from 'react';
+import { getCampaignSettings } from '@/lib/campaign';
 
 interface CampaignSettings {
   title: string;
@@ -12,9 +13,8 @@ const Campaign = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/campaign', { cache: 'no-store' });
-        const json = await res.json();
-        if (json?.success) setSettings(json.settings);
+        const s = await getCampaignSettings();
+        setSettings(s);
       } catch {}
     })();
   }, []);

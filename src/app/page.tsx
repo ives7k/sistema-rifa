@@ -1,6 +1,4 @@
-"use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Campaign from "@/components/Campaign";
 import MyTicketsBar from "@/components/MyTicketsBar";
@@ -8,21 +6,11 @@ import PurchaseSection from "@/components/PurchaseSection";
 import Prizes from "@/components/Prizes";
 import Regulation from "@/components/Regulation";
 import Footer from "@/components/Footer";
+import { getCampaignSettings } from "@/lib/campaign";
 
-export default function Home() {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/campaign', { cache: 'no-store' });
-        const json = await res.json();
-        if (json?.success && json.settings?.imageUrl) setImageUrl(json.settings.imageUrl);
-      } catch {}
-    })();
-  }, []);
-
-  const banner = imageUrl ?? "https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg";
+export default async function Home() {
+  const settings = await getCampaignSettings();
+  const banner = settings.imageUrl;
 
   return (
     <div className="bg-[#ebebeb]"> 
@@ -37,7 +25,7 @@ export default function Home() {
               alt="Prêmio"
               fill
               priority
-              unoptimized={banner.startsWith('http') && !banner.includes('s3.incrivelsorteios.com')}
+              unoptimized
               className="object-cover object-center"
             />
             {/* Gradiente que cobre a metade inferior */}
