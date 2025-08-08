@@ -69,24 +69,26 @@ export default function AdminPage() {
               {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
             </form>
           ) : (
-          <h1 className="text-lg font-bold text-gray-800">Admin - Campanha</h1>
-          <form className="space-y-3" onSubmit={handleSave}>
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">Título</label>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">URL da Imagem</label>
-              <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-              {imageUrl && (
-                <img src={imageUrl} alt="preview" className="mt-2 rounded-md border max-h-40 object-cover" />
-              )}
-            </div>
-            <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400">
-              {loading ? 'Salvando...' : 'Salvar alterações'}
-            </button>
-          </form>
-          {message && <div className="text-sm text-center text-gray-700">{message}</div>}
+            <>
+              <h1 className="text-lg font-bold text-gray-800">Admin - Campanha</h1>
+              <form className="space-y-3" onSubmit={handleSave}>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">Título</label>
+                  <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-1">URL da Imagem</label>
+                  <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                  {imageUrl && (
+                    <img src={imageUrl} alt="preview" className="mt-2 rounded-md border max-h-40 object-cover" />
+                  )}
+                </div>
+                <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400">
+                  {loading ? 'Salvando...' : 'Salvar alterações'}
+                </button>
+              </form>
+              {message && <div className="text-sm text-center text-gray-700">{message}</div>}
+            </>
           )}
         </div>
       </div>
