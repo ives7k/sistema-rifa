@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       .eq('telefone', telefone)
       .single(); // .single() para pegar apenas um resultado ou null
 
-    if (error && (error as any).code !== 'PGRST116') { // PGRST116: significa 'nenhuma linha encontrada', o que não é um erro para nós
+    if (error && error.code !== 'PGRST116') { // PGRST116: significa 'nenhuma linha encontrada', o que não é um erro para nós
       console.error('Erro ao buscar cliente no Supabase:', error);
       throw new Error('Erro ao consultar o banco de dados.');
     }
