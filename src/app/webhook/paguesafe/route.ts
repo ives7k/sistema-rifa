@@ -24,9 +24,26 @@ async function validateSignature(req: Request): Promise<boolean> {
 
 export async function POST(request: Request) {
   try {
+    const requireAuth = process.env.WEBHOOK_REQUIRE_AUTH !== 'false';
+
+    // Logging opcional do webhook
+    if (process.env.LOG_WEBHOOKS === 'true') {
+      try {
+        const raw = await request.clone().text();
+        const headers: Record<string, string> = {};
+        request.headers.forEach((v, k) => {
+          headers[k] = k.toLowerCase() === 'authorization' ? '[redacted]' : v;
+        });
+        console.log('[WEBHOOK] headers:', headers);
+        console.log('[WEBHOOK] body:', raw?.slice(0, 2000));
+      } catch (e) {
+        console.warn('[WEBHOOK] falha ao logar payload:', e);
+      }
+    }
+
     // 1) Autorização básica
     const authHeader = request.headers.get('authorization');
-    if (!isAuthorizedBasic(authHeader)) {
+    if (requireAuth && !isAuthorizedBasic(authHeader)) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
@@ -38,8 +55,8 @@ export async function POST(request: Request) {
 
     // 3) Corpo do postback
     const body = await request.json();
-    // Esperado: body.id ou body.transactionId, ajustar conforme payload real
-    const transactionId: string | undefined = body?.id || body?.transactionId;
+    // Tentativas comuns de campo de ID
+    const transactionId: string | undefined = body?.id || body?.transactionId || body?.transaction_id || body?.data?.id || body?.payload?.id;
     if (!transactionId) {
       return NextResponse.json({ success: false, message: 'Missing transaction id' }, { status: 400 });
     }
