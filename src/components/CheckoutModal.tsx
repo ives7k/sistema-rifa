@@ -111,6 +111,11 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                 });
                 setPaidAt(formattedDate);
             }
+            try {
+              if ((data.fb?.enabled && data.fb?.sendPurchase && data.fb?.pixelId) && (window as any).fbq) {
+                (window as any).fbq('track', 'Purchase', { value: pixData?.valor ?? 0, currency: 'BRL' });
+              }
+            } catch {}
         } else {
             // Mostra o erro de 'pendente' apenas se não for uma verificação silenciosa
             if (!isSilent) {
@@ -216,6 +221,11 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
       setPixData(data);
       setStep(3);
       setShowQr(window.innerWidth >= 768);
+      try {
+        if ((data.fb?.enabled && data.fb?.pixelId) && (window as any).fbq) {
+          (window as any).fbq('track', 'InitiateCheckout', { value: data.valor, currency: 'BRL' });
+        }
+      } catch {}
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError('Ocorreu um erro desconhecido.');

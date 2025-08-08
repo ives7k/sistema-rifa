@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { limparTelefone, limparCpf } from '@/utils/formatters';
 import { TICKET_PRICE } from '@/config/pricing';
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
+import { getFacebookSettings } from '@/lib/facebook';
 
 export async function POST(request: Request) {
     try {
@@ -115,6 +116,11 @@ export async function POST(request: Request) {
         // --- Resposta para o Frontend ---
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(resultSkalePay.pix.qrcode)}&size=300x300`;
 
+        const fb = await getFacebookSettings();
+
+        // Envia Purchase para o Pixel (browser) via fbq em client já acontece com PageView. Para CAPI, enviaremos servidor → Facebook se ativado.
+
+        // --- Resposta para o Frontend ---
         return NextResponse.json({
             success: true,
             token: resultSkalePay.id,
@@ -125,7 +131,8 @@ export async function POST(request: Request) {
                 nome: nome,
                 cpf: cpf_limpo,
                 telefone: telefone_limpo
-            }
+            },
+            fb: { enabled: fb.enabled, sendPurchase: fb.sendPurchase, pixelId: fb.pixelId }
         });
 
     } catch (error) {

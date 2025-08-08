@@ -9,6 +9,10 @@ export default function AdminPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [fbEnabled, setFbEnabled] = useState(false);
+  const [fbSendPurchase, setFbSendPurchase] = useState(false);
+  const [fbPixelId, setFbPixelId] = useState('');
+  const [fbCapiToken, setFbCapiToken] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -18,6 +22,13 @@ export default function AdminPage() {
         if (json?.success && json.settings) {
           setTitle(json.settings.title || '');
           setImageUrl(json.settings.imageUrl || '');
+        }
+        const fb = await fetch('/api/facebook', { cache: 'no-store' }).then(r => r.json());
+        if (fb?.success) {
+          setFbEnabled(Boolean(fb.settings?.enabled));
+          setFbSendPurchase(Boolean(fb.settings?.sendPurchase));
+          setFbPixelId(String(fb.settings?.pixelId || ''));
+          setFbCapiToken(String(fb.settings?.capiToken || ''));
         }
       } catch {}
     })();
@@ -46,6 +57,13 @@ export default function AdminPage() {
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message || 'Falha ao salvar');
+      // Facebook settings
+      const resFb = await fetch('/api/facebook/update', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: fbEnabled, sendPurchase: fbSendPurchase, pixelId: fbPixelId, capiToken: fbCapiToken }),
+      });
+      const jsonFb = await resFb.json();
+      if (!jsonFb.success) throw new Error(jsonFb.message || 'Falha ao salvar Facebook');
       setMessage('Salvo com sucesso.');
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Erro desconhecido');
@@ -82,6 +100,25 @@ export default function AdminPage() {
                   {imageUrl && (
                     <img src={imageUrl} alt="preview" className="mt-2 rounded-md border max-h-40 object-cover" />
                   )}
+                </div>
+                <div className="border-t pt-3">
+                  <h2 className="text-md font-bold text-gray-800 mb-2">Facebook Pixel / CAPI</h2>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-700">Ativar Pixel</span>
+                    <input type="checkbox" checked={fbEnabled} onChange={(e) => setFbEnabled(e.target.checked)} />
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-gray-700">Enviar Purchase</span>
+                    <input type="checkbox" checked={fbSendPurchase} onChange={(e) => setFbSendPurchase(e.target.checked)} />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block text-sm font-semibold text-gray-800 mb-1">Pixel ID</label>
+                    <input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block text-sm font-semibold text-gray-800 mb-1">Token API Conversões</label>
+                    <input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                  </div>
                 </div>
                 <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400">
                   {loading ? 'Salvando...' : 'Salvar alterações'}
