@@ -5,6 +5,7 @@ import { TICKET_PRICE } from '@/config/pricing';
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getFacebookSettings } from '@/lib/facebook';
 import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
+import { getCampaignSettings } from '@/lib/campaign';
 
 export async function POST(request: Request) {
     try {
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
         const baseWebhookUrl = `https://${request.headers.get('host')}/webhook/paguesafe`;
         const postbackUrl = webhookToken ? `${baseWebhookUrl}?t=${encodeURIComponent(webhookToken)}` : baseWebhookUrl;
 
+        const campaign = await getCampaignSettings();
         const payloadSkalePay = {
             "amount": valor_centavos,
             "paymentMethod": "pix",
@@ -75,7 +77,7 @@ export async function POST(request: Request) {
             },
             "items": [{
                 "id": `PROD_${new Date().getTime()}`,
-                "title": "Produto Padrao",
+                "title": campaign.title,
                 "quantity": quantity,
                 "unitPrice": Math.round(valor_centavos / quantity),
                 "tangible": false

@@ -68,6 +68,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [titles, setTitles] = useState<string[]>([]);
   const [debugEnabled, setDebugEnabled] = useState(false);
   const [tracking, setTracking] = useState<{ [k: string]: string | null }>({});
+  const [campaignTitle, setCampaignTitle] = useState<string>('EDIÇÃO 76 - NOVO TERA 2026 0KM');
+  const [campaignImage, setCampaignImage] = useState<string>('https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg');
   
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
@@ -274,6 +276,18 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
           utm_source: get('utm_source'), utm_campaign: get('utm_campaign'), utm_medium: get('utm_medium'), utm_content: get('utm_content'), utm_term: get('utm_term'),
           xcod: get('xcod'), fbclid: get('fbclid'), gclid: get('gclid'), ttclid: get('ttclid'),
         });
+      } catch {}
+      // busca configurações de campanha para imagem/título do produto
+      try {
+        fetch('/api/campaign', { cache: 'no-store' })
+          .then(r => r.json())
+          .then(json => {
+            if (json?.success && json.settings) {
+              if (json.settings.title) setCampaignTitle(json.settings.title);
+              if (json.settings.imageUrl) setCampaignImage(json.settings.imageUrl);
+            }
+          })
+          .catch(() => {});
       } catch {}
     } else {
       document.body.classList.remove('modal-open');
@@ -519,14 +533,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
                 <div className="relative w-24 h-16 shrink-0">
                     <Image
-                        src="https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg"
+                        src={campaignImage}
                         alt="Prêmio"
                         fill
                         className="rounded-md object-cover"
-                    />
+                      />
                 </div>
                 <p>
-                    <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">EDIÇÃO 76 - NOVO TERA 2026 0KM</b>
+                    <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">{campaignTitle}</b>
                 </p>
             </div>
             {renderStep()}
