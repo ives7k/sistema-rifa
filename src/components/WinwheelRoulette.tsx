@@ -43,12 +43,13 @@ export default function WinwheelRoulette({
   wheelSizePx = 360,
   angleOffsetDeg = 0,
   segments: segmentLabels = [
+    // Ordem exata no sentido horário com centros em: 0°, 60°, 120°, 180°, 240°, 300°
     'CARRO 0KM',
-    'TENTE OUTRA VEZ',
-    '15 MIL REAIS',
-    'TENTE OUTRA VEZ',
+    'TENTE OUTRA VEZ', // direita
+    '2 iPhone 16 Pro Max',
     '12 MIL REAIS',
-    'iPhone 16 Pro Max',
+    'TENTE OUTRA VEZ', // esquerda
+    '15 MIL REAIS',
   ],
   spins = 7,
   durationSec = 5,
@@ -76,18 +77,19 @@ export default function WinwheelRoulette({
       if (typeof window.TweenMax === 'undefined') return; // GSAP v2 necessário
       if (wheelInstanceRef.current) return; // já inicializado
 
-      // Cria segmentos apenas para fins de lógica/resultado
-      const segments = segmentLabels.map((label) => ({ text: label }));
+      // Cria segmentos (lógica) com 60° cada, seguindo a ordem acima
+      const segments = segmentLabels.map((label) => ({ text: label, size: 60 }));
 
       const computedPct = Math.ceil(wheelSizePx * 0.015);
       const effectivePadding = paddingPx ?? Math.max(0, computedPct);
 
+      const effectiveRotation = -30 + angleOffsetDeg; // alinha o início da primeira fatia em -30° (centro 0°)
       const theWheel = new window.Winwheel({
         canvasId: canvasRef.current.id,
         numSegments: segments.length,
         outerRadius: Math.max(10, Math.floor(wheelSizePx / 2) - Math.max(1, effectivePadding)),
         pointerAngle: 90, // ponteiro no topo
-        rotationAngle: angleOffsetDeg,
+        rotationAngle: effectiveRotation,
         drawMode: 'image',
         textFontSize: 0, // não desenhar texto; imagem já contém
         segments,
