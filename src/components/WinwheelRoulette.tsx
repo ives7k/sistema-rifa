@@ -4,6 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 
 type WinwheelSegment = { text?: string };
 
+interface WinwheelAnimation {
+  type?: string;
+  duration?: number;
+  spins?: number;
+  callbackFinished?: () => void;
+  stopAngle?: number | null;
+}
+
 interface WinwheelInstance {
   outerRadius: number;
   stopAnimation: (canComplete?: boolean) => void;
@@ -12,6 +20,7 @@ interface WinwheelInstance {
   startAnimation: () => void;
   getIndicatedSegment?: () => WinwheelSegment | null;
   wheelImage?: HTMLImageElement | HTMLCanvasElement;
+  animation?: WinwheelAnimation;
 }
 
 type WinwheelCtor = new (config: Record<string, unknown>) => WinwheelInstance;
@@ -36,6 +45,8 @@ interface WinwheelRouletteProps {
   disabled?: boolean;
   onSpinStart?: () => boolean | void;
   onFinished?: (resultLabel: string) => void;
+  centerOverlaySrc?: string; // imagem central (seta) apontando para a direita
+  centerOverlaySizePx?: number; // tamanho do overlay central (px)
 }
 
 export default function WinwheelRoulette({
@@ -59,6 +70,8 @@ export default function WinwheelRoulette({
   disabled = false,
   onSpinStart,
   onFinished,
+  centerOverlaySrc = '/gire.png',
+  centerOverlaySizePx = 110,
 }: WinwheelRouletteProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wheelInstanceRef = useRef<WinwheelInstance | null>(null);
@@ -94,7 +107,8 @@ export default function WinwheelRoulette({
         canvasId: canvasRef.current.id,
         numSegments: segments.length,
         outerRadius: Math.max(10, Math.floor(wheelSizePx / 2) - Math.max(1, effectivePadding)),
-        pointerAngle: 90, // ponteiro no topo
+        // Mantemos o ponteiro lógico em 90° para que a seta à direita represente 90°
+        pointerAngle: 90,
         rotationAngle: effectiveRotation,
         drawMode: 'image',
         textFontSize: 0, // não desenhar texto; imagem já contém
@@ -181,10 +195,29 @@ export default function WinwheelRoulette({
 
     // Reset opcional para permitir giros múltiplos
     try {
-      wheelInstanceRef.current.stopAnimation(false);
-      // não resetamos mais aqui; o Winwheel mantém o ângulo atual após stop
-      // apenas redesenhar para garantir frame consistente
-      wheelInstanceRef.current.draw();
+      const wheel = wheelInstanceRef.current;
+      wheel.stopAnimation(false);
+      // manter ângulo atual
+      wheel.draw();
+      // Recriar objeto de animação para evitar resíduos do GSAP
+      const randomSpins = Math.max(6, Math.floor(spins));
+      wheel.animation = {
+        type: 'spinToStop',
+        duration: durationSec,
+        spins: randomSpins,
+        stopAngle: null,
+        callbackFinished: () => {
+          try {
+            const seg = wheel.getIndicatedSegment?.() ?? null;
+            if (seg && seg.text) {
+              setMessage(seg.text);
+              if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
+            }
+          } finally {
+            setIsSpinning(false);
+          }
+        },
+      };
     } catch {}
 
     wheelInstanceRef.current.startAnimation();
@@ -203,6 +236,16 @@ export default function WinwheelRoulette({
           className="block rounded-full bg-transparent"
           style={imageScale !== 1 ? { transform: `scale(${imageScale})`, transformOrigin: 'center' } : undefined}
         />
+
+        {centerOverlaySrc && (
+          <img
+            src={centerOverlaySrc}
+            alt="Gire"
+            width={centerOverlaySizePx}
+            height={centerOverlaySizePx}
+            className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          />
+        )}
       </div>
 
       <button
