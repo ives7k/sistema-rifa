@@ -135,7 +135,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
             setIsVerifying(false);
         }
     }
-  }, [pixData?.token]);
+  }, [pixData?.token, pixData?.valor]);
 
   // Atualiza a ref com a última versão da função
   useEffect(() => {
@@ -236,7 +236,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, quantity]);
+  }, [formData, quantity, tracking]);
   
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);

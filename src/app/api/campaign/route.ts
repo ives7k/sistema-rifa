@@ -32,7 +32,7 @@ export async function GET() {
       ...(value || {}),
     } as CampaignSettings;
     return NextResponse.json({ success: true, settings });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: true, settings: DEFAULT_SETTINGS });
   }
 }

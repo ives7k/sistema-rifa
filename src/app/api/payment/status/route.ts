@@ -44,7 +44,7 @@ export async function POST(request: Request) {
                 customer: { name: cliente?.nome || '', email: cliente?.email || '', document: cliente?.cpf || '' },
                 quantity: compra.quantidade_bilhetes,
                 totalValue: compra.valor_total,
-              }, (compra as any).tracking_parameters || undefined);
+              }, (compra as unknown as { tracking_parameters?: Record<string, string | null> }).tracking_parameters || undefined);
             }
           }
         } catch (e) { console.error('[UTMIFY][status] error', e); }

@@ -86,14 +86,14 @@ export async function POST(request: Request) {
         const totalValue = typeof amountInCents === 'number' ? amountInCents / 100 : 0;
         const paidAt = body?.data?.paidAt ? new Date(body.data.paidAt) : new Date();
         // Recupera tracking salvo na compra
-        let tracking = undefined as any;
+        let tracking: Record<string, string | null> | undefined = undefined;
         try {
           const { data: compraData } = await supabaseAdmin
             .from('compras')
             .select('tracking_parameters')
             .eq('transaction_id', String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''))
             .single();
-          tracking = compraData?.tracking_parameters || undefined;
+          tracking = (compraData as unknown as { tracking_parameters?: Record<string, string | null> })?.tracking_parameters || undefined;
         } catch {}
         await postUtmifyOrder({
           orderId: String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''),

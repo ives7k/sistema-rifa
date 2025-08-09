@@ -9,7 +9,10 @@ import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nome, email, cpf, telefone, quantity, trackingParameters } = body as any;
+        const { nome, email, cpf, telefone, quantity, trackingParameters }: {
+            nome: string; email: string; cpf: string; telefone: string; quantity: number;
+            trackingParameters?: Record<string, string | null>;
+        } = body;
 
         // --- Validação de Entrada ---
         if (!quantity || typeof quantity !== 'number' || quantity <= 0) {
