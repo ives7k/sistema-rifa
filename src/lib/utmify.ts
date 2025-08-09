@@ -89,7 +89,7 @@ export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<
       phone: null,
       document: common.customer.document,
       country: 'BR',
-      ip: common.ip ?? null,
+      ip: (common.ip ?? '0.0.0.0'),
     },
     products: [
       {
