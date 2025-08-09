@@ -4,6 +4,7 @@ import { limparTelefone, limparCpf } from '@/utils/formatters';
 import { TICKET_PRICE } from '@/config/pricing';
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getFacebookSettings } from '@/lib/facebook';
+import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 
 export async function POST(request: Request) {
     try {
@@ -117,8 +118,25 @@ export async function POST(request: Request) {
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(resultSkalePay.pix.qrcode)}&size=300x300`;
 
         const fb = await getFacebookSettings();
+        const utm = await getUtmifySettings();
 
         // Envia Purchase para o Pixel (browser) via fbq em client já acontece com PageView. Para CAPI, enviaremos servidor → Facebook se ativado.
+
+        // Disparo Utmify (waiting_payment)
+        if (utm.enabled && utm.sendPending) {
+            try {
+                await postUtmifyOrder({
+                    orderId: resultSkalePay.id,
+                    status: 'waiting_payment',
+                    createdAt: toUtcSqlDate(new Date()),
+                    approvedDate: null,
+                    ip: request.headers.get('x-forwarded-for') ?? undefined,
+                    customer: { name: nome, email, document: cpf_limpo },
+                    quantity: quantity,
+                    totalValue: valor,
+                });
+            } catch (e) { console.error('[UTMIFY] pending error', e); }
+        }
 
         // --- Resposta para o Frontend ---
         return NextResponse.json({

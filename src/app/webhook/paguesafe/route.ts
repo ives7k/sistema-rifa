@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processPaymentFromWebhookPayload } from '@/services/payments';
+import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -74,6 +75,28 @@ export async function POST(request: Request) {
     const body = await request.json();
     // Preferir processamento direto do payload (usa status e secureId/id do corpo)
     const result = await processPaymentFromWebhookPayload(body);
+
+    // Utmify: quando pago
+    const utm = await getUtmifySettings();
+    if (utm.enabled && utm.sendPaid && result.status === 'paid') {
+      try {
+        const customer = body?.data?.customer;
+        const amountInCents = body?.data?.paidAmount ?? body?.data?.amount;
+        const quantity = body?.data?.items?.[0]?.quantity ?? 1;
+        const totalValue = typeof amountInCents === 'number' ? amountInCents / 100 : 0;
+        const paidAt = body?.data?.paidAt ? new Date(body.data.paidAt) : new Date();
+        await postUtmifyOrder({
+          orderId: String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''),
+          status: 'paid',
+          createdAt: toUtcSqlDate(new Date()),
+          approvedDate: toUtcSqlDate(paidAt),
+          ip: undefined,
+          customer: { name: customer?.name ?? '', email: customer?.email ?? '', document: customer?.document?.number ?? '' },
+          quantity,
+          totalValue,
+        });
+      } catch (e) { console.error('[UTMIFY] paid error', e); }
+    }
 
     return NextResponse.json({ success: true, status: result.status, titles: result.titles });
   } catch (error) {
