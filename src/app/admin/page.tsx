@@ -9,12 +9,14 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-pressed={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? 'bg-green-600' : 'bg-gray-300'}`}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(!checked); } }}
+      className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors outline-none focus:ring-2 focus:ring-green-500 ${checked ? 'bg-green-600' : 'bg-gray-300'}`}
       title={label}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow ${checked ? 'translate-x-5' : 'translate-x-1'}`}
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${checked ? 'translate-x-5' : 'translate-x-1'}`}
       />
     </button>
   );
@@ -106,94 +108,91 @@ export default function AdminPage() {
   return (
     <div className="bg-[#ebebeb] min-h-screen p-4">
       <div className="container mx-auto max-w-2xl">
-        <div className="bg-white rounded-xl shadow-md p-5 space-y-4 border border-gray-200">
+        <div className="bg-white rounded-xl shadow-md p-4 space-y-4 border border-gray-200">
           {!isAuthed ? (
             <form className="space-y-3" onSubmit={handleLogin}>
-              <h1 className="text-2xl font-extrabold text-gray-900">Painel Administrativo</h1>
-              <p className="text-sm text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
+              <h1 className="text-xl font-extrabold text-gray-900">Painel Administrativo</h1>
+              <p className="text-xs text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
               <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-1">Token</label>
+                <label className="block text-xs font-semibold text-gray-800 mb-1">Token</label>
                 <input id="admin_token" type="password" className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
               </div>
-              <button className="w-full bg-black text-white font-bold py-2 rounded-md hover:bg-gray-800 transition-colors">Entrar</button>
+              <button className="w-full bg-black text-white font-bold py-2 rounded-md hover:bg-gray-800 transition-colors text-sm">Entrar</button>
               {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
             </form>
           ) : (
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-extrabold text-gray-900">Painel Administrativo</h1>
-                  <p className="text-sm text-gray-600">Gerencie as configurações da campanha e integrações.</p>
+                  <h1 className="text-xl font-extrabold text-gray-900">Painel Administrativo</h1>
+                  <p className="text-xs text-gray-600">Gerencie as configurações da campanha e integrações.</p>
                 </div>
               </div>
 
-              <form className="space-y-5" onSubmit={handleSave}>
-                <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
-                  <h2 className="text-lg font-bold text-gray-800 mb-3">Configurações da Campanha</h2>
-                  <div className="space-y-3">
+              <form className="space-y-4" onSubmit={handleSave}>
+                <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+                  <h2 className="text-base font-bold text-gray-800 mb-2">Configurações da Campanha</h2>
+                  <div className="space-y-2">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">Título</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Título</label>
                       <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">URL da Imagem</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem</label>
                       <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                       {imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-48 object-cover w-full" />
+                        <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
-                  <h2 className="text-lg font-bold text-gray-800 mb-4">Facebook Pixel / CAPI</h2>
+                <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+                  <h2 className="text-base font-bold text-gray-800 mb-3">Facebook Pixel / CAPI</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
+                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2">
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">Ativar Pixel</p>
-                        <p className="text-xs text-gray-500">Liga/desliga a injeção do Pixel na página</p>
+                        <p className="text-xs font-semibold text-gray-800">Ativar Pixel</p>
                       </div>
                       <ToggleSwitch checked={fbEnabled} onChange={setFbEnabled} label="Ativar Pixel" />
                     </div>
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
+                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2">
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">Enviar Purchase</p>
-                        <p className="text-xs text-gray-500">Dispara o evento Purchase quando pago</p>
+                        <p className="text-xs font-semibold text-gray-800">Enviar Purchase</p>
                       </div>
                       <ToggleSwitch checked={fbSendPurchase} onChange={setFbSendPurchase} label="Enviar Purchase" />
                     </div>
                   </div>
-                  <div className="mt-4 grid grid-cols-1 gap-3">
+                  <div className="mt-3 grid grid-cols-1 gap-2">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">Pixel ID</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Pixel ID</label>
                       <input value={fbPixelId} onChange={(e) => setFbPixelId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">Token API Conversões</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Token API Conversões</label>
                       <input value={fbCapiToken} onChange={(e) => setFbCapiToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 p-4 bg-gray-50">
-                  <h2 className="text-lg font-bold text-gray-800 mb-4">Utmify</h2>
-                  <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-3">
+                <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+                  <h2 className="text-base font-bold text-gray-800 mb-3">Utmify</h2>
+                  <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2">
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">Ativar Utmify</p>
-                      <p className="text-xs text-gray-500">Quando ativo, envia pending e paid automaticamente</p>
+                      <p className="text-xs font-semibold text-gray-800">Ativar Utmify</p>
                     </div>
                     <ToggleSwitch checked={utmEnabled} onChange={setUtmEnabled} label="Ativar Utmify" />
                   </div>
-                  <div className="mt-4 grid grid-cols-1 gap-3">
+                  <div className="mt-3 grid grid-cols-1 gap-2">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800 mb-1">Token</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Token</label>
                       <input value={utmToken} onChange={(e) => setUtmToken(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                   </div>
                 </div>
 
-                <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors">
+                <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
                   {loading ? 'Salvando...' : 'Salvar alterações'}
                 </button>
               </form>
