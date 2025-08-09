@@ -67,6 +67,12 @@ export default function WinwheelRoulette({
   const [message, setMessage] = useState<string>('');
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // Guardar callbacks mais recentes sem re-inicializar o wheel
+  const onFinishedRef = useRef<typeof onFinished>(onFinished);
+  const onSpinStartRef = useRef<typeof onSpinStart>(onSpinStart);
+  useEffect(() => { onFinishedRef.current = onFinished; }, [onFinished]);
+  useEffect(() => { onSpinStartRef.current = onSpinStart; }, [onSpinStart]);
+
   useEffect(() => {
     let checkInterval: number | null = null;
 
@@ -109,7 +115,7 @@ export default function WinwheelRoulette({
           const seg = theWheel.getIndicatedSegment?.() ?? null;
           if (seg && seg.text) {
             setMessage(seg.text);
-            if (typeof onFinished === 'function') onFinished(seg.text);
+            if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
           }
         } catch {
           // no-op
@@ -164,21 +170,11 @@ export default function WinwheelRoulette({
       wheelInstanceRef.current = null;
       setReady(false);
     };
-  }, [
-    angleOffsetDeg,
-    durationSec,
-    imageFitScale,
-    imageSrc,
-    paddingPx,
-    segmentLabels,
-    spins,
-    wheelSizePx,
-    onFinished,
-  ]);
+  }, []);
 
   const handleSpin = () => {
     if (!wheelInstanceRef.current || isSpinning || !ready || !imageLoaded || disabled) return;
-    const allow = onSpinStart ? onSpinStart() : true;
+    const allow = onSpinStartRef.current ? onSpinStartRef.current() : true;
     if (allow === false) return;
     setMessage('');
     setIsSpinning(true);
@@ -186,7 +182,8 @@ export default function WinwheelRoulette({
     // Reset opcional para permitir giros múltiplos
     try {
       wheelInstanceRef.current.stopAnimation(false);
-      // não resetamos mais o ângulo; iniciamos do ângulo atual para evitar "snap back"
+      // não resetamos mais aqui; o Winwheel mantém o ângulo atual após stop
+      // apenas redesenhar para garantir frame consistente
       wheelInstanceRef.current.draw();
     } catch {}
 
