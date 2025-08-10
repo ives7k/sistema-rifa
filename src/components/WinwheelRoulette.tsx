@@ -98,14 +98,16 @@ export default function WinwheelRoulette({
       if (typeof window.TweenMax === 'undefined') return; // GSAP v2 necessário
       if (wheelInstanceRef.current) return; // já inicializado
 
-      // Cria segmentos (lógica) com 60° cada, seguindo a ordem acima
-      const segments = segmentLabels.map((label) => ({ text: label, size: 60 }));
+      // Cria segmentos com tamanhos específicos conforme mapeamento enviado
+      const sizesDeg = [60.85, 60.784, 54.945, 61.429, 58.604, 63.388];
+      const segments = segmentLabels.map((label, idx) => ({ text: label, size: sizesDeg[idx] ?? (360 / segmentLabels.length) }));
       segmentsRef.current = segments;
 
       const computedPct = Math.ceil(wheelSizePx * 0.015);
       const effectivePadding = paddingPx ?? Math.max(0, computedPct);
 
-      const effectiveRotation = -30 + angleOffsetDeg; // alinha o início da primeira fatia em -30° (centro 0°)
+      // Alinha o centro do primeiro segmento (CARRO 0KM) em 30.425° => rotação inicial -30.425°
+      const effectiveRotation = -30.425 + angleOffsetDeg;
       const theWheel = new window.Winwheel({
         canvasId: canvasRef.current.id,
         numSegments: segments.length,
