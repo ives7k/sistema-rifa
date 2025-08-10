@@ -60,13 +60,15 @@ export default function WinwheelRoulette({
   wheelSizePx = 360,
   angleOffsetDeg = 0,
   segments: segmentLabels = [
-    // Ordem exata no sentido horário com centros em: 0°, 60°, 120°, 180°, 240°, 300°
-    'CARRO 0KM',
+    // Mapa final (0°=direita):
+    // 8 MIL (330°–30°) → TENTE (30°–90°) → 15 MIL (90°–150°) → CARRO (150°–210°)
+    // → TENTE (210°–270°) → 2 iPhones (270°–330°)
+    '8 MIL REAIS',
     'TENTE OUTRA VEZ', // direita
-    '2 iPhone 16 Pro Max',
-    '12 MIL REAIS',
-    'TENTE OUTRA VEZ', // esquerda
     '15 MIL REAIS',
+    'CARRO 0KM',
+    'TENTE OUTRA VEZ', // esquerda
+    '2 iPhone 16 Pro Max',
   ],
   spins = 7,
   durationSec = 5,
@@ -93,6 +95,9 @@ export default function WinwheelRoulette({
   useEffect(() => { onSpinStartRef.current = onSpinStart; }, [onSpinStart]);
   const segmentsRef = useRef<Array<{ text: string; size?: number }>>([]);
   const wheelImageRef = useRef<HTMLCanvasElement | HTMLImageElement | null>(null);
+  const baseStartDegRef = useRef<number>(330); // primeiro segmento inicia em 330°
+  const sizesDegRef = useRef<number[]>([]);
+  const selectedIdxRef = useRef<number | null>(null);
 
   useEffect(() => {
     let checkInterval: number | null = null;
@@ -104,21 +109,24 @@ export default function WinwheelRoulette({
       if (typeof window.TweenMax === 'undefined') return; // GSAP v2 necessário
       if (wheelInstanceRef.current) return; // já inicializado
 
-      // Cria segmentos com tamanhos específicos conforme mapeamento enviado
-      const sizesDeg = [60.85, 60.784, 54.945, 61.429, 58.604, 63.388];
+      // Todos com 60° (cada faixa é de 60°)
+      const sizesDeg = [60, 60, 60, 60, 60, 60];
       const segments = segmentLabels.map((label, idx) => ({ text: label, size: sizesDeg[idx] ?? (360 / segmentLabels.length) }));
       segmentsRef.current = segments;
+      sizesDegRef.current = sizesDeg;
 
       const computedPct = Math.ceil(wheelSizePx * 0.015);
       const effectivePadding = paddingPx ?? Math.max(0, computedPct);
 
-      // Alinha o centro do primeiro segmento (CARRO 0KM) em 30.425° => rotação inicial -30.425°
-      const effectiveRotation = -30.425 + angleOffsetDeg;
+      // Primeiro segmento deve iniciar em 330° para cobrir 330°–30°
+      baseStartDegRef.current = 330;
+      // ponteiro lógico no topo (90°), então giramos -90° para manter o início em 330° relativo ao ponteiro
+      const effectiveRotation = (baseStartDegRef.current - 90) + angleOffsetDeg; // 240° + offset
       const theWheel = new window.Winwheel({
         canvasId: canvasRef.current.id,
         numSegments: segments.length,
         outerRadius: Math.max(10, Math.floor(wheelSizePx / 2) - Math.max(1, effectivePadding)),
-        // Mantemos o ponteiro lógico em 90° para que a seta à direita represente 90°
+        // Ponteiro lógico no topo (90°)
         pointerAngle: 90,
         rotationAngle: effectiveRotation,
         drawMode: 'image',
@@ -242,7 +250,10 @@ export default function WinwheelRoulette({
             try {
               const seg = newWheel.getIndicatedSegment?.() ?? null;
               if (seg && seg.text) {
-                setMessage(seg.text);
+                // Se o mapeamento da lib divergir, usamos o índice escolhido para exibir o label correto
+                const idx = selectedIdxRef.current;
+                const safeText = (idx !== null && segmentsRef.current[idx]) ? (segmentsRef.current[idx].text ?? seg.text) : seg.text;
+                setMessage(safeText ?? '');
                 if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
               }
             } finally {
@@ -256,8 +267,19 @@ export default function WinwheelRoulette({
       if (wheelImageRef.current) {
         newWheel.wheelImage = wheelImageRef.current;
       }
-      // Garantia extra: remover qualquer stopAngle
-      if (newWheel.animation) newWheel.animation.stopAngle = null;
+      // Definir um stopAngle aleatório uniforme entre segmentos (faixas desiguais são respeitadas via tamanhos)
+      if (newWheel.animation) {
+        const sizes = sizesDegRef.current;
+        const base = baseStartDegRef.current;
+        const idx = Math.floor(Math.random() * sizes.length);
+        // início da faixa i
+        let start = base;
+        for (let i = 0; i < idx; i += 1) start = (start + sizes[i]) % 360;
+        const angleWithin = Math.random() * sizes[idx];
+        const target = (start + angleWithin) % 360;
+        newWheel.animation.stopAngle = target;
+        selectedIdxRef.current = idx;
+      }
       newWheel.draw();
       wheelInstanceRef.current = newWheel;
     } catch {}
