@@ -2,9 +2,11 @@
 "use client";
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link'; // Importa o Link
 import MobileMenu from './MobileMenu';
+import { Bungee } from 'next/font/google';
+
+const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,14 +27,13 @@ const Header = () => {
             {/* Logo Centralizado */}
             <div className="flex-shrink-0">
               <Link href="/" passHref>
-                <div className="w-[140px] cursor-pointer">
-                  <Image
-                    src="/next.svg"
-                    alt="Sistema de Rifas"
-                    width={150}
-                    height={40}
-                    priority
-                  />
+                <div className="w-[160px] cursor-pointer">
+                  <span
+                    aria-label="Rifas7k"
+                    className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`}
+                  >
+                    Rifas7k
+                  </span>
                 </div>
               </Link>
             </div>
