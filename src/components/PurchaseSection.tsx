@@ -51,7 +51,7 @@ const PurchaseSection = () => {
                 </div>
                 <div className="text-center">
                     <span className="text-gray-600 mr-1">Por apenas</span>
-                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">{TICKET_PRICE.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">R$ 0,11</span>
                 </div>
             </div>
             

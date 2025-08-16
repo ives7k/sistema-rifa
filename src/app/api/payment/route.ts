@@ -7,8 +7,6 @@ import { getFacebookSettings } from '@/lib/facebook';
 import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 import { getCampaignSettings } from '@/lib/campaign';
 
-export const runtime = 'nodejs';
-
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -54,7 +52,7 @@ export async function POST(request: Request) {
 
         // --- Geração de Pagamento na SkalePay ---
         const valor_centavos = Math.round(valor * 100);
-        const secretKey = process.env.SKALEPAY_SECRET_KEY;
+        const secretKey = process.env.SKALEPLAY_SECRET_KEY;
         if (!secretKey) {
             throw new Error('Chave secreta da API de pagamento não configurada.');
         }
@@ -95,7 +93,6 @@ export async function POST(request: Request) {
 
         if (!responseSkalePay.ok) {
             const errorBody = await responseSkalePay.text();
-            console.error('[SKALEPAY][create] HTTP', responseSkalePay.status, errorBody);
             throw new Error(`Erro na API de pagamento: HTTP ${responseSkalePay.status} - ${errorBody}`);
         }
 
