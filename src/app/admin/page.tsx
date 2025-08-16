@@ -26,7 +26,7 @@ export default function AdminPage() {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [ticketPrice, setTicketPrice] = useState<number>(0.11);
-  const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay'>('fixedDate');
+  const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay' | 'today'>('today');
   const [drawDate, setDrawDate] = useState<string>('');
   const [drawDay, setDrawDay] = useState<number>(9);
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ export default function AdminPage() {
           setTitle(json.settings.title || '');
           setImageUrl(json.settings.imageUrl || '');
           if (typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
-          if (json.settings.drawMode === 'fixedDate' || json.settings.drawMode === 'sameDay') setDrawMode(json.settings.drawMode);
+          if (json.settings.drawMode === 'fixedDate' || json.settings.drawMode === 'sameDay' || json.settings.drawMode === 'today') setDrawMode(json.settings.drawMode);
           if (typeof json.settings.drawDate === 'string') setDrawDate(json.settings.drawDate);
           if (typeof json.settings.drawDay === 'number') setDrawDay(json.settings.drawDay);
         }
@@ -192,7 +192,8 @@ export default function AdminPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
-                        <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                        <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay' | 'today')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                          <option value="today">Hoje (data atual)</option>
                           <option value="fixedDate">Data fixa</option>
                           <option value="sameDay">Mesmo dia de todo mês</option>
                         </select>
@@ -202,10 +203,15 @@ export default function AdminPage() {
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
                           <input type="date" value={drawDate} onChange={(e) => setDrawDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                         </div>
-                      ) : (
+                      ) : drawMode === 'sameDay' ? (
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Dia do Mês</label>
                           <input type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Exibição</label>
+                          <input value={new Date().toLocaleDateString('pt-BR')} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100" />
                         </div>
                       )}
                     </div>

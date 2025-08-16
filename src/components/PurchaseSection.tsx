@@ -24,12 +24,15 @@ const PurchaseSection = () => {
         if (json?.success && json.settings) {
           if (typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
           // label da data
-          const mode = json.settings.drawMode as 'fixedDate' | 'sameDay' | undefined;
+          const mode = json.settings.drawMode as 'fixedDate' | 'sameDay' | 'today' | undefined;
           if (mode === 'fixedDate' && json.settings.drawDate) {
             const d = new Date(json.settings.drawDate + 'T00:00:00');
             setDrawLabel(d.toLocaleDateString('pt-BR'));
           } else if (mode === 'sameDay' && typeof json.settings.drawDay === 'number') {
             setDrawLabel(String(json.settings.drawDay).padStart(2, '0') + '/todo mês');
+          } else if (mode === 'today') {
+            const now = new Date();
+            setDrawLabel(now.toLocaleDateString('pt-BR'));
           }
         }
       } catch {}
