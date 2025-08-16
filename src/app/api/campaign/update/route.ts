@@ -17,13 +17,33 @@ export async function POST(request: Request) {
     const body = await request.json();
     const title: string | undefined = body?.title;
     const imageUrl: string | undefined = body?.imageUrl;
-    if (!title && !imageUrl) {
+    const ticketPrice: number | undefined = typeof body?.ticketPrice === 'number' ? body.ticketPrice : undefined;
+    const drawMode: 'fixedDate' | 'sameDay' | undefined = body?.drawMode;
+    const drawDate: string | null | undefined = body?.drawDate ?? undefined; // string ou null
+    const drawDay: number | null | undefined = (typeof body?.drawDay === 'number' || body?.drawDay === null) ? body.drawDay : undefined;
+
+    if (
+      title === undefined &&
+      imageUrl === undefined &&
+      ticketPrice === undefined &&
+      drawMode === undefined &&
+      drawDate === undefined &&
+      drawDay === undefined
+    ) {
       return NextResponse.json({ success: false, message: 'Nenhum campo para atualizar.' }, { status: 400 });
     }
 
+    const payload: Record<string, unknown> = {};
+    if (title !== undefined) payload.title = title;
+    if (imageUrl !== undefined) payload.imageUrl = imageUrl;
+    if (ticketPrice !== undefined) payload.ticketPrice = ticketPrice;
+    if (drawMode !== undefined) payload.drawMode = drawMode;
+    if (drawDate !== undefined) payload.drawDate = drawDate;
+    if (drawDay !== undefined) payload.drawDay = drawDay;
+
     const { error } = await supabaseAdmin
       .from('settings')
-      .upsert({ id: 'campaign', value: { title, imageUrl } }, { onConflict: 'id' });
+      .upsert({ id: 'campaign', value: payload }, { onConflict: 'id' });
 
     if (error) throw error;
 

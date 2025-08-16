@@ -1,5 +1,4 @@
 import { supabaseAdmin } from '@/lib/supabase';
-import { TICKET_PRICE } from '@/config/pricing';
 import { getCampaignSettings } from '@/lib/campaign';
 
 export type UtmifySettings = {
@@ -72,7 +71,8 @@ export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<
     return;
   }
   const campaign = await getCampaignSettings();
-  const priceInCents = Math.round(TICKET_PRICE * 100);
+  const ticketPrice = typeof campaign.ticketPrice === 'number' ? campaign.ticketPrice : 0.11;
+  const priceInCents = Math.round(ticketPrice * 100);
   const totalInCents = Math.round(common.totalValue * 100);
   const trackingParams: Tracking = { ...DEFAULT_TRACKING, ...(tracking || {}) };
   const payload = {

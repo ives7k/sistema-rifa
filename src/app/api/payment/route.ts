@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { limparTelefone, limparCpf } from '@/utils/formatters';
-import { TICKET_PRICE } from '@/config/pricing';
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getFacebookSettings } from '@/lib/facebook';
 import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
@@ -27,7 +26,9 @@ export async function POST(request: Request) {
         const cpf_limpo = limparCpf(cpf);
 
         // --- Cálculo de valor no SERVIDOR (fonte de verdade) ---
-        const valor = quantity * TICKET_PRICE;
+        const campaign = await getCampaignSettings();
+        const ticketPrice = typeof campaign.ticketPrice === 'number' ? campaign.ticketPrice : 0.11;
+        const valor = quantity * ticketPrice;
         if (valor > MAX_PIX_TOTAL_BR) {
             throw new Error(`Valor máximo por Pix é R$ ${MAX_PIX_TOTAL_BR.toFixed(2)}. Reduza a quantidade ou realize múltiplas compras.`);
         }
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
         const baseWebhookUrl = `https://${request.headers.get('host')}/webhook/paguesafe`;
         const postbackUrl = webhookToken ? `${baseWebhookUrl}?t=${encodeURIComponent(webhookToken)}` : baseWebhookUrl;
 
-        const campaign = await getCampaignSettings();
+        // Já temos campaign acima
         const payloadSkalePay = {
             "amount": valor_centavos,
             "paymentMethod": "pix",

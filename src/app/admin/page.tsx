@@ -25,6 +25,10 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
 export default function AdminPage() {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [ticketPrice, setTicketPrice] = useState<number>(0.11);
+  const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay'>('fixedDate');
+  const [drawDate, setDrawDate] = useState<string>('');
+  const [drawDay, setDrawDay] = useState<number>(9);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
@@ -44,6 +48,10 @@ export default function AdminPage() {
         if (json?.success && json.settings) {
           setTitle(json.settings.title || '');
           setImageUrl(json.settings.imageUrl || '');
+          if (typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
+          if (json.settings.drawMode === 'fixedDate' || json.settings.drawMode === 'sameDay') setDrawMode(json.settings.drawMode);
+          if (typeof json.settings.drawDate === 'string') setDrawDate(json.settings.drawDate);
+          if (typeof json.settings.drawDay === 'number') setDrawDay(json.settings.drawDay);
         }
         // Só tenta buscar integrações se já autenticado
         const cookieHasAdmin = document.cookie.includes('__Host-admin_session=');
@@ -112,7 +120,7 @@ export default function AdminPage() {
       const res = await fetch('/api/campaign/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, imageUrl }),
+        body: JSON.stringify({ title, imageUrl, ticketPrice, drawMode, drawDate: drawDate || null, drawDay }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message || 'Falha ao salvar');
@@ -175,6 +183,30 @@ export default function AdminPage() {
                       {imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
+                      <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
+                        <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                          <option value="fixedDate">Data fixa</option>
+                          <option value="sameDay">Mesmo dia de todo mês</option>
+                        </select>
+                      </div>
+                      {drawMode === 'fixedDate' ? (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
+                          <input type="date" value={drawDate} onChange={(e) => setDrawDate(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Dia do Mês</label>
+                          <input type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
                       )}
                     </div>
                   </div>

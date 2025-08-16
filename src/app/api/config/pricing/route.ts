@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { TICKET_PRICE } from '@/config/pricing';
+import { getCampaignSettings } from '@/lib/campaign';
 
 export async function GET() {
-  return NextResponse.json({ price: TICKET_PRICE });
+  const c = await getCampaignSettings();
+  return NextResponse.json({ price: c.ticketPrice });
 }
 
 

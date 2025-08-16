@@ -3,23 +3,43 @@
 
 import { useState, useEffect } from 'react';
 import CheckoutModal from './CheckoutModal'; // Importando o modal
-import { TICKET_PRICE } from '@/config/pricing';
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
+import { getCampaignSettings } from '@/lib/campaign';
 
 const PurchaseSection = () => {
   const [quantity, setQuantity] = useState(120);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
+  const [ticketPrice, setTicketPrice] = useState<number>(0.11);
+  const [drawLabel, setDrawLabel] = useState<string>('');
 
   useEffect(() => {
     setHasMounted(true);
+    // busca configurações para preço e data do sorteio
+    (async () => {
+      try {
+        const res = await fetch('/api/campaign', { cache: 'no-store' });
+        const json = await res.json();
+        if (json?.success && json.settings) {
+          if (typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
+          // label da data
+          const mode = json.settings.drawMode as 'fixedDate' | 'sameDay' | undefined;
+          if (mode === 'fixedDate' && json.settings.drawDate) {
+            const d = new Date(json.settings.drawDate + 'T00:00:00');
+            setDrawLabel(d.toLocaleDateString('pt-BR'));
+          } else if (mode === 'sameDay' && typeof json.settings.drawDay === 'number') {
+            setDrawLabel(String(json.settings.drawDay).padStart(2, '0') + '/todo mês');
+          }
+        }
+      } catch {}
+    })();
   }, []);
 
   useEffect(() => {
-    const price = quantity * TICKET_PRICE;
+    const price = quantity * ticketPrice;
     setTotalPrice(price);
-  }, [quantity]);
+  }, [quantity, ticketPrice]);
 
   const handleAddQuantity = (amount: number) => {
     setQuantity(current => Math.max(0, current + amount));
@@ -47,11 +67,11 @@ const PurchaseSection = () => {
             <div className="flex justify-center items-center space-x-4 text-xs font-semibold mb-2">
                 <div className="text-center">
                     <span className="text-gray-600 mr-1">Sorteio</span>
-                    <span className="font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">09/08/2025</span>
+                    <span className="font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded-md">{drawLabel || 'a definir'}</span>
                 </div>
                 <div className="text-center">
                     <span className="text-gray-600 mr-1">Por apenas</span>
-                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">R$ 0,11</span>
+                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">{`R$ ${ticketPrice.toFixed(2)}`}</span>
                 </div>
             </div>
             
