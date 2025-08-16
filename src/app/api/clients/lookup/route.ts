@@ -27,8 +27,11 @@ export async function POST(request: Request) {
     }
 
     if (cliente) {
-      // Evita expor CPF completo via API pública
-      const maskedCpf = String(cliente.cpf || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      // Evita expor CPF completo via API pública (mantém apenas 3 primeiros e 2 últimos dígitos)
+      const digits = String(cliente.cpf || '').replace(/\D/g, '');
+      const maskedCpf = digits.length === 11
+        ? `${digits.slice(0, 3)}.***.***-${digits.slice(9, 11)}`
+        : '***.***.***-**';
       const safeCliente = { nome: cliente.nome, email: cliente.email, cpf: maskedCpf };
       return NextResponse.json({ success: true, found: true, cliente: safeCliente });
     } else {

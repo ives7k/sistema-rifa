@@ -29,6 +29,21 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SKALEPLAY_SECRET_KEY=
+# Painel Admin
+ADMIN_TOKEN=
+ADMIN_SESSION_SECRET=
+
+# Webhook SkalePay
+WEBHOOK_TOKEN=
+WEBHOOK_REQUIRE_AUTH=true
+WEBHOOK_REQUIRE_SIGNATURE=false
+# Opcional: base pública para compor postbackUrl (use em dev/local ou ambiente sem HTTPS público)
+WEBHOOK_BASE_URL=
+# Logar payloads do webhook (apenas para debug)
+LOG_WEBHOOKS=false
+
+# Frontend (debug do checkout)
+NEXT_PUBLIC_DEBUG_CHECKOUT=false
 ```
 
 ### Fluxo de Pagamento
@@ -36,7 +51,7 @@ SKALEPLAY_SECRET_KEY=
 - O preço do título é centralizado em `src/config/pricing.ts` e calculado no servidor.
 - `POST /api/payment` cria a transação na SkalePay e registra a compra como `pending`.
 - `POST /api/payment/status` consulta a SkalePay e, quando `paid`, marca a compra como `paid` e gera os bilhetes.
-- Webhook para postbacks da SkalePay será implementado em `/webhook/paguesafe`.
+- Webhook para postbacks da SkalePay: `POST /webhook/paguesafe` (usa Basic Auth e `WEBHOOK_TOKEN`).
 
 ## Learn More
 
