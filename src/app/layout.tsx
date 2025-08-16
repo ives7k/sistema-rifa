@@ -10,8 +10,8 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Campanha Filantrópica",
-  description: "Site de campanha filantrópica",
+  title: "Sistema de Rifas",
+  description: "Sistema de rifas online",
 };
 
 export default async function RootLayout({

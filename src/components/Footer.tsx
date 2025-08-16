@@ -28,7 +28,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <p style={{fontSize: '0.7rem'}}>
-          2025 Campanha Filantrópica© - Todos os direitos reservados.
+          2025 Sistema de Rifas© - Todos os direitos reservados.
         </p>
         
         {/* Desenvolvedor */}

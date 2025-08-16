@@ -28,7 +28,7 @@ const Header = () => {
                 <div className="w-[140px] cursor-pointer">
                   <Image
                     src="/next.svg"
-                    alt="Logo da campanha"
+                    alt="Sistema de Rifas"
                     width={150}
                     height={40}
                     priority
