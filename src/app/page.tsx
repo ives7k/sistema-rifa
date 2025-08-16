@@ -14,6 +14,17 @@ export const revalidate = 0;
 export default async function Home() {
   const settings = await getCampaignSettings();
   const banner = settings.imageUrl;
+  let drawLabel = '';
+  try {
+    if (settings.drawMode === 'fixedDate' && settings.drawDate) {
+      const d = new Date(settings.drawDate + 'T00:00:00');
+      drawLabel = d.toLocaleDateString('pt-BR');
+    } else if (settings.drawMode === 'sameDay' && typeof settings.drawDay === 'number') {
+      drawLabel = String(settings.drawDay).padStart(2, '0') + '/todo mês';
+    } else if (settings.drawMode === 'today') {
+      drawLabel = new Date().toLocaleDateString('pt-BR');
+    }
+  } catch {}
 
   return (
     <div className="bg-[#ebebeb]"> 
@@ -44,7 +55,7 @@ export default async function Home() {
       {/* Container principal de conteúdo */}
       <div className="container mx-auto max-w-lg px-4 mt-2 space-y-2">
         <MyTicketsBar />
-        <PurchaseSection />
+        <PurchaseSection ticketPrice={settings.ticketPrice} drawLabel={drawLabel} />
         <Regulation />
         <Prizes />
       </div>

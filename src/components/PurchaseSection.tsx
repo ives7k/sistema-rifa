@@ -6,37 +6,42 @@ import CheckoutModal from './CheckoutModal'; // Importando o modal
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getCampaignSettings } from '@/lib/campaign';
 
-const PurchaseSection = () => {
+type Props = { ticketPrice?: number; drawLabel?: string };
+
+const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp }: Props) => {
   const [quantity, setQuantity] = useState(120);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
-  const [ticketPrice, setTicketPrice] = useState<number>(0.11);
-  const [drawLabel, setDrawLabel] = useState<string>('');
+  const [ticketPrice, setTicketPrice] = useState<number>(ticketPriceProp ?? 0.11);
+  const [drawLabel, setDrawLabel] = useState<string>(drawLabelProp ?? '');
 
   useEffect(() => {
     setHasMounted(true);
-    // busca configurações para preço e data do sorteio
-    (async () => {
-      try {
-        const res = await fetch('/api/campaign', { cache: 'no-store' });
-        const json = await res.json();
-        if (json?.success && json.settings) {
-          if (typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
-          // label da data
-          const mode = json.settings.drawMode as 'fixedDate' | 'sameDay' | 'today' | undefined;
-          if (mode === 'fixedDate' && json.settings.drawDate) {
-            const d = new Date(json.settings.drawDate + 'T00:00:00');
-            setDrawLabel(d.toLocaleDateString('pt-BR'));
-          } else if (mode === 'sameDay' && typeof json.settings.drawDay === 'number') {
-            setDrawLabel(String(json.settings.drawDay).padStart(2, '0') + '/todo mês');
-          } else if (mode === 'today') {
-            const now = new Date();
-            setDrawLabel(now.toLocaleDateString('pt-BR'));
+    // Se não recebemos valores do servidor, faz fallback via API
+    if (ticketPriceProp === undefined || drawLabelProp === undefined) {
+      (async () => {
+        try {
+          const res = await fetch('/api/campaign', { cache: 'no-store' });
+          const json = await res.json();
+          if (json?.success && json.settings) {
+            if (ticketPriceProp === undefined && typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
+            if (drawLabelProp === undefined) {
+              const mode = json.settings.drawMode as 'fixedDate' | 'sameDay' | 'today' | undefined;
+              if (mode === 'fixedDate' && json.settings.drawDate) {
+                const d = new Date(json.settings.drawDate + 'T00:00:00');
+                setDrawLabel(d.toLocaleDateString('pt-BR'));
+              } else if (mode === 'sameDay' && typeof json.settings.drawDay === 'number') {
+                setDrawLabel(String(json.settings.drawDay).padStart(2, '0') + '/todo mês');
+              } else if (mode === 'today') {
+                const now = new Date();
+                setDrawLabel(now.toLocaleDateString('pt-BR'));
+              }
+            }
           }
-        }
-      } catch {}
-    })();
+        } catch {}
+      })();
+    }
   }, []);
 
   useEffect(() => {
