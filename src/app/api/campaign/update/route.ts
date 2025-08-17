@@ -18,6 +18,9 @@ export async function POST(request: Request) {
     const title: string | undefined = body?.title;
     const imageUrl: string | undefined = body?.imageUrl;
     const subtitle: string | undefined = body?.subtitle;
+    const logoMode: 'text' | 'image' | undefined = body?.logoMode;
+    const logoText: string | undefined = body?.logoText;
+    const logoImageUrl: string | undefined = body?.logoImageUrl;
     const ticketPrice: number | undefined = typeof body?.ticketPrice === 'number' ? body.ticketPrice : undefined;
     const drawMode: 'fixedDate' | 'sameDay' | undefined = body?.drawMode;
     const drawDate: string | null | undefined = body?.drawDate ?? undefined; // string ou null
@@ -29,7 +32,10 @@ export async function POST(request: Request) {
       ticketPrice === undefined &&
       drawMode === undefined &&
       drawDate === undefined &&
-      drawDay === undefined
+      drawDay === undefined &&
+      logoMode === undefined &&
+      logoText === undefined &&
+      logoImageUrl === undefined
     ) {
       return NextResponse.json({ success: false, message: 'Nenhum campo para atualizar.' }, { status: 400 });
     }
@@ -38,6 +44,9 @@ export async function POST(request: Request) {
     if (title !== undefined) payload.title = title;
     if (imageUrl !== undefined) payload.imageUrl = imageUrl;
     if (subtitle !== undefined) payload.subtitle = subtitle;
+    if (logoMode !== undefined) payload.logoMode = logoMode;
+    if (logoText !== undefined) payload.logoText = logoText;
+    if (logoImageUrl !== undefined) payload.logoImageUrl = logoImageUrl;
     if (ticketPrice !== undefined) payload.ticketPrice = ticketPrice;
     if (drawMode !== undefined) payload.drawMode = drawMode;
     if (drawDate !== undefined) payload.drawDate = drawDate;
