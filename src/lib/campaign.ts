@@ -1,6 +1,7 @@
 export type CampaignSettings = {
   title: string;
   imageUrl: string;
+  subtitle: string;
   ticketPrice: number; // preço por título (BRL)
   // drawMode 'today' exibe a data atual (dia/mês) sempre. Mantemos 'sameDay' para retrocompatibilidade.
   drawMode: 'fixedDate' | 'sameDay' | 'today';
@@ -11,6 +12,7 @@ export type CampaignSettings = {
 const DEFAULT_SETTINGS: CampaignSettings = {
   title: 'EDIÇÃO 76 - NOVO TERA 2026 0KM',
   imageUrl: 'https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg',
+  subtitle: '',
   ticketPrice: 0.11,
   drawMode: 'today',
   drawDate: null,

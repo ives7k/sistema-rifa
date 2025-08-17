@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const title: string | undefined = body?.title;
     const imageUrl: string | undefined = body?.imageUrl;
+    const subtitle: string | undefined = body?.subtitle;
     const ticketPrice: number | undefined = typeof body?.ticketPrice === 'number' ? body.ticketPrice : undefined;
     const drawMode: 'fixedDate' | 'sameDay' | undefined = body?.drawMode;
     const drawDate: string | null | undefined = body?.drawDate ?? undefined; // string ou null
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
     const payload: Record<string, unknown> = {};
     if (title !== undefined) payload.title = title;
     if (imageUrl !== undefined) payload.imageUrl = imageUrl;
+    if (subtitle !== undefined) payload.subtitle = subtitle;
     if (ticketPrice !== undefined) payload.ticketPrice = ticketPrice;
     if (drawMode !== undefined) payload.drawMode = drawMode;
     if (drawDate !== undefined) payload.drawDate = drawDate;

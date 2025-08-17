@@ -25,6 +25,7 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
 export default function AdminPage() {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [subtitle, setSubtitle] = useState('');
   const [ticketPrice, setTicketPrice] = useState<number>(0.11);
   const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay' | 'today'>('today');
   const [drawDate, setDrawDate] = useState<string>('');
@@ -48,6 +49,7 @@ export default function AdminPage() {
         if (json?.success && json.settings) {
           setTitle(json.settings.title || '');
           setImageUrl(json.settings.imageUrl || '');
+          setSubtitle(json.settings.subtitle || '');
           if (typeof json.settings.ticketPrice === 'number') setTicketPrice(json.settings.ticketPrice);
           if (json.settings.drawMode === 'fixedDate' || json.settings.drawMode === 'sameDay' || json.settings.drawMode === 'today') setDrawMode(json.settings.drawMode);
           if (typeof json.settings.drawDate === 'string') setDrawDate(json.settings.drawDate);
@@ -120,7 +122,7 @@ export default function AdminPage() {
       const res = await fetch('/api/campaign/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, imageUrl, ticketPrice, drawMode, drawDate: drawDate || null, drawDay }),
+        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message || 'Falha ao salvar');
@@ -184,6 +186,10 @@ export default function AdminPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
                       )}
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
+                      <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>

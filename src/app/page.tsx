@@ -48,7 +48,7 @@ export default async function Home() {
         </div>
         {/* Texto da campanha sobreposto */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-            <Campaign title={settings.title} />
+            <Campaign title={settings.title} subtitle={settings.subtitle} />
         </div>
       </div>
       

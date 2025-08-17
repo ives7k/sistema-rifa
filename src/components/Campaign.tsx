@@ -1,9 +1,10 @@
 // src/components/Campaign.tsx
 interface CampaignProps {
   title: string;
+  subtitle?: string;
 }
 
-const Campaign = ({ title }: CampaignProps) => {
+const Campaign = ({ title, subtitle }: CampaignProps) => {
   return (
     <section className="text-white text-left">
       <div className="space-y-1">
@@ -13,6 +14,9 @@ const Campaign = ({ title }: CampaignProps) => {
         </div>
         <div>
             <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+            {subtitle && (
+              <p className="text-sm font-medium text-white/90 mt-0.5">{subtitle}</p>
+            )}
         </div>
       </div>
     </section>
