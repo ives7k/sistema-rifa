@@ -15,9 +15,13 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
   const [ticketPrice, setTicketPrice] = useState<number>(ticketPriceProp ?? 0.11);
   const [drawLabel, setDrawLabel] = useState<string>(drawLabelProp ?? '');
+  const [bannerReady, setBannerReady] = useState(false);
+  const [spins, setSpins] = useState<number>(Math.floor(15 / 5));
+  const [spinsBump, setSpinsBump] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
+    setBannerReady(true);
     // Se não recebemos valores do servidor, faz fallback via API
     if (ticketPriceProp === undefined || drawLabelProp === undefined) {
       (async () => {
@@ -47,6 +51,14 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   useEffect(() => {
     const price = quantity * ticketPrice;
     setTotalPrice(price);
+    const nextSpins = Math.floor(quantity / 5);
+    setSpins(prev => {
+      if (prev !== nextSpins) {
+        setSpinsBump(true);
+        window.setTimeout(() => setSpinsBump(false), 350);
+      }
+      return nextSpins;
+    });
   }, [quantity, ticketPrice]);
 
   const handleAddQuantity = (amount: number) => {
@@ -88,28 +100,33 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                 <p className="text-xs text-gray-600 font-semibold">QUANTO MAIS TÍTULOS, MAIS VOCÊ AJUDA E MAIS CHANCES VOCÊ TEM DE GANHAR!</p>
             </div>
 
-            {/* Banner Roleta da Sorte */}
-            {(() => {
-              const spins = Math.floor(quantity / 5);
-              return (
-                <div className="rounded-lg bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white p-2 shadow-md mb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20">
-                        <i className="bi bi-stars text-[16px]"></i>
-                      </span>
-                      <div className="leading-tight">
-                        <p className="text-[11px] font-bold uppercase tracking-wide">Roleta da Sorte</p>
-                        <p className="text-[11px]">Ganhe 1 giro a cada 5 cotas</p>
-                      </div>
-                    </div>
-                    <span className="bg-white/15 px-2 py-1 rounded-md text-xs font-semibold">
-                      {spins} giro{spins === 1 ? '' : 's'}
-                    </span>
+            {/* Banner Roleta da Sorte com animações */}
+            <div
+              className={
+                `rounded-lg bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white p-2 shadow-md mb-2 ` +
+                `transition-all duration-500 ${bannerReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`
+              }
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20">
+                    <i className="bi bi-stars text-[16px]"></i>
+                  </span>
+                  <div className="leading-tight">
+                    <p className="text-[11px] font-bold uppercase tracking-wide">Roleta da Sorte</p>
+                    <p className="text-[11px]">Ganhe 1 giro a cada 5 cotas</p>
                   </div>
                 </div>
-              );
-            })()}
+                <span
+                  className={
+                    `bg-white/15 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 ` +
+                    `${spinsBump ? 'scale-110 ring-2 ring-white/60' : 'scale-100'}`
+                  }
+                >
+                  {spins} giro{spins === 1 ? '' : 's'}
+                </span>
+              </div>
+            </div>
 
             <div className="grid grid-cols-3 gap-2 mb-2 text-center">
                 {[10, 25, 50, 75, 100, 150].map((num) => {
