@@ -31,9 +31,10 @@ body.modal-open {
 
 /* Persistent animations for the roulette banner */
 .animated-gradient {
-  background: linear-gradient(90deg, #7e22ce, #a21caf, #7e22ce);
-  background-size: 200% 200%;
-  animation: gradientShift 6s ease infinite;
+  background: linear-gradient(90deg, #7c3aed, #d946ef, #7c3aed);
+  background-size: 300% 300%;
+  animation: gradientShift 5.5s ease-in-out infinite;
+  filter: saturate(1.4) contrast(1.08);
 }
 
 @keyframes gradientShift {

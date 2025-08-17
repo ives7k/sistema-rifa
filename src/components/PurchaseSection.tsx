@@ -111,20 +111,20 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
             </div>
 
             {/* Banner Roleta da Sorte com animações */}
-            <div className={`rounded-lg text-white p-2 shadow-md mb-2 animated-gradient`}>
+            <div className={`rounded-2xl text-white p-3 shadow-lg mb-2 animated-gradient`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20">
-                    <i className="bi bi-stars text-[16px]"></i>
+                  <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/25 shadow-sm">
+                    <i className="bi bi-stars text-[18px]"></i>
                   </span>
                   <div className="leading-tight">
-                    <p className="text-[11px] font-bold uppercase tracking-wide">Roleta da Sorte</p>
-                    <p className="text-[11px]">Ganhe 1 giro a cada 5 cotas</p>
+                    <p className="text-[12px] font-extrabold uppercase tracking-wide drop-shadow-sm">Roleta da Sorte</p>
+                    <p className="text-[12px] opacity-95">Ganhe 1 giro a cada 5 cotas</p>
                   </div>
                 </div>
                 <span
                   className={
-                    `bg-white/15 px-2 py-1 rounded-md text-xs font-semibold transition-transform duration-300 ` +
+                    `bg-white/25 px-3 py-1.5 rounded-md text-sm font-extrabold transition-transform duration-300 drop-shadow-sm ` +
                     `${spinsBump ? 'scale-110 ring-2 ring-white/60' : 'scale-100'}`
                   }
                 >
