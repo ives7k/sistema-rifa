@@ -28,3 +28,25 @@ body {
 body.modal-open {
   overflow: hidden;
 }
+
+/* Persistent animations for the roulette banner */
+.animated-gradient {
+  background: linear-gradient(90deg, #7e22ce, #a21caf, #7e22ce);
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.pulse-badge {
+  animation: pulseGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.45); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+}

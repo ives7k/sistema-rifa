@@ -10,6 +10,8 @@ interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   quantity: number;
+  campaignTitle?: string;
+  campaignImage?: string;
 }
 interface CompradorData {
     nome: string;
@@ -49,7 +51,7 @@ const formatPhone = (phone: string) => {
     return `(${ddd}) ****-**${last4}`;
 };
 
-const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
+const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp }: CheckoutModalProps) => {
   // --- Estados do Componente ---
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -68,8 +70,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
   const [titles, setTitles] = useState<string[]>([]);
   const [debugEnabled, setDebugEnabled] = useState(false);
   const [tracking, setTracking] = useState<{ [k: string]: string | null }>({});
-  const [campaignTitle, setCampaignTitle] = useState<string>('EDIÇÃO 76 - NOVO TERA 2026 0KM');
-  const [campaignImage, setCampaignImage] = useState<string>('https://s3.incrivelsorteios.com/redimensiona?key=600x600/20250731_688b54af15d40.jpg');
+  const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp || '');
+  const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp || '');
   
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
@@ -277,18 +279,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
           xcod: get('xcod'), fbclid: get('fbclid'), gclid: get('gclid'), ttclid: get('ttclid'),
         });
       } catch {}
-      // busca configurações de campanha para imagem/título do produto
-      try {
-        fetch('/api/campaign', { cache: 'no-store' })
-          .then(r => r.json())
-          .then(json => {
-            if (json?.success && json.settings) {
-              if (json.settings.title) setCampaignTitle(json.settings.title);
-              if (json.settings.imageUrl) setCampaignImage(json.settings.imageUrl);
-            }
-          })
-          .catch(() => {});
-      } catch {}
+      // título e imagem já são passados pela seção de compra via props (quando disponível); fallback deixado para seção
     } else {
       document.body.classList.remove('modal-open');
     }
@@ -540,7 +531,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity }: CheckoutModalProps) => {
                       />
                 </div>
                 <p>
-                    <b className="font-semibold text-gray-800">{quantity}</b> unidade(s) do produto <b className="font-semibold text-gray-800">{campaignTitle}</b>
+                    <b className="font-semibold text-gray-800">{quantity}</b> {quantity === 1 ? 'cota' : 'cotas'} da campanha <b className="font-semibold text-gray-800">{campaignTitle}</b>
                 </p>
             </div>
             {renderStep()}

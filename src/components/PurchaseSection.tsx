@@ -6,9 +6,9 @@ import CheckoutModal from './CheckoutModal'; // Importando o modal
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getCampaignSettings } from '@/lib/campaign';
 
-type Props = { ticketPrice?: number; drawLabel?: string };
+type Props = { ticketPrice?: number; drawLabel?: string; campaignTitle?: string; campaignImage?: string };
 
-const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp }: Props) => {
+const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp }: Props) => {
   const [quantity, setQuantity] = useState(15);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
@@ -18,12 +18,14 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
   const [bannerReady, setBannerReady] = useState(false);
   const [spins, setSpins] = useState<number>(Math.floor(15 / 5));
   const [spinsBump, setSpinsBump] = useState(false);
+  const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp ?? '');
+  const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp ?? '');
 
   useEffect(() => {
     setHasMounted(true);
     setBannerReady(true);
     // Se não recebemos valores do servidor, faz fallback via API
-    if (ticketPriceProp === undefined || drawLabelProp === undefined) {
+    if (ticketPriceProp === undefined || drawLabelProp === undefined || campaignTitleProp === undefined || campaignImageProp === undefined) {
       (async () => {
         try {
           const res = await fetch('/api/campaign', { cache: 'no-store' });
@@ -42,6 +44,8 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                 setDrawLabel(now.toLocaleDateString('pt-BR'));
               }
             }
+            if (campaignTitleProp === undefined && typeof json.settings.title === 'string') setCampaignTitle(json.settings.title);
+            if (campaignImageProp === undefined && typeof json.settings.imageUrl === 'string') setCampaignImage(json.settings.imageUrl);
           }
         } catch {}
       })();
@@ -101,12 +105,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
             </div>
 
             {/* Banner Roleta da Sorte com animações */}
-            <div
-              className={
-                `rounded-lg bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white p-2 shadow-md mb-2 ` +
-                `transition-all duration-500 ${bannerReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`
-              }
-            >
+            <div className={`rounded-lg text-white p-2 shadow-md mb-2 animated-gradient`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20">
@@ -119,8 +118,8 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                 </div>
                 <span
                   className={
-                    `bg-white/15 px-2 py-1 rounded-md text-xs font-semibold transition-all duration-300 ` +
-                    `${spinsBump ? 'scale-110 ring-2 ring-white/60' : 'scale-100'}`
+                    `bg-white/15 px-2 py-1 rounded-md text-xs font-semibold transition-transform duration-300 pulse-badge ` +
+                    `${spinsBump ? 'scale-110' : 'scale-100'}`
                   }
                 >
                   {spins} giro{spins === 1 ? '' : 's'}
@@ -191,6 +190,8 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
             isOpen={isModalOpen} 
             onClose={() => setIsModalOpen(false)}
             quantity={quantity}
+            campaignTitle={campaignTitle}
+            campaignImage={campaignImage}
         />
     </>
   );
