@@ -9,7 +9,7 @@ import { getCampaignSettings } from '@/lib/campaign';
 type Props = { ticketPrice?: number; drawLabel?: string };
 
 const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp }: Props) => {
-  const [quantity, setQuantity] = useState(120);
+  const [quantity, setQuantity] = useState(15);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
