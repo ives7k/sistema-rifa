@@ -55,13 +55,16 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
             {/* Logo Centralizado */}
             <div className="flex-shrink-0">
               <Link href="/" passHref>
-                <div className="w-[160px] h-[30px] cursor-pointer flex items-center justify-center">
+                <div className="w-[160px] h-[34px] cursor-pointer flex items-center justify-center overflow-hidden">
                   {logoMode === 'image' && logoImageUrl ? (
-                    <Image src={logoImageUrl} alt="Logo" width={160} height={30} className="object-contain" />
+                    <div className="relative w-full h-full">
+                      <Image src={logoImageUrl} alt="Logo" fill className="object-contain" priority />
+                    </div>
                   ) : (
                     <span
                       aria-label={logoText || 'Logo'}
                       className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`}
+                      style={{ lineHeight: 1 }}
                     >
                       {logoText || 'Rifas7k'}
                     </span>
