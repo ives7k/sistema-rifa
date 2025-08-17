@@ -28,7 +28,7 @@ export default async function Home() {
 
   return (
     <div className="bg-[#ebebeb]"> 
-      <Header />
+      <Header logoMode={settings.logoMode} logoText={settings.logoText} logoImageUrl={settings.logoImageUrl} />
       
       {/* Container para Banner */}
       <div className="relative">

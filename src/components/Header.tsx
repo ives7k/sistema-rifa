@@ -6,29 +6,38 @@ import Link from 'next/link'; // Importa o Link
 import MobileMenu from './MobileMenu';
 import { Bungee } from 'next/font/google';
 import Image from 'next/image';
-import { getCampaignSettings } from '@/lib/campaign';
+// Sem fetch de settings aqui por padrão para evitar flicker. Recebe por props.
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
-const Header = () => {
+type HeaderProps = {
+  logoMode?: 'text' | 'image';
+  logoText?: string;
+  logoImageUrl?: string;
+};
+
+const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: logoImageUrlProp }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [logoMode, setLogoMode] = useState<'text' | 'image'>('text');
-  const [logoText, setLogoText] = useState('Rifas7k');
-  const [logoImageUrl, setLogoImageUrl] = useState('');
+  const [logoMode, setLogoMode] = useState<'text' | 'image'>(logoModeProp ?? 'text');
+  const [logoText, setLogoText] = useState(logoTextProp ?? 'Rifas7k');
+  const [logoImageUrl, setLogoImageUrl] = useState(logoImageUrlProp ?? '');
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/campaign', { cache: 'no-store' });
-        const json = await res.json();
-        if (json?.success && json.settings) {
-          if (json.settings.logoMode === 'text' || json.settings.logoMode === 'image') setLogoMode(json.settings.logoMode);
-          if (typeof json.settings.logoText === 'string') setLogoText(json.settings.logoText);
-          if (typeof json.settings.logoImageUrl === 'string') setLogoImageUrl(json.settings.logoImageUrl);
-        }
-      } catch {}
-    })();
-  }, []);
+    // Fallback: se props não foram passadas, busca da API
+    if (logoModeProp === undefined || logoTextProp === undefined || logoImageUrlProp === undefined) {
+      (async () => {
+        try {
+          const res = await fetch('/api/campaign', { cache: 'no-store' });
+          const json = await res.json();
+          if (json?.success && json.settings) {
+            if (logoModeProp === undefined && (json.settings.logoMode === 'text' || json.settings.logoMode === 'image')) setLogoMode(json.settings.logoMode);
+            if (logoTextProp === undefined && typeof json.settings.logoText === 'string') setLogoText(json.settings.logoText);
+            if (logoImageUrlProp === undefined && typeof json.settings.logoImageUrl === 'string') setLogoImageUrl(json.settings.logoImageUrl);
+          }
+        } catch {}
+      })();
+    }
+  }, [logoModeProp, logoTextProp, logoImageUrlProp]);
 
   return (
     <>
