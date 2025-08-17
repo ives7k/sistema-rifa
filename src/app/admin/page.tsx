@@ -210,7 +210,7 @@ export default function AdminPage() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem</label>
+                      <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem do Banner</label>
                       <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                       {imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
