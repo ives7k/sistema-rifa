@@ -88,8 +88,8 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
             </div>
 
             <div className="grid grid-cols-3 gap-2 mb-2 text-center">
-                {[100, 250, 500, 750, 1000, 1500].map((num) => {
-                    const isPopular = num === 250;
+                {[10, 25, 50, 75, 100, 150].map((num) => {
+                    const isPopular = num === 25;
                     return (
                     <div key={num} className="relative h-16">
                         {isPopular && (
