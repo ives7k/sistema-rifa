@@ -63,7 +63,8 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
         return;
     }
     if (totalPrice > MAX_PIX_TOTAL_BR) {
-        alert(`Valor máximo por Pix é R$ ${MAX_PIX_TOTAL_BR.toFixed(2)}. Diminua a quantidade ou faça várias compras.`);
+        const maxPix = MAX_PIX_TOTAL_BR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        alert(`Valor máximo por Pix é ${maxPix}. Diminua a quantidade ou faça várias compras.`);
         return;
     }
     setIsModalOpen(true);
@@ -79,7 +80,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                 </div>
                 <div className="text-center">
                     <span className="text-gray-600 mr-1">Por apenas</span>
-                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">{`R$ ${ticketPrice.toFixed(2)}`}</span>
+                    <span className="font-bold text-white bg-black px-2 py-1 rounded-md">{ticketPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
             </div>
             
