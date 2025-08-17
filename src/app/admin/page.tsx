@@ -30,6 +30,9 @@ export default function AdminPage() {
   const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay' | 'today'>('today');
   const [drawDate, setDrawDate] = useState<string>('');
   const [drawDay, setDrawDay] = useState<number>(9);
+  const [logoMode, setLogoMode] = useState<'text' | 'image'>('text');
+  const [logoText, setLogoText] = useState('Rifas7k');
+  const [logoImageUrl, setLogoImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isAuthed, setIsAuthed] = useState(false);
@@ -54,6 +57,9 @@ export default function AdminPage() {
           if (json.settings.drawMode === 'fixedDate' || json.settings.drawMode === 'sameDay' || json.settings.drawMode === 'today') setDrawMode(json.settings.drawMode);
           if (typeof json.settings.drawDate === 'string') setDrawDate(json.settings.drawDate);
           if (typeof json.settings.drawDay === 'number') setDrawDay(json.settings.drawDay);
+          if (json.settings.logoMode === 'text' || json.settings.logoMode === 'image') setLogoMode(json.settings.logoMode);
+          if (typeof json.settings.logoText === 'string') setLogoText(json.settings.logoText);
+          if (typeof json.settings.logoImageUrl === 'string') setLogoImageUrl(json.settings.logoImageUrl);
         }
         // Só tenta buscar integrações se já autenticado
         const cookieHasAdmin = document.cookie.includes('__Host-admin_session=');
@@ -122,7 +128,7 @@ export default function AdminPage() {
       const res = await fetch('/api/campaign/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay }),
+        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay, logoMode, logoText, logoImageUrl }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message || 'Falha ao salvar');
@@ -182,6 +188,26 @@ export default function AdminPage() {
                     <div>
                       <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
                       <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-800 mb-1">Logo</label>
+                        <select value={logoMode} onChange={(e) => setLogoMode(e.target.value as 'text' | 'image')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
+                          <option value="text">Texto</option>
+                          <option value="image">Imagem (URL)</option>
+                        </select>
+                      </div>
+                      {logoMode === 'text' ? (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Texto da Logo</label>
+                          <input value={logoText} onChange={(e) => setLogoText(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem da Logo</label>
+                          <input value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem</label>
