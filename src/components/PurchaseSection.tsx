@@ -95,8 +95,9 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
                 <div className="rounded-lg bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white p-2 shadow-md mb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20">
-                        <i className="bi bi-stars text-[16px]"></i>
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/20 overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/icone-roleta.png" alt="Roleta" className="w-5 h-5" />
                       </span>
                       <div className="leading-tight">
                         <p className="text-[11px] font-bold uppercase tracking-wide">Roleta da Sorte</p>
