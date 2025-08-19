@@ -170,7 +170,8 @@ export default function AdminPage() {
     <div className="min-h-screen p-4 bg-background text-foreground">
       <div className="container mx-auto max-w-7xl">
         {!isAuthed ? (
-          <div className="max-w-xl mx-auto w-full">
+          <div className="min-h-[80vh] flex items-center justify-center">
+            <div className="max-w-xl mx-auto w-full">
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Painel Administrativo</CardTitle>
@@ -187,6 +188,7 @@ export default function AdminPage() {
                 </form>
               </CardContent>
             </Card>
+            </div>
           </div>
         ) : (
           <>
