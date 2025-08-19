@@ -280,9 +280,9 @@ export default function WinwheelRoulette({
           // Força o alvo com base no label/idx usando o mapeamento local para garantir alinhamento visual
           const sizes = sizesDegRef.current;
           const base = baseStartDegRef.current;
-          let idx: number | null = null;
-          if (typeof data.idx === 'number' && data.idx >= 0 && data.idx < sizes.length) idx = data.idx;
-          if (data.label) {
+          let idx: number | null = (typeof data.idx === 'number' && data.idx >= 0 && data.idx < sizes.length) ? data.idx : null;
+          // Só usa label como fallback se o idx não veio válido
+          if (idx === null && data.label) {
             const found = segmentsRef.current.findIndex(s => (s.text || '').toLowerCase() === data.label!.toLowerCase());
             if (found >= 0) idx = found;
           }
