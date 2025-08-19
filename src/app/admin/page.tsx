@@ -205,7 +205,7 @@ export default function AdminPage() {
                       <i className="bi bi-diagram-3 me-1"></i> Utmify
                     </button>
                     <button type="button" onClick={() => setActiveTab('purchases')} className={`w-full text-left px-3 py-2 rounded-md text-sm font-semibold ${activeTab==='purchases' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
-                      <i className="bi bi-receipt me-1"></i> Compras (em breve)
+                      <i className="bi bi-receipt me-1"></i> Compras
                     </button>
                   </nav>
                 </div>
@@ -216,7 +216,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
-                    <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e em breve veja as compras.</p>
+                    <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e compras.</p>
                   </div>
                   <div className="hidden lg:block">
                     <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
@@ -352,9 +352,9 @@ export default function AdminPage() {
 
                   {activeTab === 'purchases' && (
                     <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
-                      <h2 className="text-base font-bold text-gray-800 mb-3">Compras (em breve)</h2>
-                      <div className="text-xs text-gray-600 mb-3">Lista de compras do banco (ordenado por mais recentes).</div>
-                      <div className="flex items-center gap-2 mb-2">
+                      <h2 className="text-base font-bold text-gray-800 mb-1">Compras</h2>
+                      <p className="text-xs text-gray-600 mb-3">Ordenado por mais recentes. Use os botões para navegar.</p>
+                      <div className="flex items-center gap-2 mb-3">
                         <button type="button" onClick={async () => {
                           setPurchasesLoading(true);
                           try {
@@ -362,37 +362,48 @@ export default function AdminPage() {
                             const json = await res.json();
                             if (json?.success) { setPurchases(json.items || []); setPurchasesTotal(json.total || 0); }
                           } finally { setPurchasesLoading(false); }
-                        }} className="px-3 py-1 rounded-md bg-black text-white text-xs font-semibold">Atualizar</button>
+                        }} className="px-3 py-1.5 rounded-md bg-black text-white text-xs font-semibold shadow hover:bg-gray-900">Atualizar</button>
                         <span className="text-[12px] text-gray-600">Página {purchasesPage} de {Math.max(1, Math.ceil(purchasesTotal / 20))}</span>
                         <div className="ml-auto flex gap-2">
-                          <button type="button" disabled={purchasesPage<=1} onClick={() => setPurchasesPage((p) => Math.max(1, p-1))} className="px-2 py-1 rounded-md bg-gray-200 text-gray-800 text-xs disabled:opacity-50">Anterior</button>
-                          <button type="button" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)} className="px-2 py-1 rounded-md bg-gray-200 text-gray-800 text-xs disabled:opacity-50">Próxima</button>
+                          <button type="button" disabled={purchasesPage<=1} onClick={() => setPurchasesPage((p) => Math.max(1, p-1))} className="px-2.5 py-1.5 rounded-md bg-gray-100 text-gray-800 text-xs disabled:opacity-50 hover:bg-gray-200">Anterior</button>
+                          <button type="button" disabled={purchasesPage>=Math.max(1, Math.ceil(purchasesTotal/20))} onClick={() => setPurchasesPage((p) => p+1)} className="px-2.5 py-1.5 rounded-md bg-gray-100 text-gray-800 text-xs disabled:opacity-50 hover:bg-gray-200">Próxima</button>
                         </div>
                       </div>
-                      <div className="border rounded-md overflow-hidden">
-                        <div className="grid grid-cols-12 bg-gray-50 p-2 text-[12px] font-semibold text-gray-700">
-                          <div className="col-span-3">Cliente</div>
+                      <div className="rounded-lg overflow-hidden border border-gray-100">
+                        <div className="grid grid-cols-12 bg-gray-50 px-3 py-2 text-[11px] font-bold tracking-wide text-gray-600 uppercase">
+                          <div className="col-span-4">Cliente</div>
                           <div className="col-span-3">Transação</div>
                           <div className="col-span-2">Quantidade</div>
                           <div className="col-span-2">Valor</div>
-                          <div className="col-span-2 text-right">Status</div>
+                          <div className="col-span-1 text-right">Status</div>
                         </div>
                         {purchasesLoading ? (
-                          <div className="p-3 text-xs text-gray-500">Carregando...</div>
+                          <div className="px-3 py-4 text-xs text-gray-500">Carregando...</div>
                         ) : purchases.length === 0 ? (
-                          <div className="p-3 text-xs text-gray-500">Nenhum dado para exibir.</div>
+                          <div className="px-3 py-4 text-xs text-gray-500">Nenhuma compra encontrada.</div>
                         ) : (
-                          <div className="divide-y">
-                            {purchases.map((c) => (
-                              <div key={c.id} className="grid grid-cols-12 p-2 text-[12px] text-gray-800">
-                                <div className="col-span-3 truncate">{c.clientes?.nome || '—'}<span className="block text-[11px] text-gray-500 truncate">{c.clientes?.email || ''}</span></div>
-                                <div className="col-span-3 truncate">{c.transaction_id}</div>
-                                <div className="col-span-2">{c.quantidade_bilhetes}</div>
-                                <div className="col-span-2">R$ {Number(c.valor_total).toFixed(2)}</div>
-                                <div className="col-span-2 text-right font-semibold {c.status==='paid' ? 'text-green-700' : 'text-yellow-700'}">{c.status}</div>
-                              </div>
-                            ))}
-                          </div>
+                          <ul className="divide-y divide-gray-100">
+                            {purchases.map((c) => {
+                              const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                              const statusPill = c.status === 'paid'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800';
+                              return (
+                                <li key={c.id} className="grid grid-cols-12 px-3 py-2.5 text-[12px] text-gray-800 hover:bg-gray-50">
+                                  <div className="col-span-4 truncate">
+                                    <div className="font-semibold truncate">{c.clientes?.nome || '—'}</div>
+                                    <div className="text-[11px] text-gray-500 truncate">{c.clientes?.email || ''}</div>
+                                  </div>
+                                  <div className="col-span-3 truncate font-mono text-[12px]">{c.transaction_id}</div>
+                                  <div className="col-span-2">{c.quantidade_bilhetes}</div>
+                                  <div className="col-span-2">{valor}</div>
+                                  <div className="col-span-1 text-right">
+                                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${statusPill}`}>{c.status}</span>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
                         )}
                       </div>
                     </div>
