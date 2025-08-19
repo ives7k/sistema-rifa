@@ -4,9 +4,11 @@ import './theme.css';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {children}
-    </div>
+    <html lang="pt-BR">
+      <body className="min-h-screen bg-background text-foreground">
+        {children}
+      </body>
+    </html>
   );
 }
 

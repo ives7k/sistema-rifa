@@ -168,7 +168,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="bg-[#ebebeb] min-h-screen p-4">
+    <div className="min-h-screen p-4 bg-background text-foreground">
       <div className="container mx-auto max-w-7xl">
         {!isAuthed ? (
           <Card className="border border-gray-200 shadow-md">
@@ -191,14 +191,14 @@ export default function AdminPage() {
           <>
             <div className="w-full">
               <div className="mb-3">
-                <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
-                <p className="text-xs text-gray-600">Gerencie sua campanha, integrações e compras.</p>
+                <h1 className="text-2xl font-extrabold tracking-tight">Painel Administrativo</h1>
+                <p className="text-xs text-muted-foreground">Gerencie sua campanha, integrações e compras.</p>
               </div>
 
               <div className="lg:flex lg:items-start lg:gap-4">
                 {/* Sidebar desktop */}
                 <aside className="hidden lg:block w-64 shrink-0">
-                  <Card className="border border-gray-200 shadow-sm">
+                  <Card>
                     <CardHeader>
                       <CardTitle className="text-sm">Menu</CardTitle>
                     </CardHeader>
@@ -214,7 +214,7 @@ export default function AdminPage() {
                 {/* Conteúdo */}
                 <div className="flex-1 min-w-0">
                   <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 lg:hidden">
+                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                   <TabsTrigger value="campaign">Configurações</TabsTrigger>
                   <TabsTrigger value="purchases">Compras</TabsTrigger>
                   <TabsTrigger value="facebook">Facebook Pixel</TabsTrigger>
