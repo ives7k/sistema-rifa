@@ -170,22 +170,24 @@ export default function AdminPage() {
     <div className="min-h-screen p-4 bg-background text-foreground">
       <div className="container mx-auto max-w-7xl">
         {!isAuthed ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-xl">Painel Administrativo</CardTitle>
-              <p className="text-xs text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-3" onSubmit={handleLogin}>
-                <div>
-                  <Label htmlFor="admin_token" className="text-xs">Token</Label>
-                  <Input id="admin_token" type="password" className="mt-1" />
-                </div>
-                <Button className="w-full" type="submit">Entrar</Button>
-                {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
-              </form>
-            </CardContent>
-          </Card>
+          <div className="max-w-xl mx-auto w-full">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">Painel Administrativo</CardTitle>
+                <p className="text-xs text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
+              </CardHeader>
+              <CardContent>
+                <form className="space-y-3" onSubmit={handleLogin}>
+                  <div>
+                    <Label htmlFor="admin_token" className="text-xs">Token</Label>
+                    <Input id="admin_token" type="password" className="mt-1" />
+                  </div>
+                  <Button className="w-full" type="submit">Entrar</Button>
+                  {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           <>
             <div className="w-full">
