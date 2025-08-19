@@ -49,6 +49,7 @@ interface WinwheelRouletteProps {
   imageScale?: number; // escala visual do canvas (CSS) – opcional
   imageFitScale?: number; // escala da imagem dentro do canvas (offscreen), cria folga real (1 = ocupar 100%)
   disabled?: boolean;
+  playerCpf?: string; // CPF opcional; se ausente usa sessão via cookie
   onSpinStart?: () => boolean | void;
   onFinished?: (resultLabel: string) => void;
   centerOverlaySrc?: string; // imagem central (seta) apontando para a direita
@@ -76,6 +77,7 @@ export default function WinwheelRoulette({
   imageScale = 1,
   imageFitScale = 0.995,
   disabled = false,
+  playerCpf,
   onSpinStart,
   onFinished,
   centerOverlaySrc = '/gire.png',
@@ -270,7 +272,8 @@ export default function WinwheelRoulette({
       // Busca o ângulo de parada no servidor
       if (newWheel.animation) {
         try {
-          const resp = await fetch('/api/roulette/spin', { method: 'POST' });
+          const hasCpf = !!(playerCpf && playerCpf.replace(/\D/g, '').length >= 11);
+          const resp = await fetch('/api/roulette/spin', hasCpf ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: playerCpf!.replace(/\D/g, '') }) } : { method: 'POST' });
           if (!resp.ok) throw new Error('spin_http_error');
           const data: { success?: boolean; stopAngle?: number; idx?: number; label?: string } = await resp.json();
           if (!data || !data.success || typeof data.stopAngle !== 'number') throw new Error('spin_invalid_response');

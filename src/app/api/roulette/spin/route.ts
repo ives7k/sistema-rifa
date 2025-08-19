@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
+import { getClientIdFromRequest } from '@/lib/clientAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,8 +25,48 @@ const SEGMENT_LABELS = [
 const SIZES_DEG = [60, 60, 60, 60, 60, 60];
 const BASE_START_DEG = 330; // primeiro segmento inicia em 330°
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    // Identificação do jogador via sessão (cookie) ou fallback para CPF no body
+    let clienteId: string | null = getClientIdFromRequest(request);
+    if (!clienteId) {
+      let cpf: string | undefined;
+      try {
+        const body = await request.json();
+        cpf = (body?.cpf ?? '').toString();
+      } catch {}
+      if (!cpf) return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
+      const { data: cliente, error: clienteError } = await supabaseAdmin
+        .from('clientes')
+        .select('id')
+        .eq('cpf', cpf)
+        .single();
+      if (clienteError || !cliente) return NextResponse.json({ success: false, message: 'cliente_not_found' }, { status: 404 });
+      clienteId = String(cliente.id);
+    }
+
+    // Tenta decrementar 1 giro do saldo (tabela cliente_spins)
+    // Estratégia: ler saldo atual e atualizar com checagem de >0
+    const { data: current, error: curErr } = await supabaseAdmin
+      .from('cliente_spins')
+      .select('balance')
+      .eq('cliente_id', clienteId)
+      .single();
+    if (curErr && curErr.code !== 'PGRST116') {
+      return NextResponse.json({ success: false, message: 'balance_error' }, { status: 500 });
+    }
+    const balance = (current?.balance ?? 0) as number;
+    if (balance <= 0) {
+      return NextResponse.json({ success: false, message: 'no_spins' }, { status: 403 });
+    }
+    const { error: updErr } = await supabaseAdmin
+      .from('cliente_spins')
+      .update({ balance: balance - 1, updated_at: new Date().toISOString() })
+      .eq('cliente_id', clienteId);
+    if (updErr) {
+      return NextResponse.json({ success: false, message: 'decrement_error' }, { status: 500 });
+    }
+
     // Sorteio seguro no servidor
     const idx = Math.floor(Math.random() * SIZES_DEG.length);
 

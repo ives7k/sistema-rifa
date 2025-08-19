@@ -155,9 +155,9 @@ export default function AdminPage() {
 
   return (
     <div className="bg-[#ebebeb] min-h-screen p-4">
-      <div className="container mx-auto max-w-2xl">
-        <div className="bg-white rounded-xl shadow-md p-4 space-y-4 border border-gray-200">
-          {!isAuthed ? (
+      <div className="container mx-auto max-w-7xl">
+        {!isAuthed ? (
+          <div className="bg-white rounded-xl shadow-md p-4 space-y-4 border border-gray-200">
             <form className="space-y-3" onSubmit={handleLogin}>
               <h1 className="text-xl font-extrabold text-gray-900">Painel Administrativo</h1>
               <p className="text-xs text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
@@ -168,19 +168,26 @@ export default function AdminPage() {
               <button className="w-full bg-black text-white font-bold py-2 rounded-md hover:bg-gray-800 transition-colors text-sm">Entrar</button>
               {loginError && <div className="text-sm text-center text-red-600">{loginError}</div>}
             </form>
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-xl font-extrabold text-gray-900">Painel Administrativo</h1>
-                  <p className="text-xs text-gray-600">Gerencie as configurações da campanha e integrações.</p>
-                </div>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
+                <p className="text-xs text-gray-600">Gerencie as configurações da campanha e integrações.</p>
               </div>
+              <div className="hidden lg:block">
+                <button onClick={(e) => { e.preventDefault(); const form = document.getElementById('admin-form') as HTMLFormElement | null; form?.requestSubmit(); }} disabled={loading} className="px-4 py-2 rounded-md bg-black text-white font-bold disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
+                  {loading ? 'Salvando...' : 'Salvar alterações'}
+                </button>
+              </div>
+            </div>
 
-              <form className="space-y-4" onSubmit={handleSave}>
-                <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
-                  <h2 className="text-base font-bold text-gray-800 mb-2">Configurações da Campanha</h2>
-                  <div className="space-y-2">
+            <form id="admin-form" className="grid grid-cols-12 gap-4" onSubmit={handleSave}>
+              <div className="col-span-12 lg:col-span-8">
+                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
+                  <h2 className="text-base font-bold text-gray-800 mb-3">Configurações da Campanha</h2>
+                  <div className="space-y-3">
                     <div>
                       <label className="block text-xs font-semibold text-gray-800 mb-1">Título</label>
                       <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
@@ -189,7 +196,7 @@ export default function AdminPage() {
                       <label className="block text-xs font-semibold text-gray-800 mb-1">Subtítulo</label>
                       <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-gray-800 mb-1">Logo</label>
                         <select value={logoMode} onChange={(e) => setLogoMode(e.target.value as 'text' | 'image')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
@@ -217,11 +224,11 @@ export default function AdminPage() {
                         <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
                       )}
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
-                      <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
+                        <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                      </div>
                       <div>
                         <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
                         <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay' | 'today')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
@@ -230,6 +237,8 @@ export default function AdminPage() {
                           <option value="sameDay">Mesmo dia de todo mês</option>
                         </select>
                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {drawMode === 'fixedDate' ? (
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
@@ -249,17 +258,19 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+              <div className="col-span-12 lg:col-span-4">
+                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
                   <h2 className="text-base font-bold text-gray-800 mb-3">Facebook Pixel / CAPI</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2">
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
                       <div>
                         <p className="text-xs font-semibold text-gray-800">Ativar Pixel</p>
                       </div>
                       <ToggleSwitch checked={fbEnabled} onChange={setFbEnabled} label="Ativar Pixel" />
                     </div>
-                    <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2">
+                    <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
                       <div>
                         <p className="text-xs font-semibold text-gray-800">Enviar Purchase</p>
                       </div>
@@ -277,10 +288,12 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="rounded-lg border border-gray-200 p-3 bg-gray-50">
+              <div className="col-span-12 lg:col-span-4">
+                <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
                   <h2 className="text-base font-bold text-gray-800 mb-3">Utmify</h2>
-                  <div className="flex items-center justify-between bg-white border border-gray-200 rounded-md p-2">
+                  <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md p-2">
                     <div>
                       <p className="text-xs font-semibold text-gray-800">Ativar Utmify</p>
                     </div>
@@ -293,15 +306,18 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
+              </div>
 
+              <div className="col-span-12 lg:hidden">
                 <button disabled={loading} className="w-full bg-black text-white font-bold py-2 rounded-md disabled:bg-gray-400 hover:bg-gray-800 transition-colors text-sm">
                   {loading ? 'Salvando...' : 'Salvar alterações'}
                 </button>
-              </form>
-              {message && <div className="text-sm text-center text-gray-700">{message}</div>}
-            </>
-          )}
-        </div>
+              </div>
+            </form>
+
+            {message && <div className="text-sm text-center text-gray-700 mt-2">{message}</div>}
+          </>
+        )}
       </div>
     </div>
   );

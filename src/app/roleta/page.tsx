@@ -8,28 +8,46 @@ import { Bungee } from 'next/font/google';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { limparCpf } from '@/utils/formatters';
+import { useRouter } from 'next/navigation';
 
 export default function RoletaPage() {
-  const INITIAL_SPINS = 10;
-  const remainingKey = 'roulette_remaining_spins_v1';
-  const [remaining, setRemaining] = useState<number>(INITIAL_SPINS);
+  const [cpf, setCpf] = useState<string>('');
+  const [balance, setBalance] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    // Durante ajustes: sempre resetar os giros ao carregar a página
-    try { window.localStorage.setItem(remainingKey, String(INITIAL_SPINS)); } catch {}
-    setRemaining(INITIAL_SPINS);
+  const fetchBalance = useCallback(async (cpfInput: string) => {
+    const clean = limparCpf(cpfInput);
+    if (!clean) { setBalance(0); return; }
+    setLoading(true);
+    try {
+      const resp = await fetch('/api/roulette/balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: clean }) });
+      if (!resp.ok) { setBalance(0); return; }
+      const data = await resp.json();
+      setBalance(Number(data?.balance ?? 0));
+    } catch { setBalance(0); } finally { setLoading(false); }
   }, []);
 
-  const handleSpinStart = () => {
-    if (remaining <= 0) return false;
-    const next = remaining - 1;
-    setRemaining(next);
-    try { window.localStorage.setItem(remainingKey, String(next)); } catch {}
-    return true;
-  };
+  const handleSpinStart = () => true;
+  const handleFinished = () => { if (cpf) fetchBalance(cpf); };
 
-  const handleFinished = () => {};
+  // Ao montar, tenta puxar saldo pela sessão (sem CPF). Se houver, não precisa digitar.
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const resp = await fetch('/api/roulette/balance', { method: 'POST' });
+        if (resp.ok) {
+          const data = await resp.json();
+          setBalance(Number(data?.balance ?? 0));
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
   return (
     <div className="bg-[#ebebeb] min-h-screen">
       {/* GSAP TweenMax v2 (necessária para Winwheel.js clássico) */}
@@ -48,9 +66,24 @@ export default function RoletaPage() {
               </span>
             </h1>
             <p className="mt-1 text-base sm:text-lg text-gray-700 font-semibold">Gire a roleta e boa sorte!</p>
-            <div className="mt-3 sm:mt-4 flex justify-end">
-              <div className="bg-gray-100 rounded-md px-3 py-1 text-sm font-semibold text-gray-700">
-                Giros restantes: <span className="text-gray-900">{remaining}</span>
+            <div className="mt-3 sm:mt-4 grid grid-cols-1 gap-2">
+              <div className="flex items-center gap-2 justify-between">
+                <input
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  placeholder="Informe seu CPF para usar os giros"
+                  className="flex-1 border rounded-md px-3 py-2 text-sm"
+                />
+                <button
+                  onClick={() => fetchBalance(cpf)}
+                  className="px-3 py-2 rounded-md bg-blue-600 text-white text-sm font-semibold disabled:opacity-60"
+                  disabled={loading}
+                >
+                  {loading ? 'Carregando...' : 'Atualizar saldo'}
+                </button>
+              </div>
+              <div className="bg-gray-100 rounded-md px-3 py-1 text-sm font-semibold text-gray-700 text-right">
+                Giros restantes: <span className="text-gray-900">{balance}</span>
               </div>
             </div>
           </div>
@@ -62,9 +95,10 @@ export default function RoletaPage() {
               angleOffsetDeg={-30}
               paddingPx={0}
               imageFitScale={1.12}
+              playerCpf={cpf}
               onSpinStart={handleSpinStart}
               onFinished={handleFinished}
-              disabled={remaining <= 0}
+              disabled={!cpf || balance <= 0}
             />
           </div>
         </div>

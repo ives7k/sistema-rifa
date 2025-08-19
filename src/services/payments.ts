@@ -109,6 +109,14 @@ export async function processPaymentConfirmation(transactionId: string): Promise
 
       titles = newTitles;
       updated = true;
+
+      // Conceder giros pela compra (apenas na primeira confirmação)
+      try {
+        const spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
+        if (spins > 0) await grantSpinsToCliente(String(compra.cliente_id), spins);
+      } catch (e) {
+        console.error('Erro ao conceder giros (polling):', e);
+      }
     } else {
       // Já pago: garantir idempotência
       const { data: existingTitles, error: existingTitlesError } = await supabaseAdmin
@@ -235,6 +243,14 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
 
       titles = newTitles;
       updated = true;
+
+      // Conceder giros pela compra (apenas na primeira confirmação via webhook)
+      try {
+        const spins = calculateSpinsFromQuantity((compra as any).quantidade_bilhetes);
+        if (spins > 0) await grantSpinsToCliente(String((compra as any).cliente_id), spins);
+      } catch (e) {
+        console.error('Erro ao conceder giros (webhook):', e);
+      }
     } else {
       // Já pago: garantir idempotência
       const { data: existingTitles, error: existingTitlesError } = await supabaseAdmin
@@ -273,6 +289,41 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
 
   const transactionIdUsed = (compra as unknown as { transaction_id?: string }).transaction_id;
   return { titles, updated, status: skalePayStatus, raw: payload, transactionIdUsed };
+}
+
+// ---- Giros: cálculo e concessão ----
+
+function calculateSpinsFromQuantity(quantity: number): number {
+  const ratio = Number(process.env.ROULETTE_SPINS_PER_TICKET || '0.1'); // padrão: 1 giro a cada 10 bilhetes
+  const minPerPurchase = Number(process.env.ROULETTE_MIN_SPINS_PER_PURCHASE || '0'); // padrão: pode ser 0
+  const computed = Math.floor(quantity * ratio);
+  return Math.max(minPerPurchase, computed);
+}
+
+async function grantSpinsToCliente(clienteId: string, spinsToGrant: number): Promise<void> {
+  if (!spinsToGrant || spinsToGrant <= 0) return;
+  // Upsert saldo em cliente_spins
+  const { data: existing, error: selErr } = await supabaseAdmin
+    .from('cliente_spins')
+    .select('balance')
+    .eq('cliente_id', clienteId)
+    .single();
+  if (selErr && selErr.code !== 'PGRST116') {
+    throw new Error('db_error');
+  }
+  const nextBalance = (existing?.balance ?? 0) + spinsToGrant;
+  if (existing) {
+    const { error: updErr } = await supabaseAdmin
+      .from('cliente_spins')
+      .update({ balance: nextBalance, updated_at: new Date().toISOString() })
+      .eq('cliente_id', clienteId);
+    if (updErr) throw new Error('update_error');
+  } else {
+    const { error: insErr } = await supabaseAdmin
+      .from('cliente_spins')
+      .insert({ cliente_id: clienteId, balance: nextBalance, updated_at: new Date().toISOString() });
+    if (insErr) throw new Error('insert_error');
+  }
 }
 
 

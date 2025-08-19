@@ -5,6 +5,7 @@ import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getFacebookSettings } from '@/lib/facebook';
 import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 import { getCampaignSettings } from '@/lib/campaign';
+import { buildLoginCookie } from '@/lib/clientAuth';
 
 export async function POST(request: Request) {
     try {
@@ -146,7 +147,7 @@ export async function POST(request: Request) {
         }
 
         // --- Resposta para o Frontend ---
-        return NextResponse.json({
+        const res = NextResponse.json({
             success: true,
             token: resultSkalePay.id,
             pixCopiaECola: resultSkalePay.pix.qrcode,
@@ -159,6 +160,9 @@ export async function POST(request: Request) {
             },
             fb: { enabled: fb.enabled, sendPurchase: fb.sendPurchase, pixelId: fb.pixelId }
         });
+        // Define cookie de sessão do cliente (evita digitar CPF nas próximas páginas)
+        try { res.headers.append('Set-Cookie', buildLoginCookie(String((cliente as any).id))); } catch {}
+        return res;
 
     } catch (error) {
         console.error("Erro ao processar pagamento:", error);
