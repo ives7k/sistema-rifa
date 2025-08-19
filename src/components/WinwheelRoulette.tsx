@@ -206,7 +206,7 @@ export default function WinwheelRoulette({
     };
   }, []); // inicializar apenas uma vez (evita reiniciar a roleta durante o ciclo)
 
-  const handleSpin = () => {
+  const handleSpin = async () => {
     if (!wheelInstanceRef.current || isSpinning || !ready || !imageLoaded || disabled) return;
     const allow = onSpinStartRef.current ? onSpinStartRef.current() : true;
     if (allow === false) return;
@@ -267,23 +267,24 @@ export default function WinwheelRoulette({
       if (wheelImageRef.current) {
         newWheel.wheelImage = wheelImageRef.current;
       }
-      // Definir um stopAngle aleatório uniforme entre segmentos (faixas desiguais são respeitadas via tamanhos)
+      // Busca o ângulo de parada no servidor
       if (newWheel.animation) {
-        const sizes = sizesDegRef.current;
-        const base = baseStartDegRef.current;
-        const idx = Math.floor(Math.random() * sizes.length);
-        // início da faixa i
-        let start = base;
-        for (let i = 0; i < idx; i += 1) start = (start + sizes[i]) % 360;
-        const angleWithin = Math.random() * sizes[idx];
-        const target = (start + angleWithin) % 360;
-        newWheel.animation.stopAngle = target;
-        selectedIdxRef.current = idx;
+        try {
+          const resp = await fetch('/api/roulette/spin', { method: 'POST' });
+          if (!resp.ok) throw new Error('spin_http_error');
+          const data: { success?: boolean; stopAngle?: number; idx?: number; label?: string } = await resp.json();
+          if (!data || !data.success || typeof data.stopAngle !== 'number') throw new Error('spin_invalid_response');
+          newWheel.animation.stopAngle = data.stopAngle;
+          selectedIdxRef.current = typeof data.idx === 'number' ? data.idx : null;
+        } catch (e) {
+          setIsSpinning(false);
+          return;
+        }
       }
       newWheel.draw();
       wheelInstanceRef.current = newWheel;
     } catch {}
-
+    
     wheelInstanceRef.current.startAnimation();
   };
 
