@@ -260,12 +260,23 @@ export default function AdminPage() {
                             </div>
                           )}
                         </div>
+                        {/* Preview da logo */}
+                        <div className="mt-2">
+                          {logoMode === 'image' && logoImageUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border bg-white" />
+                          ) : (
+                            <div className="h-10 flex items-center justify-center rounded-md border bg-white">
+                              <span className="text-base font-extrabold text-gray-900">{logoText || 'Prévia da Logo'}</span>
+                            </div>
+                          )}
+                        </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">URL da Imagem do Banner</label>
                           <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                           {imageUrl && (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-40 object-cover w-full" />
+                            <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border max-h-60 object-contain w-full bg-white" />
                           )}
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -277,8 +288,6 @@ export default function AdminPage() {
                               <option value="sameDay">Mesmo dia de todo mês</option>
                             </select>
                           </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {drawMode === 'fixedDate' ? (
                             <div>
                               <label className="block text-xs font-semibold text-gray-800 mb-1">Data do Sorteio</label>
@@ -298,7 +307,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
-                          <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
+                          <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full sm:w-48 px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                         </div>
                       </div>
                     </div>
