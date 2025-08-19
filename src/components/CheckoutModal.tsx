@@ -73,12 +73,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp || '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp || '');
   
-  // --- Cálculo local de giros (alinha com services/payments.ts) ---
+  // --- Cálculo local de giros (mesma regra exibida no subtítulo: 1 giro a cada 5 cotas) ---
   const getSpinsFromQuantity = useCallback((qty: number) => {
-    const ratio = Number(process.env.NEXT_PUBLIC_ROULETTE_SPINS_PER_TICKET || process.env.ROULETTE_SPINS_PER_TICKET || '0.1');
-    const minPerPurchase = Number(process.env.NEXT_PUBLIC_ROULETTE_MIN_SPINS_PER_PURCHASE || process.env.ROULETTE_MIN_SPINS_PER_PURCHASE || '0');
-    const computed = Math.floor(qty * ratio);
-    return Math.max(computed, minPerPurchase);
+    return Math.floor(qty / 5);
   }, []);
   
   // --- Refs para lógica de polling ---
