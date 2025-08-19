@@ -232,6 +232,18 @@ export default function AdminPage() {
                   )}
                 </div>
 
+                {/* Menu (mobile) abaixo do título/subtítulo */}
+                <div className="lg:hidden w-full mb-3">
+                  <div className="bg-white rounded-lg shadow border border-gray-200 p-2">
+                    <nav className="grid grid-cols-2 gap-2 text-sm font-semibold">
+                      <button type="button" onClick={() => setActiveTab('campaign')} className={`px-3 py-2 rounded-md ${activeTab==='campaign' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Configurações</button>
+                      <button type="button" onClick={() => setActiveTab('purchases')} className={`px-3 py-2 rounded-md ${activeTab==='purchases' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Compras</button>
+                      <button type="button" onClick={() => setActiveTab('facebook')} className={`px-3 py-2 rounded-md ${activeTab==='facebook' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Facebook Pixel</button>
+                      <button type="button" onClick={() => setActiveTab('utmify')} className={`px-3 py-2 rounded-md ${activeTab==='utmify' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Utmify</button>
+                    </nav>
+                  </div>
+                </div>
+
                 <form id="admin-form" className="space-y-4" onSubmit={handleSave}>
                   {activeTab === 'campaign' && (
                     <div className="rounded-lg border border-gray-200 p-4 bg-white shadow-sm">
