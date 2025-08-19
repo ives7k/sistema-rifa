@@ -36,9 +36,9 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
       const cached = localStorage.getItem('campaign_logo');
       if (cached) {
         const obj = JSON.parse(cached) as { logoMode?: 'text' | 'image'; logoText?: string; logoImageUrl?: string };
-        if (obj.logoMode === 'text' || obj.logoMode === 'image') setLogoMode((prev) => prev ?? obj.logoMode);
-        if (typeof obj.logoText === 'string') setLogoText((prev) => prev ?? obj.logoText);
-        if (typeof obj.logoImageUrl === 'string') setLogoImageUrl((prev) => prev ?? obj.logoImageUrl);
+        if (obj.logoMode === 'text' || obj.logoMode === 'image') setLogoMode(obj.logoMode);
+        if (typeof obj.logoText === 'string') setLogoText(obj.logoText);
+        if (typeof obj.logoImageUrl === 'string') setLogoImageUrl(obj.logoImageUrl);
       }
     } catch {}
 
