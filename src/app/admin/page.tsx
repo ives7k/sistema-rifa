@@ -239,7 +239,7 @@ export default function AdminPage() {
                         <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
                         <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3 items-end">
                         <div>
                           <Label className="text-xs">Logo</Label>
                           <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
@@ -319,7 +319,7 @@ export default function AdminPage() {
                       </div>
                       <div>
                         <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
-                        <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 w-full sm:w-48" />
+                        <Input id="price" type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="mt-1 w-40 sm:w-48" />
                       </div>
                       <div className="flex justify-end">
                         <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : 'Salvar alterações'}</Button>
