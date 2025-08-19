@@ -11,17 +11,21 @@ export async function POST(request: Request) {
     // Primeiro tenta sessão; se não houver, aceita cpf no body para consulta pontual
     let clienteId: string | null = getClientIdFromRequest(request);
     if (!clienteId) {
-      const body = await request.json();
-      const rawCpf = (body?.cpf ?? '').toString();
-      const cpf = limparCpf(rawCpf);
-      if (!cpf) return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
-      const { data: cliente, error: clienteError } = await supabaseAdmin
-        .from('clientes')
-        .select('id')
-        .eq('cpf', cpf)
-        .single();
-      if (clienteError || !cliente) return NextResponse.json({ success: false, message: 'cliente_not_found' }, { status: 404 });
-      clienteId = String(cliente.id);
+      try {
+        const body = await request.json();
+        const rawCpf = (body?.cpf ?? '').toString();
+        const cpf = limparCpf(rawCpf);
+        if (!cpf) return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
+        const { data: cliente, error: clienteError } = await supabaseAdmin
+          .from('clientes')
+          .select('id')
+          .eq('cpf', cpf)
+          .single();
+        if (clienteError || !cliente) return NextResponse.json({ success: false, message: 'cliente_not_found' }, { status: 404 });
+        clienteId = String(cliente.id);
+      } catch {
+        return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
+      }
     }
 
     const { data: spin, error: spinErr } = await supabaseAdmin

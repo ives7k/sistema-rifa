@@ -30,19 +30,20 @@ export async function POST(request: Request) {
     // Identificação do jogador via sessão (cookie) ou fallback para CPF no body
     let clienteId: string | null = getClientIdFromRequest(request);
     if (!clienteId) {
-      let cpf: string | undefined;
       try {
         const body = await request.json();
-        cpf = (body?.cpf ?? '').toString();
-      } catch {}
-      if (!cpf) return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
-      const { data: cliente, error: clienteError } = await supabaseAdmin
-        .from('clientes')
-        .select('id')
-        .eq('cpf', cpf)
-        .single();
-      if (clienteError || !cliente) return NextResponse.json({ success: false, message: 'cliente_not_found' }, { status: 404 });
-      clienteId = String(cliente.id);
+        const cpf = (body?.cpf ?? '').toString();
+        if (!cpf) return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
+        const { data: cliente, error: clienteError } = await supabaseAdmin
+          .from('clientes')
+          .select('id')
+          .eq('cpf', cpf)
+          .single();
+        if (clienteError || !cliente) return NextResponse.json({ success: false, message: 'cliente_not_found' }, { status: 404 });
+        clienteId = String(cliente.id);
+      } catch {
+        return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
+      }
     }
 
     // Tenta decrementar 1 giro do saldo (tabela cliente_spins)
