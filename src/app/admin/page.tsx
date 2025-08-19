@@ -170,7 +170,7 @@ export default function AdminPage() {
     <div className="min-h-screen p-4 bg-background text-foreground">
       <div className="container mx-auto max-w-7xl">
         {!isAuthed ? (
-          <Card className="border border-gray-200 shadow-md">
+          <Card>
             <CardHeader>
               <CardTitle className="text-xl">Painel Administrativo</CardTitle>
               <p className="text-xs text-gray-600">Acesse com seu token para gerenciar a campanha.</p>
@@ -213,11 +213,11 @@ export default function AdminPage() {
                 {/* Conteúdo */}
                 <div className="flex-1 min-w-0">
                   <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                  <TabsTrigger value="campaign">Configurações</TabsTrigger>
-                  <TabsTrigger value="purchases">Compras</TabsTrigger>
-                  <TabsTrigger value="facebook">Facebook Pixel</TabsTrigger>
-                  <TabsTrigger value="utmify">Utmify</TabsTrigger>
+                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-1 border border-border rounded-md">
+                  <TabsTrigger value="campaign" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Configurações</TabsTrigger>
+                  <TabsTrigger value="purchases" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Compras</TabsTrigger>
+                  <TabsTrigger value="facebook" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Facebook Pixel</TabsTrigger>
+                  <TabsTrigger value="utmify" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Utmify</TabsTrigger>
                 </TabsList>
 
                 {/* Configurações */}
@@ -235,7 +235,7 @@ export default function AdminPage() {
                         <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
                         <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs">Logo</Label>
                           <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
@@ -248,19 +248,21 @@ export default function AdminPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        {logoMode === 'text' ? (
-                          <div>
-                            <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
-                            <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1" />
-                          </div>
-                        ) : (
-                          <div>
-                            <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
-                            <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1" />
-                          </div>
-                        )}
+                        <div>
+                          {logoMode === 'text' ? (
+                            <>
+                              <Label className="text-xs" htmlFor="logoText">Texto da Logo</Label>
+                              <Input id="logoText" value={logoText} onChange={(e) => setLogoText(e.target.value)} className="mt-1" />
+                            </>
+                          ) : (
+                            <>
+                              <Label className="text-xs" htmlFor="logoUrl">URL da Imagem da Logo</Label>
+                              <Input id="logoUrl" value={logoImageUrl} onChange={(e) => setLogoImageUrl(e.target.value)} className="mt-1" />
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <div>
+                      <div className="md:col-span-2">
                         {logoMode === 'image' && logoImageUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={logoImageUrl} alt="Preview da logo" className="max-h-20 w-full object-contain rounded-md border border-border bg-card" />
@@ -278,7 +280,7 @@ export default function AdminPage() {
                           <img src={imageUrl} alt="Preview da imagem" className="mt-2 rounded-md border border-border max-h-60 object-contain w-full bg-card" />
                         )}
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs">Modo do Sorteio</Label>
                           <Select value={drawMode} onValueChange={(v) => setDrawMode(v as 'fixedDate' | 'sameDay' | 'today')}>
@@ -292,22 +294,24 @@ export default function AdminPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        {drawMode === 'fixedDate' ? (
-                          <div>
-                            <Label className="text-xs" htmlFor="drawDate">Data do Sorteio</Label>
-                            <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1" />
-                          </div>
-                        ) : drawMode === 'sameDay' ? (
-                          <div>
-                            <Label className="text-xs" htmlFor="drawDay">Dia do Mês</Label>
-                            <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1" />
-                          </div>
-                        ) : (
-                          <div>
-                            <Label className="text-xs">Exibição</Label>
-                            <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1" />
-                          </div>
-                        )}
+                        <div>
+                          {drawMode === 'fixedDate' ? (
+                            <>
+                              <Label className="text-xs" htmlFor="drawDate">Data do Sorteio</Label>
+                              <Input id="drawDate" type="date" value={drawDate || ''} onChange={(e) => setDrawDate(e.target.value)} className="mt-1" />
+                            </>
+                          ) : drawMode === 'sameDay' ? (
+                            <>
+                              <Label className="text-xs" htmlFor="drawDay">Dia do Mês</Label>
+                              <Input id="drawDay" type="number" min={1} max={31} value={drawDay} onChange={(e) => setDrawDay(parseInt(e.target.value || '1', 10))} className="mt-1" />
+                            </>
+                          ) : (
+                            <>
+                              <Label className="text-xs">Exibição</Label>
+                              <Input readOnly value={new Date().toLocaleDateString('pt-BR')} className="mt-1" />
+                            </>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <Label className="text-xs" htmlFor="price">Preço do Título (R$)</Label>
