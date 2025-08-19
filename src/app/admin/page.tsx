@@ -214,19 +214,7 @@ export default function AdminPage() {
                 </div>
               </aside>
 
-              {/* Mobile menu */}
-              <div className="lg:hidden w-full mb-2">
-                <div className="bg-white rounded-lg shadow border border-gray-200 p-2">
-                  <nav className="grid grid-cols-2 gap-2 text-sm font-semibold">
-                    <button type="button" onClick={() => setActiveTab('campaign')} className={`px-3 py-2 rounded-md ${activeTab==='campaign' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Configurações</button>
-                    <button type="button" onClick={() => setActiveTab('purchases')} className={`px-3 py-2 rounded-md ${activeTab==='purchases' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Compras</button>
-                    <button type="button" onClick={() => setActiveTab('facebook')} className={`px-3 py-2 rounded-md ${activeTab==='facebook' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Facebook Pixel</button>
-                    <button type="button" onClick={() => setActiveTab('utmify')} className={`px-3 py-2 rounded-md ${activeTab==='utmify' ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}>Utmify</button>
-                  </nav>
-                </div>
-              </div>
-              {/* spacer for mobile */}
-              <div className="lg:hidden h-1" />
+              
 
               {/* Content */}
               <div className="flex-1 min-w-0 w-full">
@@ -403,41 +391,45 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="rounded-lg overflow-hidden border border-gray-100">
-                        <div className="grid grid-cols-12 bg-gray-50 px-3 py-2 text-[11px] font-bold tracking-wide text-gray-600 uppercase">
-                          <div className="col-span-4">Cliente</div>
-                          <div className="col-span-3">Transação</div>
-                          <div className="col-span-2">Quantidade</div>
-                          <div className="col-span-2">Valor</div>
-                          <div className="col-span-1 text-right">Status</div>
+                        <div className="overflow-x-auto">
+                          <div className="min-w-[760px]">
+                            <div className="grid grid-cols-12 bg-gray-50 px-3 py-2 text-[11px] font-bold tracking-wide text-gray-600 uppercase">
+                              <div className="col-span-2">Status</div>
+                              <div className="col-span-4">Cliente</div>
+                              <div className="col-span-3">Transação</div>
+                              <div className="col-span-2">Quantidade</div>
+                              <div className="col-span-1 text-right">Valor</div>
+                            </div>
+                            {purchasesLoading ? (
+                              <div className="px-3 py-4 text-xs text-gray-500">Carregando...</div>
+                            ) : purchases.length === 0 ? (
+                              <div className="px-3 py-4 text-xs text-gray-500">Nenhuma compra encontrada.</div>
+                            ) : (
+                              <ul className="divide-y divide-gray-100">
+                                {purchases.map((c) => {
+                                  const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                  const statusPill = c.status === 'paid'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-yellow-100 text-yellow-800';
+                                  return (
+                                    <li key={c.id} className="grid grid-cols-12 px-3 py-2.5 text-[12px] text-gray-800 hover:bg-gray-50">
+                                      <div className="col-span-2">
+                                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${statusPill}`}>{c.status}</span>
+                                      </div>
+                                      <div className="col-span-4 truncate">
+                                        <div className="font-semibold truncate">{c.clientes?.nome || '—'}</div>
+                                        <div className="text-[11px] text-gray-500 truncate">{c.clientes?.email || ''}</div>
+                                      </div>
+                                      <div className="col-span-3 truncate font-mono text-[12px]">{c.transaction_id}</div>
+                                      <div className="col-span-2">{c.quantidade_bilhetes}</div>
+                                      <div className="col-span-1 text-right">{valor}</div>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            )}
+                          </div>
                         </div>
-                        {purchasesLoading ? (
-                          <div className="px-3 py-4 text-xs text-gray-500">Carregando...</div>
-                        ) : purchases.length === 0 ? (
-                          <div className="px-3 py-4 text-xs text-gray-500">Nenhuma compra encontrada.</div>
-                        ) : (
-                          <ul className="divide-y divide-gray-100">
-                            {purchases.map((c) => {
-                              const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                              const statusPill = c.status === 'paid'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800';
-                              return (
-                                <li key={c.id} className="grid grid-cols-12 px-3 py-2.5 text-[12px] text-gray-800 hover:bg-gray-50">
-                                  <div className="col-span-4 truncate">
-                                    <div className="font-semibold truncate">{c.clientes?.nome || '—'}</div>
-                                    <div className="text-[11px] text-gray-500 truncate">{c.clientes?.email || ''}</div>
-                                  </div>
-                                  <div className="col-span-3 truncate font-mono text-[12px]">{c.transaction_id}</div>
-                                  <div className="col-span-2">{c.quantidade_bilhetes}</div>
-                                  <div className="col-span-2">{valor}</div>
-                                  <div className="col-span-1 text-right">
-                                    <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${statusPill}`}>{c.status}</span>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        )}
                       </div>
                     </div>
                   )}
