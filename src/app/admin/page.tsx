@@ -250,10 +250,6 @@ export default function AdminPage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
-                            <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
-                          </div>
-                          <div>
                             <label className="block text-xs font-semibold text-gray-800 mb-1">Modo do Sorteio</label>
                             <select value={drawMode} onChange={(e) => setDrawMode(e.target.value as 'fixedDate' | 'sameDay' | 'today')} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900">
                               <option value="today">Hoje (data atual)</option>
@@ -279,6 +275,10 @@ export default function AdminPage() {
                               <input value={new Date().toLocaleDateString('pt-BR')} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100" />
                             </div>
                           )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Preço do Título (R$)</label>
+                          <input type="number" step="0.01" min="0" value={ticketPrice} onChange={(e) => setTicketPrice(parseFloat(e.target.value || '0'))} className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900" />
                         </div>
                       </div>
                     </div>
