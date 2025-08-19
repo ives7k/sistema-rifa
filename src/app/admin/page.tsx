@@ -192,7 +192,7 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
-            <div className="flex items-start gap-4">
+            <div className="flex flex-col lg:flex-row items-start gap-4">
               {/* Sidebar */}
               <aside className="hidden lg:block w-64 shrink-0">
                 <div className="bg-white rounded-lg shadow border border-gray-200 p-3">
@@ -225,9 +225,11 @@ export default function AdminPage() {
                   </nav>
                 </div>
               </div>
+              {/* spacer for mobile */}
+              <div className="lg:hidden h-1" />
 
               {/* Content */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 w-full">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Painel Administrativo</h1>
