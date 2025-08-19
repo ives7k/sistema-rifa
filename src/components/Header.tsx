@@ -18,25 +18,46 @@ type HeaderProps = {
 
 const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: logoImageUrlProp }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [logoMode, setLogoMode] = useState<'text' | 'image'>(logoModeProp ?? 'text');
-  const [logoText, setLogoText] = useState(logoTextProp ?? 'Rifas7k');
-  const [logoImageUrl, setLogoImageUrl] = useState(logoImageUrlProp ?? '');
+  const [logoMode, setLogoMode] = useState<'text' | 'image' | null>(logoModeProp ?? null);
+  const [logoText, setLogoText] = useState<string | null>(logoTextProp ?? null);
+  const [logoImageUrl, setLogoImageUrl] = useState<string | null>(logoImageUrlProp ?? null);
 
   useEffect(() => {
-    // Fallback: se props não foram passadas, busca da API
-    if (logoModeProp === undefined || logoTextProp === undefined || logoImageUrlProp === undefined) {
-      (async () => {
-        try {
-          const res = await fetch('/api/campaign', { cache: 'no-store' });
-          const json = await res.json();
-          if (json?.success && json.settings) {
-            if (logoModeProp === undefined && (json.settings.logoMode === 'text' || json.settings.logoMode === 'image')) setLogoMode(json.settings.logoMode);
-            if (logoTextProp === undefined && typeof json.settings.logoText === 'string') setLogoText(json.settings.logoText);
-            if (logoImageUrlProp === undefined && typeof json.settings.logoImageUrl === 'string') setLogoImageUrl(json.settings.logoImageUrl);
-          }
-        } catch {}
-      })();
-    }
+    // Caso as props venham definidas, usamos imediatamente
+    if (logoModeProp !== undefined) setLogoMode(logoModeProp);
+    if (logoTextProp !== undefined) setLogoText(logoTextProp);
+    if (logoImageUrlProp !== undefined) setLogoImageUrl(logoImageUrlProp);
+
+    // Se alguma prop não veio, tenta cache local para evitar flicker
+    const needFetch = (logoModeProp === undefined || logoTextProp === undefined || logoImageUrlProp === undefined);
+    if (!needFetch) return;
+
+    try {
+      const cached = localStorage.getItem('campaign_logo');
+      if (cached) {
+        const obj = JSON.parse(cached) as { logoMode?: 'text' | 'image'; logoText?: string; logoImageUrl?: string };
+        if (obj.logoMode === 'text' || obj.logoMode === 'image') setLogoMode((prev) => prev ?? obj.logoMode);
+        if (typeof obj.logoText === 'string') setLogoText((prev) => prev ?? obj.logoText);
+        if (typeof obj.logoImageUrl === 'string') setLogoImageUrl((prev) => prev ?? obj.logoImageUrl);
+      }
+    } catch {}
+
+    // Busca atualizada no servidor sem cache
+    (async () => {
+      try {
+        const res = await fetch('/api/campaign', { cache: 'no-store' });
+        const json = await res.json();
+        if (json?.success && json.settings) {
+          const mode = json.settings.logoMode;
+          const txt = json.settings.logoText;
+          const img = json.settings.logoImageUrl;
+          if (mode === 'text' || mode === 'image') setLogoMode(mode);
+          if (typeof txt === 'string') setLogoText(txt);
+          if (typeof img === 'string') setLogoImageUrl(img);
+          try { localStorage.setItem('campaign_logo', JSON.stringify({ logoMode: mode, logoText: txt, logoImageUrl: img })); } catch {}
+        }
+      } catch {}
+    })();
   }, [logoModeProp, logoTextProp, logoImageUrlProp]);
 
   return (
@@ -56,17 +77,19 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
             <div className="flex-shrink-0">
               <Link href="/" passHref>
                 <div className="w-[160px] h-[34px] cursor-pointer flex items-center justify-center overflow-hidden">
-                  {logoMode === 'image' && logoImageUrl ? (
+                  {logoMode === null ? (
+                    <div className="w-full h-full" />
+                  ) : logoMode === 'image' && logoImageUrl ? (
                     <div className="relative w-full h-full">
-                      <Image src={logoImageUrl} alt="Logo" fill className="object-contain" priority />
+                      <Image key={logoImageUrl} src={logoImageUrl} alt="Logo" fill className="object-contain" priority />
                     </div>
                   ) : (
                     <span
-                      aria-label={logoText || 'Logo'}
+                      aria-label={(logoText || 'Logo') as string}
                       className={`${bungee.className} block text-center bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent text-2xl leading-none select-none`}
                       style={{ lineHeight: 1 }}
                     >
-                      {logoText || 'Rifas7k'}
+                      {(logoText || 'Rifas7k') as string}
                     </span>
                   )}
                 </div>
