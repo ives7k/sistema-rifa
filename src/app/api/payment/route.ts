@@ -161,7 +161,7 @@ export async function POST(request: Request) {
             fb: { enabled: fb.enabled, sendPurchase: fb.sendPurchase, pixelId: fb.pixelId }
         });
         // Define cookie de sessão do cliente (evita digitar CPF nas próximas páginas)
-        try { res.headers.append('Set-Cookie', buildLoginCookie(String((cliente as any).id))); } catch {}
+        try { res.headers.append('Set-Cookie', buildLoginCookie(String((cliente as { id: string | number }).id))); } catch {}
         return res;
 
     } catch (error) {

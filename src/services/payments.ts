@@ -246,8 +246,9 @@ export async function processPaymentFromWebhookPayload(payload: SkalePayWebhookP
 
       // Conceder giros pela compra (apenas na primeira confirmação via webhook)
       try {
-        const spins = calculateSpinsFromQuantity((compra as any).quantidade_bilhetes);
-        if (spins > 0) await grantSpinsToCliente(String((compra as any).cliente_id), spins);
+        const spins = calculateSpinsFromQuantity(compra.quantidade_bilhetes);
+        // @ts-expect-error tipo de id depende do schema (uuid/bigint)
+        if (spins > 0) await grantSpinsToCliente(String(compra.cliente_id), spins);
       } catch (e) {
         console.error('Erro ao conceder giros (webhook):', e);
       }

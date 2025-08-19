@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, balance: nextBalance });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, message: 'error' }, { status: 500 });
   }
 }

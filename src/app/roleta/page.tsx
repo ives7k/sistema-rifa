@@ -10,13 +10,11 @@ const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
 import { useCallback, useEffect, useState } from 'react';
 import { limparCpf } from '@/utils/formatters';
-import { useRouter } from 'next/navigation';
 
 export default function RoletaPage() {
   const [cpf, setCpf] = useState<string>('');
   const [balance, setBalance] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const router = useRouter();
 
   const fetchBalance = useCallback(async (cpfInput: string) => {
     const clean = limparCpf(cpfInput);

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const res = NextResponse.json({ success: true, cliente: { id: cliente.id, nome: cliente.nome, email: cliente.email } });
     res.headers.append('Set-Cookie', buildLoginCookie(String(cliente.id)));
     return res;
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, message: 'error' }, { status: 500 });
   }
 }

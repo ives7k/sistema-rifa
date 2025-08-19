@@ -85,7 +85,7 @@ export async function POST(request: Request) {
       stopAngle,
     };
     return NextResponse.json(body);
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, message: 'spin_error' }, { status: 500 });
   }
 }

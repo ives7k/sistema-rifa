@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
     const balance = (spin?.balance ?? 0) as number;
     return NextResponse.json({ success: true, balance });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ success: false, message: 'error' }, { status: 500 });
   }
 }

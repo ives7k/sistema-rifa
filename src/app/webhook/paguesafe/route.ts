@@ -16,7 +16,7 @@ function isAuthorizedBasic(authHeader: string | null): boolean {
 }
 
 // Placeholder para validação de assinatura/HMAC caso a SkalePay envie
-async function validateSignature(req: Request): Promise<boolean> {
+async function validateSignature(_: Request): Promise<boolean> {
   const requireSig = process.env.WEBHOOK_REQUIRE_SIGNATURE === 'true';
   if (!requireSig) return true;
   // Quando a SkalePay documentar o formato de assinatura, validar cabeçalhos aqui

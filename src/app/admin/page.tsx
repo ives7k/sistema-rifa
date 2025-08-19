@@ -9,7 +9,6 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
       type="button"
       role="switch"
       aria-checked={checked}
-      aria-pressed={checked}
       onClick={() => onChange(!checked)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onChange(!checked); } }}
       className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors outline-none focus:ring-2 focus:ring-green-500 ${checked ? 'bg-green-600' : 'bg-gray-300'}`}
