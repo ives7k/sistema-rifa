@@ -10,7 +10,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from '@/components/ui/table';
 import { CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
@@ -169,27 +168,19 @@ export default function AdminPage() {
 
   function StatusChip({ status }: { status: string }) {
     const s = (status || '').toLowerCase();
-    if (s === 'paid') {
-      return (
-        <Badge variant="secondary" className="gap-1">
-          <CheckCircle2 className="size-3.5" />
-          Pago
-        </Badge>
-      );
-    }
-    if (s === 'pending') {
-      return (
-        <Badge variant="outline" className="gap-1">
-          <Clock className="size-3.5" />
-          Pendente
-        </Badge>
-      );
-    }
+    const isPaid = s === 'paid';
+    const isPending = s === 'pending';
+    const theme = isPaid
+      ? { bg: 'bg-emerald-500/10', text: 'text-emerald-400', ring: 'ring-emerald-500/30', icon: <CheckCircle2 className="h-3.5 w-3.5" /> , label: 'Pago' }
+      : isPending
+      ? { bg: 'bg-amber-500/10', text: 'text-amber-400', ring: 'ring-amber-500/30', icon: <Clock className="h-3.5 w-3.5" />, label: 'Pendente' }
+      : { bg: 'bg-rose-500/10', text: 'text-rose-400', ring: 'ring-rose-500/30', icon: <XCircle className="h-3.5 w-3.5" />, label: status };
+
     return (
-      <Badge variant="destructive" className="gap-1">
-        <XCircle className="size-3.5" />
-        {status}
-      </Badge>
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${theme.bg} ${theme.text} ring-1 ring-inset ${theme.ring}`}> 
+        {theme.icon}
+        <span className="leading-none">{theme.label}</span>
+      </span>
     );
   }
 

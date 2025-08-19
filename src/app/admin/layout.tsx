@@ -1,9 +1,15 @@
 import type { ReactNode } from 'react';
+import '../globals.css';
+import './theme.css';
 
-// Layout aninhado do diretório /admin não deve criar uma nova árvore <html>/<body>.
-// Mantemos apenas um wrapper leve para herdar o tema do RootLayout.
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return children;
+  return (
+    <html lang="pt-BR">
+      <body className="min-h-screen bg-background text-foreground">
+        {children}
+      </body>
+    </html>
+  );
 }
 
 
