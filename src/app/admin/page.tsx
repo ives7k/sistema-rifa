@@ -217,11 +217,11 @@ export default function AdminPage() {
                 {/* Conteúdo */}
                 <div className="flex-1 min-w-0">
                   <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="w-full">
-                <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-1 border border-border rounded-md">
-                  <TabsTrigger value="campaign" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Configurações</TabsTrigger>
-                  <TabsTrigger value="purchases" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Compras</TabsTrigger>
-                  <TabsTrigger value="facebook" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Facebook Pixel</TabsTrigger>
-                  <TabsTrigger value="utmify" className="border border-border rounded-md py-2 data-[state=active]:bg-muted data-[state=active]:text-foreground">Utmify</TabsTrigger>
+                <TabsList className="flex gap-2 overflow-x-auto no-scrollbar mb-3 lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-1 border border-border rounded-md">
+                  <TabsTrigger value="campaign" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Configurações</TabsTrigger>
+                  <TabsTrigger value="purchases" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Compras</TabsTrigger>
+                  <TabsTrigger value="facebook" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Facebook Pixel</TabsTrigger>
+                  <TabsTrigger value="utmify" className="border border-border rounded-md py-2 px-2 text-xs shrink-0 whitespace-nowrap data-[state=active]:bg-muted data-[state=active]:text-foreground">Utmify</TabsTrigger>
                 </TabsList>
 
                 {/* Configurações */}
@@ -239,7 +239,7 @@ export default function AdminPage() {
                         <Label className="text-xs" htmlFor="subtitle">Subtítulo</Label>
                         <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="mt-1" />
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
                           <Label className="text-xs">Logo</Label>
                           <Select value={logoMode} onValueChange={(v) => setLogoMode(v as 'text' | 'image')}>
