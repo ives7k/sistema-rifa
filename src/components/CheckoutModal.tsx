@@ -425,6 +425,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                             Ir para a roleta ({getSpinsFromQuantity(quantity)} giro{getSpinsFromQuantity(quantity) > 1 ? 's' : ''})
                           </a>
                         )}
+                        <a
+                          href="/meus-titulos"
+                          className="w-full mt-1 bg-white text-gray-800 font-bold text-sm rounded-lg px-3 py-2 flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 shadow-sm"
+                          aria-label="Consultar meus títulos"
+                        >
+                          <i className="bi bi-ticket-perforated"></i>
+                          Consultar meus títulos
+                        </a>
                     </div>
                 ) : (
                     <>

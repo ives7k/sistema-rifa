@@ -474,7 +474,7 @@ export default function AdminPage() {
                       </div>
                       <div className="rounded-lg border border-border">
                         <div className="overflow-x-auto [--radix-select-content-z-index:60]">
-                          <div className="min-w-[760px] p-2 sm:p-4">
+                          <div className="min-w-[900px] p-2 sm:p-4">
                             <Table className="w-full text-[13px]">
                               <TableHeader>
                                 <TableRow className="bg-muted/40 border-b border-border/60 [&>th]:py-2 [&>th]:px-4 [&>th]:text-[12px]">
@@ -482,17 +482,20 @@ export default function AdminPage() {
                                   <TableHead>Cliente</TableHead>
                                   <TableHead>Transação</TableHead>
                                   <TableHead>Quantidade</TableHead>
+                                  <TableHead>Data/Hora</TableHead>
                                   <TableHead className="text-right">Valor</TableHead>
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {purchasesLoading ? (
-                                  <TableRow><TableCell colSpan={5} className="text-xs text-muted-foreground">Carregando...</TableCell></TableRow>
+                                  <TableRow><TableCell colSpan={6} className="text-xs text-muted-foreground">Carregando...</TableCell></TableRow>
                                 ) : purchases.length === 0 ? (
-                                  <TableRow><TableCell colSpan={5} className="text-xs text-muted-foreground">Nenhuma compra encontrada.</TableCell></TableRow>
+                                  <TableRow><TableCell colSpan={6} className="text-xs text-muted-foreground">Nenhuma compra encontrada.</TableCell></TableRow>
                                 ) : (
                                   purchases.map((c) => {
                                     const valor = (Number(c.valor_total) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                    const when = c.paid_at || c.created_at;
+                                    const dataHora = when ? new Date(when).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
                                     return (
                                       <TableRow key={c.id} className="hover:bg-muted/60 border-b border-border/60 [&>td]:py-2 [&>td]:px-4">
                                         <TableCell>
@@ -504,6 +507,7 @@ export default function AdminPage() {
                                         </TableCell>
                                         <TableCell className="font-mono text-[12px] truncate max-w-[160px]">{c.transaction_id}</TableCell>
                                         <TableCell>{c.quantidade_bilhetes}</TableCell>
+                                        <TableCell className="text-[12px] whitespace-nowrap">{dataHora}</TableCell>
                                         <TableCell className="text-right">{valor}</TableCell>
                                       </TableRow>
                                     );
