@@ -216,8 +216,8 @@ export default function WinwheelRoulette({
     setIsSpinning(true);
 
     // Reset opcional para permitir giros múltiplos
+    const prev = wheelInstanceRef.current;
     try {
-      const prev = wheelInstanceRef.current;
       prev.stopAnimation(false);
       // Mata qualquer tween residual do GSAP na instância anterior
       try {
@@ -229,13 +229,11 @@ export default function WinwheelRoulette({
 
       const currentAngle = ((prev.rotationAngle % 360) + 360) % 360;
 
-      // Recria totalmente a instância para evitar qualquer timeline residual do GSAP
       const WinwheelClass = window.Winwheel;
-      if (!WinwheelClass) {
-        setIsSpinning(false);
-        return;
-      }
-      const newWheel = new WinwheelClass({
+      if (!WinwheelClass) { setIsSpinning(false); return; }
+
+      // 1) Inicia giro imediatamente (pré-rotação) enquanto busca o resultado no servidor
+      const preWheel = new WinwheelClass({
         canvasId: canvasRef.current!.id,
         numSegments: segmentsRef.current.length,
         outerRadius: prev.outerRadius,
@@ -246,15 +244,84 @@ export default function WinwheelRoulette({
         segments: segmentsRef.current,
         animation: {
           type: 'spinToStop',
-          duration: Math.max(5, durationSec),
-          spins: Math.max(10, Math.floor(spins) + Math.floor(Math.random() * 4)),
+          duration: Math.max(6, durationSec + 2),
+          spins: Math.max(12, Math.floor(spins) + 6),
+          // Não finaliza aqui; vamos reconfigurar antes de terminar
+          callbackFinished: () => {},
+        },
+        pins: { number: 0 },
+      });
+      if (wheelImageRef.current) preWheel.wheelImage = wheelImageRef.current;
+      preWheel.draw();
+      wheelInstanceRef.current = preWheel;
+      preWheel.startAnimation();
+
+      // 2) Busca o alvo no servidor em paralelo
+      const outcomePromise = (async () => {
+        const hasCpf = !!(playerCpf && playerCpf.replace(/\D/g, '').length >= 11);
+        const resp = await fetch('/api/roulette/spin', hasCpf ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: playerCpf!.replace(/\D/g, '') }) } : { method: 'POST' });
+        if (!resp.ok) throw new Error('spin_http_error');
+        const data: { success?: boolean; stopAngle?: number; idx?: number; label?: string } = await resp.json();
+        if (!data || !data.success) throw new Error('spin_invalid_response');
+        return data;
+      })();
+
+      let data: { success?: boolean; stopAngle?: number; idx?: number; label?: string };
+      try {
+        data = await outcomePromise;
+      } catch (e) {
+        // Falha de backend: interrompe pré-rotação e aborta
+        preWheel.stopAnimation(false);
+        setIsSpinning(false);
+        return;
+      }
+
+      // 3) Com o alvo em mãos, para a pré-rotação e cria a rotação final para o ângulo certo
+      const sizes = sizesDegRef.current;
+      const base = baseStartDegRef.current;
+      let idx: number | null = (typeof data.idx === 'number' && data.idx >= 0 && data.idx < sizes.length) ? data.idx : null;
+      if (idx === null && data.label) {
+        const found = segmentsRef.current.findIndex(s => (s.text || '').toLowerCase() === data.label!.toLowerCase());
+        if (found >= 0) idx = found;
+      }
+
+      let targetAngle: number | null = null;
+      if (idx !== null) {
+        let start = base;
+        for (let i = 0; i < idx; i += 1) start = (start + sizes[i]) % 360;
+        const size = sizes[idx];
+        const margin = Math.min(size / 2 - 1, Math.max(5, size * 0.15));
+        const angleWithin = margin + Math.random() * (size - 2 * margin);
+        targetAngle = (start + angleWithin) % 360;
+        selectedIdxRef.current = idx;
+      } else if (typeof data.stopAngle === 'number') {
+        targetAngle = data.stopAngle;
+        selectedIdxRef.current = null;
+      }
+      if (targetAngle === null) { preWheel.stopAnimation(false); setIsSpinning(false); return; }
+
+      const carryAngle = ((preWheel.rotationAngle % 360) + 360) % 360;
+      preWheel.stopAnimation(false);
+
+      const finalWheel = new WinwheelClass({
+        canvasId: canvasRef.current!.id,
+        numSegments: segmentsRef.current.length,
+        outerRadius: preWheel.outerRadius,
+        pointerAngle: 90,
+        rotationAngle: carryAngle,
+        drawMode: 'image',
+        textFontSize: 0,
+        segments: segmentsRef.current,
+        animation: {
+          type: 'spinToStop',
+          duration: Math.max(4, durationSec),
+          spins: Math.max(6, Math.floor(spins / 2)),
           callbackFinished: () => {
             try {
-              const seg = newWheel.getIndicatedSegment?.() ?? null;
+              const seg = finalWheel.getIndicatedSegment?.() ?? null;
               if (seg && seg.text) {
-                // Se o mapeamento da lib divergir, usamos o índice escolhido para exibir o label correto
-                const idx = selectedIdxRef.current;
-                const safeText = (idx !== null && segmentsRef.current[idx]) ? (segmentsRef.current[idx].text ?? seg.text) : seg.text;
+                const pickedIdx = selectedIdxRef.current;
+                const safeText = (pickedIdx !== null && segmentsRef.current[pickedIdx]) ? (segmentsRef.current[pickedIdx].text ?? seg.text) : seg.text;
                 setMessage(safeText ?? '');
                 if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
               }
@@ -265,53 +332,15 @@ export default function WinwheelRoulette({
         },
         pins: { number: 0 },
       });
-
-      if (wheelImageRef.current) {
-        newWheel.wheelImage = wheelImageRef.current;
-      }
-      // Busca o ângulo de parada no servidor
-      if (newWheel.animation) {
-        try {
-          const hasCpf = !!(playerCpf && playerCpf.replace(/\D/g, '').length >= 11);
-          const resp = await fetch('/api/roulette/spin', hasCpf ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: playerCpf!.replace(/\D/g, '') }) } : { method: 'POST' });
-          if (!resp.ok) throw new Error('spin_http_error');
-          const data: { success?: boolean; stopAngle?: number; idx?: number; label?: string } = await resp.json();
-          if (!data || !data.success) throw new Error('spin_invalid_response');
-          // Força o alvo com base no label/idx usando o mapeamento local para garantir alinhamento visual
-          const sizes = sizesDegRef.current;
-          const base = baseStartDegRef.current;
-          let idx: number | null = (typeof data.idx === 'number' && data.idx >= 0 && data.idx < sizes.length) ? data.idx : null;
-          // Só usa label como fallback se o idx não veio válido
-          if (idx === null && data.label) {
-            const found = segmentsRef.current.findIndex(s => (s.text || '').toLowerCase() === data.label!.toLowerCase());
-            if (found >= 0) idx = found;
-          }
-          if (idx !== null) {
-            let start = base;
-            for (let i = 0; i < idx; i += 1) start = (start + sizes[i]) % 360;
-            // Range seguro dentro do segmento (evita bordas ~15% com mínimo 5°)
-            const size = sizes[idx];
-            const margin = Math.min(size / 2 - 1, Math.max(5, size * 0.15));
-            const angleWithin = margin + Math.random() * (size - 2 * margin);
-            const target = (start + angleWithin) % 360;
-            newWheel.animation.stopAngle = target;
-            selectedIdxRef.current = idx;
-          } else if (typeof data.stopAngle === 'number') {
-            newWheel.animation.stopAngle = data.stopAngle;
-            selectedIdxRef.current = null;
-          } else {
-            throw new Error('spin_invalid_target');
-          }
-        } catch (e) {
-          setIsSpinning(false);
-          return;
-        }
-      }
-      newWheel.draw();
-      wheelInstanceRef.current = newWheel;
-    } catch {}
-    
-    wheelInstanceRef.current.startAnimation();
+      if (wheelImageRef.current) finalWheel.wheelImage = wheelImageRef.current;
+      finalWheel.animation!.stopAngle = targetAngle;
+      finalWheel.draw();
+      wheelInstanceRef.current = finalWheel;
+      finalWheel.startAnimation();
+    } catch {
+      try { prev.stopAnimation(false); } catch {}
+      setIsSpinning(false);
+    }
   };
 
   return (
