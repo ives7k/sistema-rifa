@@ -16,6 +16,7 @@ type CampaignSettings = {
   drawDate: string | null;
   drawDay: number | null;
   minQuantity: number;
+  defaultQuantity: number;
 };
 
 const DEFAULT_SETTINGS: CampaignSettings = {
@@ -30,6 +31,7 @@ const DEFAULT_SETTINGS: CampaignSettings = {
   drawDate: null,
   drawDay: null,
   minQuantity: 15,
+  defaultQuantity: 15,
 };
 
 export async function GET() {

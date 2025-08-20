@@ -6,29 +6,32 @@ import CheckoutModal from './CheckoutModal'; // Importando o modal
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getCampaignSettings } from '@/lib/campaign';
 
-type Props = { ticketPrice?: number; drawLabel?: string; campaignTitle?: string; campaignImage?: string; minQuantity?: number };
+type Props = { ticketPrice?: number; drawLabel?: string; campaignTitle?: string; campaignImage?: string; minQuantity?: number; defaultQuantity?: number };
 
-const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp, minQuantity: minQuantityProp }: Props) => {
+const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp, minQuantity: minQuantityProp, defaultQuantity: defaultQuantityProp }: Props) => {
   const initialMinQty = typeof minQuantityProp === 'number' ? Math.max(1, Math.floor(minQuantityProp)) : 15;
-  const [quantity, setQuantity] = useState(initialMinQty);
+  const initialDefaultQtyRaw = typeof defaultQuantityProp === 'number' ? Math.max(1, Math.floor(defaultQuantityProp)) : 15;
+  const initialDefaultQty = Math.max(initialMinQty, initialDefaultQtyRaw);
+  const [quantity, setQuantity] = useState(initialDefaultQty);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
   const [ticketPrice, setTicketPrice] = useState<number>(ticketPriceProp ?? 0.11);
   const [drawLabel, setDrawLabel] = useState<string>(drawLabelProp ?? '');
   const [bannerReady, setBannerReady] = useState(false);
-  const [spins, setSpins] = useState<number>(Math.floor(initialMinQty / 5));
+  const [spins, setSpins] = useState<number>(Math.floor(initialDefaultQty / 5));
   const [spinsBump, setSpinsBump] = useState(false);
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp ?? '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp ?? '');
   const [minQuantity, setMinQuantity] = useState<number>(initialMinQty);
+  const [defaultQuantity, setDefaultQuantity] = useState<number>(initialDefaultQty);
   const MAX_QUANTITY = 200;
 
   useEffect(() => {
     setHasMounted(true);
     setBannerReady(true);
     // Se não recebemos valores do servidor, faz fallback via API
-    if (ticketPriceProp === undefined || drawLabelProp === undefined || campaignTitleProp === undefined || campaignImageProp === undefined || minQuantityProp === undefined) {
+    if (ticketPriceProp === undefined || drawLabelProp === undefined || campaignTitleProp === undefined || campaignImageProp === undefined || minQuantityProp === undefined || defaultQuantityProp === undefined) {
       (async () => {
         try {
           const res = await fetch('/api/campaign', { cache: 'no-store' });
@@ -53,6 +56,12 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
               const mq = Math.max(1, Math.floor(json.settings.minQuantity));
               setMinQuantity(mq);
               setQuantity(q => Math.max(mq, q));
+            }
+            if (defaultQuantityProp === undefined && typeof json.settings.defaultQuantity === 'number') {
+              const dqRaw = Math.max(1, Math.floor(json.settings.defaultQuantity));
+              const dq = Math.max(minQuantityProp ?? minQuantity, dqRaw);
+              setDefaultQuantity(dq);
+              setQuantity(q => Math.max(dq, q));
             }
           }
         } catch {}

@@ -25,6 +25,7 @@ export default function AdminPage() {
   const [subtitle, setSubtitle] = useState('');
   const [ticketPrice, setTicketPrice] = useState<number>(0.11);
   const [minQuantity, setMinQuantity] = useState<number>(15);
+  const [defaultQuantity, setDefaultQuantity] = useState<number>(15);
   const [drawMode, setDrawMode] = useState<'fixedDate' | 'sameDay' | 'today'>('today');
   const [drawDate, setDrawDate] = useState<string>('');
   const [drawDay, setDrawDay] = useState<number>(9);
@@ -64,6 +65,7 @@ export default function AdminPage() {
           if (typeof json.settings.logoText === 'string') setLogoText(json.settings.logoText);
           if (typeof json.settings.logoImageUrl === 'string') setLogoImageUrl(json.settings.logoImageUrl);
           if (typeof json.settings.minQuantity === 'number') setMinQuantity(json.settings.minQuantity);
+          if (typeof json.settings.defaultQuantity === 'number') setDefaultQuantity(json.settings.defaultQuantity);
         }
         // Só tenta buscar integrações se já autenticado
         const cookieHasAdmin = document.cookie.includes('__Host-admin_session=');
@@ -146,7 +148,7 @@ export default function AdminPage() {
       const res = await fetch('/api/campaign/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay, logoMode, logoText, logoImageUrl, minQuantity }),
+        body: JSON.stringify({ title, imageUrl, subtitle, ticketPrice, drawMode, drawDate: drawDate || null, drawDay, logoMode, logoText, logoImageUrl, minQuantity, defaultQuantity }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.message || 'Falha ao salvar');
@@ -392,6 +394,10 @@ export default function AdminPage() {
                           <div className="md:col-span-3">
                             <Label className="text-xs" htmlFor="minQty">Qtd. mínima de cotas</Label>
                             <Input id="minQty" type="number" min={1} value={minQuantity} onChange={(e) => setMinQuantity(Math.max(1, parseInt(e.target.value || '1', 10)))} className="mt-1 h-10" />
+                          </div>
+                          <div className="md:col-span-3">
+                            <Label className="text-xs" htmlFor="defQty">Qtd. padrão ao carregar</Label>
+                            <Input id="defQty" type="number" min={1} value={defaultQuantity} onChange={(e) => setDefaultQuantity(Math.max(1, parseInt(e.target.value || '1', 10)))} className="mt-1 h-10" />
                           </div>
                         </div>
                       </CardContent>

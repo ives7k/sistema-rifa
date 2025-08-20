@@ -11,6 +11,7 @@ export type CampaignSettings = {
   drawDate: string | null; // ISO date (YYYY-MM-DD)
   drawDay: number | null; // 1..31
   minQuantity: number; // quantidade mínima de cotas
+  defaultQuantity: number; // quantidade padrão exibida ao carregar
 };
 
 const DEFAULT_SETTINGS: CampaignSettings = {
@@ -25,6 +26,7 @@ const DEFAULT_SETTINGS: CampaignSettings = {
   drawDate: null,
   drawDay: null,
   minQuantity: 15,
+  defaultQuantity: 15,
 };
 
 import { supabaseAdmin } from '@/lib/supabase';
