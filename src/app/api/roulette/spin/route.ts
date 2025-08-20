@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { getClientIdFromRequest } from '@/lib/clientAuth';
+import { getClientIdFromRequest, parseCookie } from '@/lib/clientAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -25,6 +25,41 @@ const SEGMENT_LABELS = [
 
 const SIZES_DEG = [60, 60, 60, 60, 60, 60];
 const BASE_START_DEG = 330; // primeiro segmento inicia em 330°
+
+// Estado de tentativa/vitória controlado por cookie HttpOnly
+const STATE_COOKIE_NAME = 'roulette_state';
+const PRIZE_INDEX_IPHONES = 5; // '2 iPhone 16 Pro Max'
+
+type RouletteState = { spinsTried: number; hasWon: boolean };
+
+function readRouletteState(request: Request): RouletteState {
+  try {
+    const jar = parseCookie(request.headers.get('cookie'));
+    const raw = jar[STATE_COOKIE_NAME];
+    if (!raw) return { spinsTried: 0, hasWon: false };
+    const parsed = JSON.parse(decodeURIComponent(raw));
+    const spinsTried = Number(parsed?.spinsTried ?? 0);
+    const hasWon = Boolean(parsed?.hasWon);
+    if (!Number.isFinite(spinsTried) || spinsTried < 0) return { spinsTried: 0, hasWon: false };
+    return { spinsTried, hasWon };
+  } catch {
+    return { spinsTried: 0, hasWon: false };
+  }
+}
+
+function buildRouletteStateCookie(state: RouletteState): string {
+  const payload = encodeURIComponent(JSON.stringify({ spinsTried: state.spinsTried, hasWon: state.hasWon }));
+  const attrs = [
+    `${STATE_COOKIE_NAME}=${payload}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+  ];
+  if (process.env.NODE_ENV !== 'development') attrs.push('Secure');
+  // guarda por ~180 dias
+  attrs.push(`Max-Age=${60 * 60 * 24 * 180}`);
+  return attrs.join('; ');
+}
 
 export async function POST(request: Request) {
   try {
@@ -69,9 +104,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'decrement_error' }, { status: 500 });
     }
 
-    // Força cair em "TENTE OUTRA VEZ" (índices 1 ou 4), escolhendo aleatoriamente entre os dois
-    const candidates = [1, 4];
-    const idx = candidates[Math.floor(Math.random() * candidates.length)];
+    // Lê/atualiza estado de tentativas via cookie para forçar vitória no 2º giro e nunca mais
+    const prev = readRouletteState(request);
+    const nextSpinsTried = prev.spinsTried + 1;
+    const isWinningSpin = !prev.hasWon && nextSpinsTried === 2;
+
+    // Define o índice do resultado
+    const idx = isWinningSpin ? PRIZE_INDEX_IPHONES : ([1, 4][Math.floor(Math.random() * 2)]);
 
     // Calcula o início do segmento escolhido
     let start = BASE_START_DEG;
@@ -89,7 +128,11 @@ export async function POST(request: Request) {
       label: SEGMENT_LABELS[idx],
       stopAngle,
     };
-    return NextResponse.json(body);
+    // Prepara resposta e atualiza cookie de estado
+    const res = NextResponse.json(body);
+    const cookie = buildRouletteStateCookie({ spinsTried: nextSpinsTried, hasWon: prev.hasWon || isWinningSpin });
+    res.headers.append('Set-Cookie', cookie);
+    return res;
   } catch {
     return NextResponse.json({ success: false, message: 'spin_error' }, { status: 500 });
   }
