@@ -32,6 +32,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
           <ul className="space-y-4">
             {/* Usando o componente Link do Next.js */}
             <li><Link href="/" className="hover:text-yellow-400">Início</Link></li>
+            <li><Link href="/roleta" className="hover:text-yellow-400">Roleta da sorte</Link></li>
             <li><Link href="/campanhas" className="hover:text-yellow-400">Campanhas</Link></li>
             <li><Link href="/meus-titulos" className="hover:text-yellow-400">Meus títulos</Link></li>
             <li><Link href="/ganhadores" className="hover:text-yellow-400">Ganhadores</Link></li>
