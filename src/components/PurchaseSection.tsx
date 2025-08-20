@@ -6,28 +6,29 @@ import CheckoutModal from './CheckoutModal'; // Importando o modal
 import { MAX_PIX_TOTAL_BR } from '@/config/payments';
 import { getCampaignSettings } from '@/lib/campaign';
 
-type Props = { ticketPrice?: number; drawLabel?: string; campaignTitle?: string; campaignImage?: string };
+type Props = { ticketPrice?: number; drawLabel?: string; campaignTitle?: string; campaignImage?: string; minQuantity?: number };
 
-const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp }: Props) => {
-  const [quantity, setQuantity] = useState(15);
+const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelProp, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp, minQuantity: minQuantityProp }: Props) => {
+  const initialMinQty = typeof minQuantityProp === 'number' ? Math.max(1, Math.floor(minQuantityProp)) : 15;
+  const [quantity, setQuantity] = useState(initialMinQty);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para o modal
   const [ticketPrice, setTicketPrice] = useState<number>(ticketPriceProp ?? 0.11);
   const [drawLabel, setDrawLabel] = useState<string>(drawLabelProp ?? '');
   const [bannerReady, setBannerReady] = useState(false);
-  const [spins, setSpins] = useState<number>(Math.floor(15 / 5));
+  const [spins, setSpins] = useState<number>(Math.floor(initialMinQty / 5));
   const [spinsBump, setSpinsBump] = useState(false);
   const [campaignTitle, setCampaignTitle] = useState<string>(campaignTitleProp ?? '');
   const [campaignImage, setCampaignImage] = useState<string>(campaignImageProp ?? '');
-  const [minQuantity, setMinQuantity] = useState<number>(15);
+  const [minQuantity, setMinQuantity] = useState<number>(initialMinQty);
   const MAX_QUANTITY = 200;
 
   useEffect(() => {
     setHasMounted(true);
     setBannerReady(true);
     // Se não recebemos valores do servidor, faz fallback via API
-    if (ticketPriceProp === undefined || drawLabelProp === undefined || campaignTitleProp === undefined || campaignImageProp === undefined) {
+    if (ticketPriceProp === undefined || drawLabelProp === undefined || campaignTitleProp === undefined || campaignImageProp === undefined || minQuantityProp === undefined) {
       (async () => {
         try {
           const res = await fetch('/api/campaign', { cache: 'no-store' });
@@ -48,7 +49,7 @@ const PurchaseSection = ({ ticketPrice: ticketPriceProp, drawLabel: drawLabelPro
             }
             if (campaignTitleProp === undefined && typeof json.settings.title === 'string') setCampaignTitle(json.settings.title);
             if (campaignImageProp === undefined && typeof json.settings.imageUrl === 'string') setCampaignImage(json.settings.imageUrl);
-            if (typeof json.settings.minQuantity === 'number') {
+            if (minQuantityProp === undefined && typeof json.settings.minQuantity === 'number') {
               const mq = Math.max(1, Math.floor(json.settings.minQuantity));
               setMinQuantity(mq);
               setQuantity(q => Math.max(mq, q));

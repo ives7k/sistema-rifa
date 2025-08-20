@@ -55,7 +55,7 @@ export default async function Home() {
       {/* Container principal de conteúdo */}
       <div className="container mx-auto max-w-lg px-4 mt-2 space-y-2">
         <MyTicketsBar />
-        <PurchaseSection ticketPrice={settings.ticketPrice} drawLabel={drawLabel} campaignTitle={settings.title} campaignImage={settings.imageUrl} />
+        <PurchaseSection ticketPrice={settings.ticketPrice} drawLabel={drawLabel} campaignTitle={settings.title} campaignImage={settings.imageUrl} minQuantity={settings.minQuantity} />
         <Regulation />
         <Prizes />
       </div>
