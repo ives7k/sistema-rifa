@@ -229,32 +229,33 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
 
         {step === 2 && (
           <form className="p-4 space-y-3" onSubmit={handleGeneratePix}>
-            <p className="text-sm font-semibold">Escolha o frete</p>
-            <div className="space-y-2">
-              {FREIGHT_OPTIONS_BR.map(opt => (
-                <label key={opt.id} className="flex items-center justify-between border rounded px-3 py-2 cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <input type="radio" name="frete" checked={freightId === opt.id} onChange={() => setFreightId(opt.id)} />
-                    {opt.imageUrl ? (
-                      <div className="relative w-10 h-10 shrink-0 hidden sm:block">
-                        <Image src={opt.imageUrl} alt={opt.label} fill className="object-contain" />
+            {!pix && <p className="text-sm font-semibold">Escolha o frete</p>}
+            {!pix && (
+              <div className="space-y-2">
+                {FREIGHT_OPTIONS_BR.map(opt => (
+                  <label key={opt.id} className="flex items-center justify-between border rounded px-3 py-2 cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <input type="radio" name="frete" checked={freightId === opt.id} onChange={() => setFreightId(opt.id)} />
+                      {opt.imageUrl ? (
+                        <div className="relative w-10 h-10 shrink-0 hidden sm:block">
+                          <Image src={opt.imageUrl} alt={opt.label} fill className="object-contain" />
+                        </div>
+                      ) : null}
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-gray-900">{opt.label}</span>
+                        {opt.hasInsurance && (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-green-700 font-semibold mt-0.5">
+                            <i className="bi bi-shield-check"></i>
+                            Seguro incluso
+                          </span>
+                        )}
                       </div>
-                    ) : null}
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-gray-900">{opt.label}</span>
-                      {opt.description && <span className="text-[11px] text-gray-600">{opt.description}</span>}
-                      {opt.hasInsurance && (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-green-700 font-semibold mt-0.5">
-                          <i className="bi bi-shield-check"></i>
-                          Seguro incluso
-                        </span>
-                      )}
                     </div>
-                  </div>
-                  <span className="text-sm font-bold">R$ {opt.amount.toFixed(2)}</span>
-                </label>
-              ))}
-            </div>
+                    <span className="text-sm font-bold">R$ {opt.amount.toFixed(2)}</span>
+                  </label>
+                ))}
+              </div>
+            )}
 
             {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">{error}</div>}
 
@@ -286,7 +287,6 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
                     <span>Copiar</span>
                   </button>
                 </div>
-                <button type="button" onClick={() => setPix(null)} className="w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 text-sm">Alterar frete</button>
                 <button type="button" onClick={onClose} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg text-sm">Fechar</button>
               </div>
             )}
