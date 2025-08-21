@@ -149,8 +149,8 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
         </div>
         <div className="p-2 space-y-2">
           <div className="bg-gray-100 p-2 rounded-md text-sm text-gray-600 flex items-center space-x-3">
-            <div className="relative w-24 h-16 shrink-0">
-              <Image src={bannerImage} alt="Prêmio" fill className="rounded-md object-cover" />
+            <div className="relative w-24 h-16 shrink-0 bg-white">
+              <Image src={bannerImage} alt="Prêmio" fill className="rounded-md object-contain" />
             </div>
             <div className="flex-1">
               <p className="text-gray-700">
