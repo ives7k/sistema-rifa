@@ -7,12 +7,13 @@ export type FreightOption = {
   description?: string;
   imageUrl?: string;
   hasInsurance?: boolean;
+  subtitle?: string; // ex: "5-9 dias úteis"
 };
 
 export const FREIGHT_OPTIONS_BR: FreightOption[] = [
-  { id: 'pac', label: 'PAC (5-9 dias úteis)', amount: 24.9, description: 'Entrega econômica com rastreio básico.', imageUrl: '/window.svg' },
-  { id: 'sedex', label: 'SEDEX (2-4 dias úteis)', amount: 39.9, description: 'Entrega rápida com rastreio completo.', imageUrl: '/next.svg' },
-  { id: 'expresso', label: 'Expresso (1-2 dias úteis)', amount: 59.9, description: 'Entrega prioritária com seguro incluso.', imageUrl: '/vercel.svg', hasInsurance: true },
+  { id: 'pac', label: 'PAC', subtitle: '5-9 dias úteis', amount: 24.9, imageUrl: '/window.svg' },
+  { id: 'sedex', label: 'SEDEX', subtitle: '2-4 dias úteis', amount: 39.9, imageUrl: '/next.svg' },
+  { id: 'expresso', label: 'Expresso', subtitle: '1-2 dias úteis', amount: 59.9, imageUrl: '/vercel.svg', hasInsurance: true },
 ];
 
 

@@ -243,6 +243,7 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
                       ) : null}
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-900">{opt.label}</span>
+                        {opt.subtitle && <span className="text-[11px] text-gray-600">{opt.subtitle}</span>}
                         {opt.hasInsurance && (
                           <span className="inline-flex items-center gap-1 text-[11px] text-green-700 font-semibold mt-0.5">
                             <i className="bi bi-shield-check"></i>
@@ -271,28 +272,58 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
                 <button type="button" onClick={() => setStep(1)} className="w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 text-sm">Voltar</button>
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="text-center">
-                  <h4 className="text-base font-extrabold text-green-600">Pagamento do frete</h4>
-                  <p className="text-sm text-gray-700">Escaneie o QR Code ou copie o código Pix</p>
-                </div>
-                <div className="flex justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={pix.qrCodeUrl} alt="QR Code" className="w-48 h-48 object-contain" />
-                </div>
-                <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
-                  <span className="text-xs font-mono text-green-700 truncate mr-2">{pix.pixCopiaECola}</span>
-                  <button type="button" onClick={() => navigator.clipboard.writeText(pix.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
-                    <i className="bi bi-clipboard-check"></i>
-                    <span>Copiar</span>
-                  </button>
-                </div>
-                <button type="button" onClick={onClose} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg text-sm">Fechar</button>
-              </div>
+              <PixLikeCheckout pix={pix} onClose={onClose} />
             )}
           </form>
         )}
       </div>
+    </div>
+  );
+}
+
+function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }) {
+  const [showQr, setShowQr] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(600);
+  useEffect(() => {
+    if (timeLeft <= 0) return; const t = setInterval(() => setTimeLeft((s) => s - 1), 1000); return () => clearInterval(t);
+  }, [timeLeft]);
+  const minutes = Math.max(0, Math.floor(timeLeft / 60));
+  const seconds = Math.max(0, timeLeft % 60);
+  return (
+    <div className="space-y-3">
+      <div className="text-center text-sm text-gray-700">
+        Você tem <b className="text-red-500">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</b> para pagar
+      </div>
+      <div className="text-center">
+        <button type="button" onClick={() => setShowQr((s) => !s)} className="text-sm text-gray-600 font-semibold hover:text-black">
+          <i className={`bi ${showQr ? 'bi-eye-slash' : 'bi-qr-code'}`}></i>
+          {showQr ? ' Ocultar QR Code' : ' Exibir QR Code'}
+        </button>
+      </div>
+      {showQr && (
+        <div className="flex justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={pix.qrCodeUrl} alt="QR Code" className="w-48 h-48 object-contain" />
+        </div>
+      )}
+      <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-3 text-sm">
+        <div className="flex items-center space-x-2">
+          <span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs shrink-0">1</span>
+          <p className="font-semibold text-gray-700">Copie o código PIX abaixo.</p>
+        </div>
+        <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
+          <span className="text-xs font-mono text-green-700 truncate mr-2">{pix.pixCopiaECola}</span>
+          <button type="button" onClick={() => navigator.clipboard.writeText(pix.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
+            <i className="bi bi-clipboard-check"></i>
+            <span>Copiar</span>
+          </button>
+        </div>
+      </div>
+      <div className="bg-white p-3 rounded-md shadow-sm border border-gray-200 space-y-2 text-xs text-gray-600">
+        <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">2</span><p>Abra o app do seu banco e escolha a opção PIX.</p></div>
+        <div className="flex items-start space-x-2"><span className="flex items-center justify-center w-5 h-5 bg-gray-200 text-gray-700 rounded-full font-bold text-xs mt-1 shrink-0">3</span><p>Selecione PIX cópia e cola, cole a chave e confirme.</p></div>
+      </div>
+      <button type="button" onClick={onClose} className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg text-sm">Fechar</button>
     </div>
   );
 }
