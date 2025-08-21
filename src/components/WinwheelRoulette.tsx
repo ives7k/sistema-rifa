@@ -39,6 +39,7 @@ interface ConfettiOptions {
   origin?: { x?: number; y?: number };
   ticks?: number;
   scalar?: number;
+  angle?: number;
 }
 
 declare global {
@@ -224,12 +225,17 @@ export default function WinwheelRoulette({
       const confetti = window.confetti;
       if (typeof confetti !== 'function') return;
       if (/TENTE/i.test(label)) return; // Não dispara para "TENTE OUTRA VEZ"
-      const burst = (particleCount: number, spread: number, startVelocity: number, scalar = 1) => {
-        confetti({ particleCount, spread, startVelocity, origin: { y: 0.3 }, ticks: 200, scalar });
+      // Explosões simétricas nos dois lados, mais para baixo (y ~ 0.75)
+      const y = 0.75;
+      const leftX = 0.12;
+      const rightX = 0.88;
+      const dualBurst = (particleCount: number, spread: number, startVelocity: number, scalar = 1) => {
+        confetti({ particleCount, spread, startVelocity, origin: { x: leftX, y }, angle: 60, ticks: 200, scalar });
+        confetti({ particleCount, spread, startVelocity, origin: { x: rightX, y }, angle: 120, ticks: 200, scalar });
       };
-      burst(80, 70, 35, 1.0);
-      setTimeout(() => burst(120, 100, 45, 0.9), 180);
-      setTimeout(() => burst(80, 60, 30, 1.1), 360);
+      dualBurst(90, 65, 38, 1.0);
+      setTimeout(() => dualBurst(130, 95, 42, 0.95), 160);
+      setTimeout(() => dualBurst(90, 55, 34, 1.05), 340);
     } catch {}
   }
 
