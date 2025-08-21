@@ -64,7 +64,13 @@ const DEFAULT_TRACKING: Tracking = {
   xcod: null, fbclid: null, gclid: null, ttclid: null,
 };
 
-export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<Tracking>) {
+type UtmifyProductOverride = {
+  productName?: string;
+  productId?: string;
+  productPriceInCents?: number;
+};
+
+export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<Tracking>, override?: UtmifyProductOverride) {
   const settings = await getUtmifySettings();
   if (!settings.enabled || !settings.token) {
     console.log('[UTMIFY] Skip: disabled or missing token/apiUrl');
@@ -72,7 +78,7 @@ export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<
   }
   const campaign = await getCampaignSettings();
   const ticketPrice = typeof campaign.ticketPrice === 'number' ? campaign.ticketPrice : 0.11;
-  const priceInCents = Math.round(ticketPrice * 100);
+  const defaultPriceInCents = Math.round(ticketPrice * 100);
   const totalInCents = Math.round(common.totalValue * 100);
   const trackingParams: Tracking = { ...DEFAULT_TRACKING, ...(tracking || {}) };
   const payload = {
@@ -93,12 +99,12 @@ export async function postUtmifyOrder(common: CommonPayload, tracking?: Partial<
     },
     products: [
       {
-        id: 'CAMPAIGN',
-        name: campaign.title,
+        id: override?.productId ?? 'CAMPAIGN',
+        name: override?.productName ?? campaign.title,
         planId: null,
         planName: null,
         quantity: common.quantity,
-        priceInCents: priceInCents,
+        priceInCents: override?.productPriceInCents ?? defaultPriceInCents,
       },
     ],
     trackingParameters: trackingParams,

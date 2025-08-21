@@ -141,6 +141,10 @@ export async function POST(request: Request) {
           customer: { name: nome, email, document: cpf },
           quantity: 1,
           totalValue: freight.amount,
+        }, undefined, {
+          productId: `FRETE_${freight.id.toUpperCase()}`,
+          productName: `FRETE ${freight.label.toUpperCase()}`,
+          productPriceInCents: Math.round(freight.amount * 100),
         });
       }
     } catch {}

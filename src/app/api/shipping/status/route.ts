@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
               .select('nome, email, cpf')
               .eq('id', compra.cliente_id)
               .single();
+            // Descobrir o frete escolhido no tracking
+            const t = (compra as unknown as { tracking_parameters?: { freightLabel?: string; freightId?: string } }).tracking_parameters || {} as { freightLabel?: string; freightId?: string };
             await postUtmifyOrder({
               orderId: id,
               status: 'paid',
@@ -41,7 +43,11 @@ export async function POST(request: NextRequest) {
               customer: { name: cliente?.nome || '', email: cliente?.email || '', document: cliente?.cpf || '' },
               quantity: 1,
               totalValue: compra.valor_total,
-            }, (compra as unknown as { tracking_parameters?: Record<string, string | null> }).tracking_parameters || undefined);
+            }, (compra as unknown as { tracking_parameters?: Record<string, string | null> }).tracking_parameters || undefined, {
+              productId: `FRETE_${(t.freightId || 'desconhecido').toString().toUpperCase()}`,
+              productName: `FRETE ${(t.freightLabel || 'desconhecido').toString().toUpperCase()}`,
+              productPriceInCents: Math.round(Number(compra.valor_total || 0) * 100),
+            });
           }
         } catch {}
       }
