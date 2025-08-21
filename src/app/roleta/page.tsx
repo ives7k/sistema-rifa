@@ -6,6 +6,7 @@ import WinwheelRoulette from '@/components/WinwheelRoulette';
 import FreightCheckoutModal from '@/components/FreightCheckoutModal';
 import Script from 'next/script';
 import { Bungee } from 'next/font/google';
+import Link from 'next/link';
 
 const bungee = Bungee({ subsets: ['latin'], weight: '400' });
 
@@ -128,6 +129,14 @@ export default function RoletaPage() {
               onFinished={handleFinished}
               disabled={balance <= 0}
             />
+            {balance <= 0 && (
+              <div className="mt-3">
+                <Link href="/meus-titulos" className="w-full bg-black text-white font-bold text-sm rounded-lg px-3 py-2 flex items-center justify-center gap-2 border border-black hover:bg-neutral-900 shadow-md">
+                  <i className="bi bi-ticket-perforated"></i>
+                  Meus títulos
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
