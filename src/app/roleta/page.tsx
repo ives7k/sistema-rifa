@@ -85,6 +85,38 @@ export default function RoletaPage() {
       setLoginLoading(false);
     }
   };
+
+  // Wrapper que faz o prefetch dos dados do cliente antes de abrir o modal
+  function PrefetchedFreightModal({ onClose, prizeLabel }: { onClose: () => void; prizeLabel?: string }) {
+    const [initialData, setInitialData] = useState<{ nome?: string; email?: string; cpf?: string; telefone?: string } | null>(null);
+    useEffect(() => {
+      (async () => {
+        try {
+          const r = await fetch('/api/client/profile', { cache: 'no-store' });
+          const j = await r.json();
+          if (j?.success && j?.cliente) {
+            setInitialData({ nome: j.cliente.nome, email: j.cliente.email, cpf: j.cliente.cpf, telefone: j.cliente.telefone });
+          } else {
+            setInitialData({});
+          }
+        } catch {
+          setInitialData({});
+        }
+      })();
+    }, []);
+
+    if (!initialData) {
+      return (
+        <div className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
+            <p className="text-sm text-gray-700">Carregando seus dados...</p>
+          </div>
+        </div>
+      );
+    }
+
+    return <FreightCheckoutModal onClose={onClose} prizeLabel={prizeLabel} initialData={initialData} />;
+  }
   return (
     <div className="bg-[#ebebeb] min-h-screen">
       {/* GSAP TweenMax v2 (necessária para Winwheel.js clássico) */}
@@ -172,7 +204,7 @@ export default function RoletaPage() {
       )}
 
       {showShippingModal && (
-        <FreightCheckoutModal onClose={() => setShowShippingModal(false)} />
+        <PrefetchedFreightModal onClose={() => setShowShippingModal(false)} prizeLabel={winLabel || undefined} />
       )}
 
       <Footer />

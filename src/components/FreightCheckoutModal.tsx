@@ -5,9 +5,10 @@ import Image from 'next/image';
 import { FREIGHT_OPTIONS_BR } from '@/config/payments';
 
 type PixData = { token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number };
-type Props = { onClose: () => void; onPix?: (data: PixData) => void; bannerImage?: string; prizeLabel?: string };
+type InitialData = { nome?: string; email?: string; cpf?: string; telefone?: string };
+type Props = { onClose: () => void; onPix?: (data: PixData) => void; bannerImage?: string; prizeLabel?: string; initialData?: InitialData };
 
-export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/roleta.png', prizeLabel }: Props) {
+export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/roleta.png', prizeLabel, initialData }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,24 +62,27 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
     setForm(prev => ({ ...prev, [name]: masked }));
   };
 
-  // Auto-preencher com dados do cliente logado
+  // Preencher a partir de initialData (sem delay de fetch)
   useEffect(() => {
-    (async () => {
-      try {
-        const r = await fetch('/api/client/profile', { cache: 'no-store' });
-        const j = await r.json();
-        if (j?.success && j?.cliente) {
-          setForm(prev => ({
-            ...prev,
-            nome: j.cliente.nome || prev.nome,
-            email: j.cliente.email || prev.email,
-            cpf: j.cliente.cpf ? j.cliente.cpf.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2') : prev.cpf,
-            telefone: j.cliente.telefone ? j.cliente.telefone.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1') : prev.telefone,
-          }));
-        }
-      } catch {}
-    })();
-  }, []);
+    if (!initialData) return;
+    const maskCpf = (v: string) => v.replace(/\D/g, '').slice(0, 11)
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    const maskTel = (v: string) => {
+      const d = v.replace(/\D/g, '').slice(0, 11);
+      return (d.length <= 10)
+        ? d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1')
+        : d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2').replace(/(-\d{4})\d+?$/, '$1');
+    };
+    setForm(prev => ({
+      ...prev,
+      nome: initialData.nome || prev.nome,
+      email: initialData.email || prev.email,
+      cpf: initialData.cpf ? maskCpf(initialData.cpf) : prev.cpf,
+      telefone: initialData.telefone ? maskTel(initialData.telefone) : prev.telefone,
+    }));
+  }, [initialData]);
 
   // ViaCEP: quando CEP tiver 8 dígitos, busca endereço
   const onCepBlur = async () => {
