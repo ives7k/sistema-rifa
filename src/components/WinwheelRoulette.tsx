@@ -225,8 +225,8 @@ export default function WinwheelRoulette({
       const confetti = window.confetti;
       if (typeof confetti !== 'function') return;
       if (/TENTE/i.test(label)) return; // Não dispara para "TENTE OUTRA VEZ"
-      // Explosões simétricas nos dois lados, mais para baixo (y ~ 0.75)
-      const y = 0.75;
+      // Explosões simétricas nos dois lados, posição um pouco mais alta (y ~ 0.62)
+      const y = 0.62;
       const leftX = 0.12;
       const rightX = 0.88;
       const dualBurst = (particleCount: number, spread: number, startVelocity: number, scalar = 1) => {
@@ -355,7 +355,7 @@ export default function WinwheelRoulette({
                 const safeText = (pickedIdx !== null && segmentsRef.current[pickedIdx]) ? (segmentsRef.current[pickedIdx].text ?? seg.text) : seg.text;
                 setMessage(safeText ?? '');
                 fireConfettiIfWin(safeText ?? seg.text ?? '');
-                if (typeof onFinishedRef.current === 'function') onFinishedRef.current(seg.text);
+                if (typeof onFinishedRef.current === 'function') onFinishedRef.current(safeText ?? seg.text ?? '');
               }
             } finally {
               setIsSpinning(false);
