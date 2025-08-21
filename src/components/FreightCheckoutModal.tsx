@@ -9,7 +9,7 @@ type InitialData = { nome?: string; email?: string; cpf?: string; telefone?: str
 type Props = { onClose: () => void; onPix?: (data: PixData) => void; bannerImage?: string; prizeLabel?: string; initialData?: InitialData };
 
 export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/roleta.png', prizeLabel, initialData }: Props) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [freightId, setFreightId] = useState<string>(FREIGHT_OPTIONS_BR[0]?.id || 'pac');
@@ -130,7 +130,7 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
       const payload: PixData = { token: data.token, pixCopiaECola: data.pixCopiaECola, qrCodeUrl: data.qrCodeUrl, valor: data.valor };
       setPix(payload);
       onPix?.(payload);
-      setStep(3);
+      // Mantém na etapa 2, exibindo QR Code e copia-e-cola abaixo das opções
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido.');
     } finally {
@@ -225,34 +225,37 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
 
             {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-xs rounded-r-md">{error}</div>}
 
-            <div className="flex justify-between gap-2 pt-2">
-              <button type="button" onClick={() => setStep(1)} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Voltar</button>
-              <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
-                {loading ? 'Gerando Pix...' : 'Continuar para pagamento'}
-              </button>
-            </div>
+            {!pix ? (
+              <div className="flex justify-between gap-2 pt-2">
+                <button type="button" onClick={() => setStep(1)} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Voltar</button>
+                <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
+                  {loading ? 'Gerando Pix...' : 'Gerar Pix do frete'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="text-center">
+                  <h4 className="text-base font-extrabold text-green-600">Pagamento do frete</h4>
+                  <p className="text-sm text-gray-700">Escaneie o QR Code ou copie o código Pix</p>
+                </div>
+                <div className="flex justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={pix.qrCodeUrl} alt="QR Code" className="w-48 h-48 object-contain" />
+                </div>
+                <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
+                  <span className="text-xs font-mono text-green-700 truncate mr-2">{pix.pixCopiaECola}</span>
+                  <button type="button" onClick={() => navigator.clipboard.writeText(pix.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
+                    <i className="bi bi-clipboard-check"></i>
+                    <span>Copiar</span>
+                  </button>
+                </div>
+                <div className="flex justify-between gap-2 pt-1">
+                  <button type="button" onClick={() => setPix(null)} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Alterar frete</button>
+                  <button type="button" onClick={onClose} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700">Fechar</button>
+                </div>
+              </div>
+            )}
           </form>
-        )}
-
-        {step === 3 && pix && (
-          <div className="p-5 space-y-3 text-center">
-            <h4 className="text-lg font-extrabold text-green-600">Pagamento do frete</h4>
-            <p className="text-sm text-gray-700">Escaneie o QR Code ou copie o código Pix</p>
-            <div className="flex justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={pix.qrCodeUrl} alt="QR Code" className="w-48 h-48 object-contain" />
-            </div>
-            <div className="bg-gray-100 p-2 rounded-md flex items-center justify-between">
-              <span className="text-xs font-mono text-green-700 truncate mr-2">{pix.pixCopiaECola}</span>
-              <button type="button" onClick={() => navigator.clipboard.writeText(pix.pixCopiaECola)} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-md text-xs font-semibold hover:bg-gray-300 transition-colors flex items-center space-x-1 shrink-0">
-                <i className="bi bi-clipboard-check"></i>
-                <span>Copiar</span>
-              </button>
-            </div>
-            <div className="flex justify-center">
-              <button onClick={onClose} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700">Fechar</button>
-            </div>
-          </div>
         )}
       </div>
     </div>
