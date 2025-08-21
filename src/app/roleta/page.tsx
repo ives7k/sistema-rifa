@@ -3,6 +3,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WinwheelRoulette from '@/components/WinwheelRoulette';
+import FreightCheckoutModal from '@/components/FreightCheckoutModal';
 import Script from 'next/script';
 import { Bungee } from 'next/font/google';
 
@@ -20,6 +21,8 @@ export default function RoletaPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [winLabel, setWinLabel] = useState<string | null>(null);
   const [showWinModal, setShowWinModal] = useState<boolean>(false);
+  const [showShippingModal, setShowShippingModal] = useState<boolean>(false);
+  const [pixData, setPixData] = useState<{ token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number } | null>(null);
 
   const fetchBalance = useCallback(async (cpfOptional?: string) => {
     setLoading(true);
@@ -158,14 +161,21 @@ export default function RoletaPage() {
             <p className="mt-1 text-xl font-black text-gray-900">{winLabel}</p>
             <div className="mt-4 flex justify-center">
               <button
-                onClick={() => setShowWinModal(false)}
+                onClick={() => { setShowWinModal(false); setShowShippingModal(true); }}
                 className="px-4 py-2 rounded-md font-bold text-white bg-green-600 hover:bg-green-700"
               >
-                Ok
+                Continuar para entrega
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {showShippingModal && (
+        <FreightCheckoutModal
+          onClose={() => { setShowShippingModal(false); setPixData(null); }}
+          onPix={(data) => setPixData(data)}
+        />
       )}
 
       <Footer />
