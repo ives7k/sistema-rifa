@@ -34,6 +34,43 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
+  // Auto-preencher com dados do cliente logado
+  useState(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/client/profile', { cache: 'no-store' });
+        const j = await r.json();
+        if (j?.success && j?.cliente) {
+          setForm(prev => ({
+            ...prev,
+            nome: j.cliente.nome || prev.nome,
+            email: j.cliente.email || prev.email,
+            cpf: j.cliente.cpf || prev.cpf,
+            telefone: j.cliente.telefone || prev.telefone,
+          }));
+        }
+      } catch {}
+    })();
+  });
+
+  // ViaCEP: quando CEP tiver 8 dígitos, busca endereço
+  const onCepBlur = async () => {
+    const cepDigits = (form.cep || '').replace(/\D/g, '');
+    if (cepDigits.length !== 8) return;
+    try {
+      const resp = await fetch(`https://viacep.com.br/ws/${cepDigits}/json/`);
+      const data = await resp.json();
+      if (data?.erro) return;
+      setForm(prev => ({
+        ...prev,
+        endereco: data.logradouro || prev.endereco,
+        bairro: data.bairro || prev.bairro,
+        cidade: data.localidade || prev.cidade,
+        estado: (data.uf || prev.estado || '').toString().toUpperCase(),
+      }));
+    } catch {}
+  };
+
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -73,7 +110,7 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
               <input name="cpf" value={form.cpf} onChange={handleChange} placeholder="CPF" inputMode="numeric" className="border rounded px-3 py-2 text-sm" />
               <input name="telefone" value={form.telefone} onChange={handleChange} placeholder="Telefone" inputMode="tel" className="border rounded px-3 py-2 text-sm" />
               <div className="grid grid-cols-2 gap-3">
-                <input name="cep" value={form.cep} onChange={handleChange} placeholder="CEP" inputMode="numeric" className="border rounded px-3 py-2 text-sm" />
+                <input name="cep" value={form.cep} onChange={handleChange} onBlur={onCepBlur} placeholder="CEP" inputMode="numeric" className="border rounded px-3 py-2 text-sm" />
                 <input name="estado" value={form.estado} onChange={handleChange} placeholder="UF" maxLength={2} className="border rounded px-3 py-2 text-sm" />
               </div>
               <input name="endereco" value={form.endereco} onChange={handleChange} placeholder="Endereço" className="border rounded px-3 py-2 text-sm" />
@@ -106,8 +143,8 @@ export default function FreightCheckoutModal({ onClose, onPix }: Props) {
 
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={onClose} className="px-3 py-2 rounded text-sm bg-gray-100 hover:bg-gray-200">Cancelar</button>
-              <button disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
-                {loading ? 'Gerando Pix...' : `Pagar frete R$ ${freight.amount.toFixed(2)}`}
+              <button type="submit" disabled={loading} className="px-3 py-2 rounded text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60">
+                {loading ? 'Validando...' : 'Continuar para pagamento'}
               </button>
             </div>
           </form>
