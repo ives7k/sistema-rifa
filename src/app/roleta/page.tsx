@@ -201,7 +201,7 @@ export default function RoletaPage() {
       )}
 
       {showShippingModal && (
-        <FreightCheckoutModal onClose={() => setShowShippingModal(false)} prizeLabel={winLabel || undefined} initialData={shippingInitialData} />
+        <FreightCheckoutModal onClose={() => setShowShippingModal(false)} prizeLabel={winLabel || undefined} initialData={shippingInitialData} bannerImage="https://files.tecnoblog.net/wp-content/uploads/2025/01/iphone-16-pro-titanio-deserto.png" />
       )}
 
       <Footer />
