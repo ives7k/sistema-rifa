@@ -172,10 +172,7 @@ export default function RoletaPage() {
       )}
 
       {showShippingModal && (
-        <FreightCheckoutModal
-          onClose={() => { setShowShippingModal(false); setPixData(null); }}
-          onPix={(data) => setPixData(data)}
-        />
+        <FreightCheckoutModal onClose={() => setShowShippingModal(false)} />
       )}
 
       <Footer />
