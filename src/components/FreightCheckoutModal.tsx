@@ -234,13 +234,8 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
               <div className="space-y-2">
                 {FREIGHT_OPTIONS_BR.map(opt => (
                   <label key={opt.id} className="flex items-center justify-between border rounded px-3 py-2 cursor-pointer">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <input type="radio" name="frete" checked={freightId === opt.id} onChange={() => setFreightId(opt.id)} />
-                      {opt.imageUrl ? (
-                        <div className="relative w-10 h-10 shrink-0 hidden sm:block">
-                          <Image src={opt.imageUrl} alt={opt.label} fill className="object-contain" />
-                        </div>
-                      ) : null}
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-900">{opt.label}</span>
                         {opt.subtitle && <span className="text-[11px] text-gray-600">{opt.subtitle}</span>}
