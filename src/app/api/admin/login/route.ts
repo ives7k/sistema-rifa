@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 import { createAdminSessionToken, ADMIN_COOKIE_NAME } from '@/lib/adminAuth';
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'Credenciais inválidas' }, { status: 401 });
     }
 
-    const tokenValue = createAdminSessionToken(60 * 60 * 12);
+    const tokenValue = await createAdminSessionToken(60 * 60 * 12);
     const res = NextResponse.json({ success: true });
     res.cookies.set(ADMIN_COOKIE_NAME, tokenValue, {
       httpOnly: true,

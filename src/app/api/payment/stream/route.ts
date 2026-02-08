@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 function sseFormat(data: unknown, event?: string) {
   const payload = `data: ${JSON.stringify(data)}\n\n`;

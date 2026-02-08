@@ -5,11 +5,11 @@ import { isAdminRequest } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function POST(request: Request) {
   try {
-    if (!isAdminRequest(request)) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    if (!(await isAdminRequest(request))) return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
 
     const body = await request.json();
     const payload = {

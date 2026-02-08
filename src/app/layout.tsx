@@ -4,8 +4,6 @@ import "./globals.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { getFacebookSettings } from '@/lib/facebook';
 import Script from 'next/script';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,8 +39,6 @@ export default async function RootLayout({
       </head>
       <body className={inter.className} suppressHydrationWarning>
         {children}
-        <Analytics />
-        <SpeedInsights />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -57,3 +53,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

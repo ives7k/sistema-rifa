@@ -4,7 +4,7 @@ import { getClientIdFromRequest, parseCookie } from '@/lib/clientAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 type SpinResponse = {
   success: true;
@@ -64,7 +64,7 @@ function buildRouletteStateCookie(state: RouletteState): string {
 export async function POST(request: Request) {
   try {
     // Identificação do jogador via sessão (cookie) ou fallback para CPF no body
-    let clienteId: string | null = getClientIdFromRequest(request);
+    let clienteId: string | null = await getClientIdFromRequest(request);
     if (!clienteId) {
       try {
         const body = await request.json();

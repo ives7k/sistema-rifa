@@ -7,7 +7,7 @@ export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
-    if (!isAdminRequest(request)) {
+    if (!(await isAdminRequest(request))) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
     const { data } = await supabaseAdmin

@@ -6,7 +6,7 @@ import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 type ShippingBody = {
   nome: string;
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
           productPriceInCents: Math.round(freight.amount * 100),
         });
       }
-    } catch {}
+    } catch { }
 
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(result.pix.qrcode)}&size=300x300`;
 

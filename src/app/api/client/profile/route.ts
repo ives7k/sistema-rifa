@@ -4,11 +4,11 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   try {
-    const cid = getClientIdFromRequest(request);
+    const cid = await getClientIdFromRequest(request);
     if (!cid) return NextResponse.json({ success: false, message: 'unauthorized' }, { status: 401 });
     const { data: cliente, error } = await supabaseAdmin
       .from('clientes')

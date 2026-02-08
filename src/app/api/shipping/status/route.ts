@@ -6,7 +6,7 @@ import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
               productPriceInCents: Math.round(Number(compra.valor_total || 0) * 100),
             });
           }
-        } catch {}
+        } catch { }
       }
     }
     return NextResponse.json({ success: true, status });

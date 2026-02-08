@@ -61,7 +61,7 @@ export async function POST(request: Request) {
         }
 
         const apiUrl = 'https://api.conta.skalepay.com.br/v1';
-        const authHeader = `Basic ${Buffer.from(`${secretKey}:x`).toString('base64')}`;
+        const authHeader = `Basic ${btoa(`${secretKey}:x`)}`;
 
         const webhookToken = process.env.WEBHOOK_TOKEN;
         const baseWebhookUrl = `https://${request.headers.get('host')}/webhook/paguesafe`;
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
             fb: { enabled: fb.enabled, sendPurchase: fb.sendPurchase, pixelId: fb.pixelId }
         });
         // Define cookie de sessão do cliente (evita digitar CPF nas próximas páginas)
-        try { res.headers.append('Set-Cookie', buildLoginCookie(String((cliente as { id: string | number }).id))); } catch {}
+        try { res.headers.append('Set-Cookie', await buildLoginCookie(String((cliente as { id: string | number }).id))); } catch { }
         return res;
 
     } catch (error) {

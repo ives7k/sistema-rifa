@@ -4,7 +4,7 @@ import { processPaymentConfirmation } from '@/services/payments';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 // Rota para CRON: reconcilia compras pendentes chamando a SkalePay
 export async function POST() {

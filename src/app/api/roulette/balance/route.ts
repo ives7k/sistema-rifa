@@ -5,12 +5,12 @@ import { limparCpf } from '@/utils/formatters';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function POST(request: Request) {
   try {
     // Primeiro tenta sessão; se não houver, aceita cpf no body para consulta pontual
-    let clienteId: string | null = getClientIdFromRequest(request);
+    let clienteId: string | null = await getClientIdFromRequest(request);
     if (!clienteId) {
       try {
         const body = await request.json();

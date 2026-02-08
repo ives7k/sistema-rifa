@@ -5,15 +5,16 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 function isAuthorizedBasic(authHeader: string | null): boolean {
   if (!authHeader) return false;
   const [scheme, value] = authHeader.split(' ');
   if (scheme !== 'Basic' || !value) return false;
-  const expected = Buffer.from(`${process.env.SKALEPAY_SECRET_KEY}:x`).toString('base64');
+  const expected = btoa(`${process.env.SKALEPAY_SECRET_KEY}:x`);
   return value === expected;
 }
+
 
 // Placeholder para validação de assinatura/HMAC caso a SkalePay envie
 async function validateSignature(_: Request): Promise<boolean> {
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
             .eq('transaction_id', String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''))
             .single();
           tracking = (compraData as unknown as { tracking_parameters?: Record<string, string | null> })?.tracking_parameters || undefined;
-        } catch {}
+        } catch { }
         await postUtmifyOrder({
           orderId: String(body?.data?.id ?? body?.id ?? result.transactionIdUsed ?? ''),
           status: 'paid',

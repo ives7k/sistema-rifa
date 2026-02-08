@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+// Web Crypto API compatible version for Edge Runtime
 
 const COOKIE_NAME = 'client_session';
 
@@ -8,29 +8,61 @@ function getSecret(): string {
   return secret;
 }
 
-function base64url(input: Buffer | string): string {
-  const buf = Buffer.isBuffer(input) ? input : Buffer.from(input);
-  return buf.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+function toBase64Url(buffer: ArrayBuffer | Uint8Array): string {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function stringToBase64Url(str: string): string {
+  return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function fromBase64UrlToString(input: string): string {
+  const pad = input.length % 4 === 0 ? '' : '='.repeat(4 - (input.length % 4));
+  const b64 = input.replace(/-/g, '+').replace(/_/g, '/') + pad;
+  return atob(b64);
 }
 
 export type ClientSessionPayload = { cid: string; exp: number };
 
-export function signSession(payload: ClientSessionPayload): string {
+async function getHmacKey(): Promise<CryptoKey> {
   const secret = getSecret();
-  const p64 = base64url(JSON.stringify(payload));
-  const sig = crypto.createHmac('sha256', secret).update(p64).digest();
-  return `${p64}.${base64url(sig)}`;
+  const encoder = new TextEncoder();
+  return crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
 }
 
-export function verifySession(token: string | undefined | null): ClientSessionPayload | null {
+export async function signSession(payload: ClientSessionPayload): Promise<string> {
+  const p64 = stringToBase64Url(JSON.stringify(payload));
+  const key = await getHmacKey();
+  const encoder = new TextEncoder();
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(p64));
+  return `${p64}.${toBase64Url(signature)}`;
+}
+
+export async function verifySession(token: string | undefined | null): Promise<ClientSessionPayload | null> {
   try {
     if (!token) return null;
     const [p64, sigb64] = token.split('.');
     if (!p64 || !sigb64) return null;
-    const secret = getSecret();
-    const expected = base64url(crypto.createHmac('sha256', secret).update(p64).digest());
+
+    const key = await getHmacKey();
+    const encoder = new TextEncoder();
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(p64));
+    const expected = toBase64Url(signature);
+
     if (expected !== sigb64) return null;
-    const payload = JSON.parse(Buffer.from(p64.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString()) as ClientSessionPayload;
+
+    const payload = JSON.parse(fromBase64UrlToString(p64)) as ClientSessionPayload;
     if (!payload?.cid || !payload?.exp) return null;
     if (Date.now() > payload.exp) return null;
     return payload;
@@ -49,17 +81,17 @@ export function parseCookie(header: string | null): Record<string, string> {
   return out;
 }
 
-export function getClientIdFromRequest(req: Request): string | null {
+export async function getClientIdFromRequest(req: Request): Promise<string | null> {
   const raw = req.headers.get('cookie');
   const jar = parseCookie(raw);
   const token = jar[COOKIE_NAME];
-  const payload = verifySession(token);
+  const payload = await verifySession(token);
   return payload?.cid ?? null;
 }
 
-export function buildLoginCookie(cid: string, days = 180): string {
+export async function buildLoginCookie(cid: string, days = 180): Promise<string> {
   const exp = Date.now() + days * 24 * 60 * 60 * 1000;
-  const token = signSession({ cid, exp });
+  const token = await signSession({ cid, exp });
   const attrs = [
     `${COOKIE_NAME}=${encodeURIComponent(token)}`,
     'Path=/',
@@ -78,5 +110,3 @@ export function buildLogoutCookie(): string {
   if (process.env.NODE_ENV !== 'development') attrs.push('Secure');
   return attrs.join('; ');
 }
-
-

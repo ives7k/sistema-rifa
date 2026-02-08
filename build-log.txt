@@ -1,0 +1,117 @@
+﻿   Ôû▓ Next.js 15.4.5
+
+   Creating an optimized production build ...
+ Ô£ô Compiled successfully in 5.0s
+   Linting and checking validity of types ...
+
+./src/app/admin/page.tsx
+10:16  Warning: 'TabsList' is defined but never used.  @typescript-eslint/no-unused-vars
+10:26  Warning: 'TabsTrigger' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/api/facebook/update/route.ts
+5:7  Warning: 'COOKIE_NAME' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/roleta/page.tsx
+18:10  Warning: 'loading' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/webhook/paguesafe/route.ts
+20:34  Warning: '_' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/CheckoutModal.tsx
+73:25  Warning: 'setCampaignTitle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+74:25  Warning: 'setCampaignImage' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/FreightCheckoutModal.tsx
+32:9  Warning: 'freight' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/PurchaseSection.tsx
+7:10  Warning: 'getCampaignSettings' is defined but never used.  @typescript-eslint/no-unused-vars
+21:10  Warning: 'bannerReady' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+27:10  Warning: 'defaultQuantity' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+70:6  Warning: React Hook useEffect has missing dependencies: 'campaignImageProp', 'campaignTitleProp', 'defaultQuantityProp', 'drawLabelProp', 'minQuantity', 'minQuantityProp', and 'ticketPriceProp'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/WinwheelRoulette.tsx
+221:6  Warning: React Hook useEffect has missing dependencies: 'angleOffsetDeg', 'durationSec', 'imageFitScale', 'imageSrc', 'paddingPx', 'segmentLabels', 'spins', and 'wheelSizePx'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+node.exe :  ÔÜá Using 
+edge runtime on a 
+page currently 
+disables static 
+generation for that 
+page
+No linha:1 caractere:1
++ & "C:\Program Files\
+nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : 
+NotSpecified: ( ÔÜ    
+á Using edge...n for 
+t    hat page:String) 
+[], R    
+emoteException
+    + 
+FullyQualifiedErrorI  
+  d : 
+NativeCommandError
+ 
+   Generating static pages (0/14) ...
+   Generating static pages (3/14) 
+   Generating static pages (6/14) 
+   Generating static pages (10/14) 
+ Ô£ô Generating static pages (14/14)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+Ôöî ãÆ /                                    11.3 kB         119 kB
+Ôö£ Ôùï /_not-found                            995 B         101 kB
+Ôö£ Ôùï /admin                               49.5 kB         149 kB
+Ôö£ ãÆ /api/admin/login                       198 B        99.9 kB
+Ôö£ ãÆ /api/admin/logout                      198 B        99.9 kB
+Ôö£ ãÆ /api/admin/purchases                   198 B        99.9 kB
+Ôö£ ãÆ /api/campaign                          198 B        99.9 kB
+Ôö£ ãÆ /api/campaign/update                   198 B        99.9 kB
+Ôö£ ãÆ /api/client/login                      198 B        99.9 kB
+Ôö£ ãÆ /api/client/logout                     198 B        99.9 kB
+Ôö£ ãÆ /api/client/profile                    198 B        99.9 kB
+Ôö£ ãÆ /api/client/session                    198 B        99.9 kB
+Ôö£ ãÆ /api/clients/lookup                    198 B        99.9 kB
+Ôö£ ãÆ /api/config/pricing                    198 B        99.9 kB
+Ôö£ ãÆ /api/facebook                          198 B        99.9 kB
+Ôö£ ãÆ /api/facebook/update                   198 B        99.9 kB
+Ôö£ ãÆ /api/payment                           198 B        99.9 kB
+Ôö£ ãÆ /api/payment/status                    198 B        99.9 kB
+Ôö£ ãÆ /api/payment/stream                    198 B        99.9 kB
+Ôö£ ãÆ /api/reconcile                         198 B        99.9 kB
+Ôö£ ãÆ /api/roulette/balance                  198 B        99.9 kB
+Ôö£ ãÆ /api/roulette/grant                    198 B        99.9 kB
+Ôö£ ãÆ /api/roulette/spin                     198 B        99.9 kB
+Ôö£ ãÆ /api/shipping                          198 B        99.9 kB
+Ôö£ ãÆ /api/shipping/status                   198 B        99.9 kB
+Ôö£ ãÆ /api/titulos/lookup                    198 B        99.9 kB
+Ôö£ ãÆ /api/utmify                            198 B        99.9 kB
+Ôö£ ãÆ /api/utmify/update                     198 B        99.9 kB
+Ôö£ Ôùï /campanhas                             331 B         100 kB
+Ôö£ Ôùï /contato                               330 B         100 kB
+Ôö£ Ôùï /ganhadores                            332 B         100 kB
+Ôö£ Ôùï /meus-titulos                        3.98 kB         112 kB
+Ôö£ Ôùï /roleta                              11.4 kB         119 kB
+Ôöö ãÆ /webhook/paguesafe                     198 B        99.9 kB
++ First Load JS shared by all            99.7 kB
+  Ôö£ chunks/4bd1b696-602635ee57868870.js  54.1 kB
+  Ôö£ chunks/5964-65b29b990a9f3302.js      43.5 kB
+  Ôöö other shared chunks (total)          2.05 kB
+
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+
