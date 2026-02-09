@@ -64,6 +64,25 @@ const PurchaseSection = ({
   const CARD3_MAX = 1000;
   const [quantity3, setQuantity3] = useState(50);
 
+  // Funções de preço dinâmico com faixas de desconto
+  const getCard2Price = (qty: number) => {
+    // Faixa 1: até 79 cotas (base R$ 9,99 por 40 cotas ≈ R$ 0,24975)
+    if (qty < 80) {
+      return qty * (9.99 / 40);
+    }
+    // Faixa 2: 80 cotas ou mais (base R$ 19,90 por 80 cotas = R$ 0,24875)
+    return qty * (19.90 / 80);
+  };
+
+  const getCard3Price = (qty: number) => {
+    // Faixa 1: até 99 cotas (base R$ 9,99 por 50 cotas ≈ R$ 0,1998)
+    if (qty < 100) {
+      return qty * (9.99 / 50);
+    }
+    // Faixa 2: 100 cotas ou mais (base R$ 19,00 por 100 cotas = R$ 0,19)
+    return qty * (19.00 / 100);
+  };
+
   // Nomes dos dias da semana em português
   const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
@@ -421,7 +440,7 @@ const PurchaseSection = ({
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
                   <span className="text-sm leading-none">Comprar</span>
                   <span className="leading-none font-bold">
-                    {(quantity2 * CARD2_PRICE).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {getCard2Price(quantity2).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </span>
                 </div>
               </button>
@@ -535,7 +554,7 @@ const PurchaseSection = ({
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
                   <span className="text-sm leading-none">Comprar</span>
                   <span className="leading-none font-bold">
-                    {(quantity3 * CARD3_PRICE).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    {getCard3Price(quantity3).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </span>
                 </div>
               </button>
