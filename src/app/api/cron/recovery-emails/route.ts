@@ -32,12 +32,14 @@ export async function GET(request: Request) {
         const cutoffDate = new Date(Date.now() - delayMinutes * 60 * 1000).toISOString();
 
         // Buscar compras pendentes há mais de X minutos sem email de recuperação enviado
+        // Ignorar pagamentos de frete (kind: 'frete' nos tracking_parameters)
         const { data: comprasPendentes, error: fetchError } = await supabaseAdmin
             .from('compras')
-            .select('id, cliente_id, quantidade_bilhetes, valor_total, created_at')
+            .select('id, cliente_id, quantidade_bilhetes, valor_total, created_at, tracking_parameters')
             .eq('status', 'pending')
             .is('recovery_email_sent_at', null)
             .lt('created_at', cutoffDate)
+            .or('tracking_parameters->>kind.is.null,tracking_parameters->>kind.neq.frete')
             .order('created_at', { ascending: true })
             .limit(MAX_EMAILS_PER_RUN);
 
