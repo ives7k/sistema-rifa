@@ -64,7 +64,7 @@ export default function RoletaPage() {
           setHasLoadedBalance(true);
           return;
         }
-      } catch {}
+      } catch { }
       setHasLoadedBalance(true);
       setShowLoginModal(true);
     })();
@@ -144,7 +144,7 @@ export default function RoletaPage() {
       </div>
 
       {showLoginModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999999] bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-4">
             <h2 className="text-lg font-bold text-gray-900">Entre para girar a roleta</h2>
             <p className="text-xs text-gray-600 mt-1">Informe seu CPF para carregar seus giros.</p>
@@ -168,7 +168,7 @@ export default function RoletaPage() {
       )}
 
       {showWinModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[999999] bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-5 text-center">
             <h2 className="text-2xl font-extrabold text-green-600">Parabéns!</h2>
             <p className="mt-2 text-gray-800 font-semibold">Você ganhou:</p>

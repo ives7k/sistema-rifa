@@ -99,7 +99,7 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
         cidade: data.localidade || prev.cidade,
         estado: (data.uf || prev.estado || '').toString().toUpperCase(),
       }));
-    } catch {}
+    } catch { }
   };
 
   const handleContinueToFreight = useCallback((e: React.FormEvent) => {
@@ -139,7 +139,7 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
   }, [form, freightId, onPix]);
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[999999] bg-black/80 flex items-center justify-center p-4">
       <div className="bg-gray-50 rounded-lg shadow-xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
         <div className="relative text-center p-3 border-b border-gray-200">
           <h5 className="font-semibold text-gray-800">Resgatar prêmio</h5>
