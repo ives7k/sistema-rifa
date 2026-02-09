@@ -70,7 +70,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
             {/* Início */}
             <li>
-              <Link href="/" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <Link href="/rifa" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
                 <i className="bi bi-house-fill text-lg"></i>
                 <span>Início</span>
               </Link>

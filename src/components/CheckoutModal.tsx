@@ -13,6 +13,7 @@ interface CheckoutModalProps {
   campaignTitle?: string;
   campaignImage?: string;
   totalPrice?: number;
+  spins?: number;
 }
 interface CompradorData {
   nome: string;
@@ -52,7 +53,7 @@ const formatPhone = (phone: string) => {
   return `(${ddd}) ****-**${last4}`;
 };
 
-const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp, totalPrice }: CheckoutModalProps) => {
+const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitleProp, campaignImage: campaignImageProp, totalPrice, spins: spinsProp }: CheckoutModalProps) => {
   // --- Estados do Componente ---
   // --- Estados do Componente ---
   const [step, setStep] = useState(1);
@@ -79,10 +80,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
 
   const [isEditingData, setIsEditingData] = useState(false);
 
-  // --- Cálculo local de giros (mesma regra exibida no subtítulo: 1 giro a cada 5 cotas) ---
-  const getSpinsFromQuantity = useCallback((qty: number) => {
-    return Math.floor(qty / 5);
-  }, []);
+  // Calcula giros de bônus: usa a prop se definida, senão fallback para regra antiga
+  const bonusSpins = typeof spinsProp === 'number' ? spinsProp : Math.floor(quantity / 5);
 
   // --- Refs para lógica de polling ---
   const checkStatusCallbackRef = useRef<((isSilent: boolean) => Promise<void>) | null>(null);
@@ -462,14 +461,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
                 <h3 className="text-base font-bold text-gray-800">Pagamento confirmado</h3>
                 <p className="text-xs text-gray-600">Seu pagamento foi aprovado. Os títulos aparecem abaixo nos detalhes.</p>
                 {/* Removido "Confirmado em" conforme solicitação */}
-                {getSpinsFromQuantity(quantity) > 0 && (
+                {bonusSpins > 0 && (
                   <a
                     href="/roleta"
                     className="w-full mt-1 animated-gradient text-white font-extrabold text-sm rounded-lg px-3 py-2 flex items-center justify-center gap-2 shadow-md ring-1 ring-white/30"
-                    aria-label={`Ir para a roleta (${getSpinsFromQuantity(quantity)} giros)`}
+                    aria-label={`Ir para a roleta (${bonusSpins} giros)`}
                   >
                     <i className="bi bi-stars text-base"></i>
-                    Ir para a roleta ({getSpinsFromQuantity(quantity)} giro{getSpinsFromQuantity(quantity) > 1 ? 's' : ''})
+                    Ir para a roleta ({bonusSpins} giro{bonusSpins > 1 ? 's' : ''})
                   </a>
                 )}
                 <a
@@ -570,8 +569,8 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
               </p>
               {paidAt && <p className="text-xs text-gray-700"><b>Data do Pagamento:</b> {paidAt}</p>}
               <p className="text-xs text-gray-700"><b>Quantidade:</b> {quantity}</p>
-              {getSpinsFromQuantity(quantity) > 0 && (
-                <p className="text-xs text-gray-700"><b>Giros de bônus:</b> {getSpinsFromQuantity(quantity)}</p>
+              {bonusSpins > 0 && (
+                <p className="text-xs text-gray-700"><b>Giros de bônus:</b> {bonusSpins}</p>
               )}
               <p className="text-xs font-bold text-gray-800"><b>Total:</b> {pixData!.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
               <div className="text-xs text-gray-700">
@@ -619,10 +618,10 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
               <p className="text-gray-700">
                 <b className="font-semibold text-gray-800">{quantity}</b> {quantity === 1 ? 'cota' : 'cotas'} da campanha <b className="font-semibold text-gray-800">{campaignTitle}</b>
               </p>
-              {Math.floor(quantity / 5) > 0 && (
+              {bonusSpins > 0 && (
                 <p className="mt-0.5 text-[11px] text-purple-700 font-semibold flex items-center gap-1">
                   <i className="bi bi-stars"></i>
-                  BÔNUS: +{Math.floor(quantity / 5)} Giro{Math.floor(quantity / 5) > 1 ? 's' : ''} na Roleta da Sorte
+                  BÔNUS: +{bonusSpins} Giro{bonusSpins > 1 ? 's' : ''} na Roleta da Sorte
                 </p>
               )}
             </div>

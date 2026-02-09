@@ -41,12 +41,9 @@ const BannersSection = () => {
             <div className="overflow-x-auto scrollbar-none -mx-3">
                 <div className="flex gap-2 px-3 pb-2">
                     {banners.map((banner) => (
-                        <a
+                        <div
                             key={banner.id}
-                            href={banner.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-52 min-w-[208px] shrink-0 block rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow"
+                            className="w-52 min-w-[208px] shrink-0 block rounded-lg overflow-hidden shadow-md cursor-default"
                         >
                             <Image
                                 src={banner.imageUrl}
@@ -56,7 +53,7 @@ const BannersSection = () => {
                                 className="w-full h-auto rounded-lg"
                                 unoptimized
                             />
-                        </a>
+                        </div>
                     ))}
                 </div>
             </div>

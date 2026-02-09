@@ -20,17 +20,17 @@ const Footer = () => {
           </h2>
         </div>
 
-        {/* Redes Sociais */}
+        {/* Redes Sociais (Não Clicáveis) */}
         <div className="flex justify-center gap-4 mb-6">
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white hover:opacity-80 transition-opacity">
+          <span className="text-white opacity-80 cursor-default">
             <i className="bi bi-instagram text-xl"></i>
-          </a>
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white hover:opacity-80 transition-opacity">
+          </span>
+          <span className="text-white opacity-80 cursor-default">
             <i className="bi bi-facebook text-xl"></i>
-          </a>
-          <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-white hover:opacity-80 transition-opacity">
+          </span>
+          <span className="text-white opacity-80 cursor-default">
             <i className="bi bi-youtube text-xl"></i>
-          </a>
+          </span>
         </div>
 
         {/* Texto Legal */}
@@ -87,17 +87,17 @@ const Footer = () => {
           />
         </div>
 
-        {/* Links - Alinhados à esquerda */}
+        {/* Links - Alinhados à esquerda (Não Clicáveis) */}
         <div className="text-xs text-left space-y-2">
           <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <a href="/institucional/termos-de-uso" className="text-gray-300 hover:text-white transition-colors">Termos de Uso</a>
-            <a href="/institucional/politica-de-privacidade" className="text-gray-300 hover:text-white transition-colors">Política de Privacidade</a>
-            <a href="/institucional/perguntas-frequentes" className="text-gray-300 hover:text-white transition-colors">Perguntas frequentes</a>
+            <span className="text-gray-300 cursor-default">Termos de Uso</span>
+            <span className="text-gray-300 cursor-default">Política de Privacidade</span>
+            <span className="text-gray-300 cursor-default">Perguntas frequentes</span>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <a href="/institucional/jogo-responsavel" className="text-gray-300 hover:text-white transition-colors">Jogo Responsável</a>
-            <a href="/contato" className="text-gray-300 hover:text-white transition-colors">Contato</a>
-            <span className="text-gray-300">Sac ViaCap - (51) 3303-3851</span>
+            <span className="text-gray-300 cursor-default">Jogo Responsável</span>
+            <span className="text-gray-300 cursor-default">Contato</span>
+            <span className="text-gray-300 cursor-default">Sac ViaCap - (51) 3303-3851</span>
           </div>
           <div className="pt-2">
             <p className="text-gray-400">Ouvidoria ViaCap - 0800 874 1505</p>

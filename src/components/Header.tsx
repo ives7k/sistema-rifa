@@ -69,7 +69,7 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
 
             {/* Logo à esquerda - texto em duas linhas, GRANDE */}
             <div className="flex items-center">
-              <Link href="/" passHref>
+              <Link href="/rifa" passHref>
                 <div className="cursor-pointer leading-none">
                   {logoMode === null ? (
                     <div className="w-24 h-10" />

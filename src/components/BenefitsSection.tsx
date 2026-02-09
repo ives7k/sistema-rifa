@@ -86,15 +86,14 @@ const BenefitsSection = () => {
                                 <span className="text-base font-normal leading-tight text-center text-gray-800 mb-2">
                                     {benefit.title}
                                 </span>
-                                <a
-                                    href={benefit.link}
-                                    className="w-full py-2 px-3 rounded-full text-sm font-medium text-center text-white shadow-lg hover:shadow-xl transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0"
+                                <div
+                                    className="w-full py-2 px-3 rounded-full text-sm font-medium text-center text-white shadow-sm opacity-90 cursor-default"
                                     style={{
                                         background: 'linear-gradient(to bottom right, rgb(245, 166, 35), rgb(200, 130, 20))'
                                     }}
                                 >
                                     Ver produtos
-                                </a>
+                                </div>
                             </div>
                         </div>
                     ))}

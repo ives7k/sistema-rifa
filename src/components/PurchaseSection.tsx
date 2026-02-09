@@ -167,10 +167,11 @@ const PurchaseSection = ({
     quantity: 0,
     totalPrice: 0,
     title: '',
-    image: ''
+    image: '',
+    spins: 0
   });
 
-  const handleOpenCheckout = (qty: number, price: number, title: string, img: string) => {
+  const handleOpenCheckout = (qty: number, price: number, title: string, img: string, spins: number) => {
     if (qty <= 0) {
       alert("Por favor, selecione pelo menos um título.");
       return;
@@ -184,7 +185,8 @@ const PurchaseSection = ({
       quantity: qty,
       totalPrice: price,
       title: title,
-      image: img
+      image: img,
+      spins: spins
     });
     setIsModalOpen(true);
   };
@@ -336,7 +338,7 @@ const PurchaseSection = ({
 
             {/* Botão Comprar */}
             <button
-              onClick={() => handleOpenCheckout(quantity, totalPrice, campaignTitle, campaignImage)}
+              onClick={() => handleOpenCheckout(quantity, totalPrice, campaignTitle, campaignImage, Math.floor(quantity / 5) * 2)}
               className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-0 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
               <div className="flex flex-col items-start justify-center h-full gap-0.5">
@@ -493,7 +495,7 @@ const PurchaseSection = ({
                 >+</button>
               </div>
               <button
-                onClick={() => handleOpenCheckout(quantity2, getCard2Price(quantity2), `${currentDayName || 'Hoje'} dos Sonhos`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482')}
+                onClick={() => handleOpenCheckout(quantity2, getCard2Price(quantity2), `${currentDayName || 'Hoje'} dos Sonhos`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482', Math.floor(quantity2 / 40) * 2)}
                 className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg"
               >
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
@@ -610,7 +612,7 @@ const PurchaseSection = ({
                 >+</button>
               </div>
               <button
-                onClick={() => handleOpenCheckout(quantity3, getCard3Price(quantity3), `${nextDayName || 'Amanhã'} Premiada`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/62/323532393437313938.png?fm=webp&cs=origin&auto=compress&w=858&h=482')}
+                onClick={() => handleOpenCheckout(quantity3, getCard3Price(quantity3), `${nextDayName || 'Amanhã'} Premiada`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/62/323532393437313938.png?fm=webp&cs=origin&auto=compress&w=858&h=482', Math.floor(quantity3 / 50) * 2)}
                 className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg"
               >
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
@@ -632,6 +634,7 @@ const PurchaseSection = ({
         totalPrice={checkoutData.totalPrice || totalPrice}
         campaignTitle={checkoutData.title || campaignTitle}
         campaignImage={checkoutData.image || campaignImage}
+        spins={checkoutData.spins}
       />
     </>
   );
