@@ -103,9 +103,9 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
               <button className="h-8 w-8 rounded-xl bg-[#212121] flex items-center justify-center text-white text-sm">
                 <i className="bi bi-headset"></i>
               </button>
-              <button className="h-8 w-8 rounded-xl bg-[#212121] flex items-center justify-center text-white text-sm">
+              <Link href="/meus-titulos" className="h-8 w-8 rounded-xl bg-[#212121] flex items-center justify-center text-white text-sm">
                 <i className="bi bi-trophy-fill"></i>
-              </button>
+              </Link>
 
               {/* Botão Menu GRANDE */}
               <button

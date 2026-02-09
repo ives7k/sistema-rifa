@@ -78,7 +78,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
             {/* Resultados */}
             <li>
-              <Link href="/resultados" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <Link href="/meus-titulos" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
                 <i className="bi bi-trophy-fill text-lg"></i>
                 <span>Resultados</span>
               </Link>
