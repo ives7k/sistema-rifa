@@ -60,10 +60,10 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
             {/* Entrar */}
             <li>
-              <Link href="/login" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-4 px-5 py-4 cursor-default text-gray-500">
                 <i className="bi bi-box-arrow-in-right text-lg"></i>
                 <span>Entrar</span>
-              </Link>
+              </div>
             </li>
 
             <li className="border-b border-gray-200 mx-5"></li>
@@ -93,46 +93,46 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
             {/* Perguntas frequentes */}
             <li>
-              <Link href="/faq" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-4 px-5 py-4 cursor-default text-gray-500">
                 <i className="bi bi-question-circle-fill text-lg"></i>
                 <span>Perguntas frequentes</span>
-              </Link>
+              </div>
             </li>
 
             {/* Termos de uso */}
             <li>
-              <Link href="/termos" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-4 px-5 py-4 cursor-default text-gray-500">
                 <i className="bi bi-hammer text-lg"></i>
                 <span>Termos de uso</span>
-              </Link>
+              </div>
             </li>
 
             {/* Regulamento */}
             <li>
-              <Link href="/regulamento" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-4 px-5 py-4 cursor-default text-gray-500">
                 <span className="text-xl leading-none w-[18px] text-center font-serif font-bold">§</span>
                 <span>Regulamento</span>
-              </Link>
+              </div>
             </li>
 
             <li className="border-b border-gray-200 mx-5"></li>
 
             {/* Clube PDM */}
             <li>
-              <Link href="/clube" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-4 px-5 py-4 cursor-default text-gray-500">
                 <i className="bi bi-gift-fill text-lg"></i>
                 <span>Clube PDM</span>
-              </Link>
+              </div>
             </li>
 
             <li className="border-b border-gray-200 mx-5"></li>
 
             {/* Contato */}
             <li>
-              <Link href="/contato" onClick={onClose} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center gap-4 px-5 py-4 cursor-default text-gray-500">
                 <i className="bi bi-chat-fill text-lg"></i>
                 <span>Contato</span>
-              </Link>
+              </div>
             </li>
             <li className="border-b border-gray-200 mx-5"></li>
 
