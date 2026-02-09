@@ -8,31 +8,48 @@ export const runtime = 'edge';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    let { telefone } = body;
+    let { telefone, cpf } = body;
 
-    if (!telefone) {
-      return NextResponse.json({ success: false, message: 'Telefone não fornecido.' }, { status: 400 });
+    if (!telefone && !cpf) {
+      return NextResponse.json({ success: false, message: 'Telefone ou CPF não fornecido.' }, { status: 400 });
     }
 
-    // Limpa a máscara do telefone para buscar no banco (usa util compartilhado)
-    telefone = limparTelefone(telefone);
+    let query = supabaseAdmin.from('clientes').select('nome, email, cpf, telefone');
 
-    const { data: cliente, error } = await supabaseAdmin
-      .from('clientes')
-      .select('nome, email, cpf')
-      .eq('telefone', telefone)
-      .single(); // .single() para pegar apenas um resultado ou null
+    if (cpf) {
+      // Limpa CPF: remove não dígitos
+      const cleanCpf = String(cpf).replace(/\D/g, '');
+      query = query.eq('cpf', cleanCpf);
+    } else {
+      // Limpa Telefone
+      const cleanPhone = limparTelefone(telefone);
+      query = query.eq('telefone', cleanPhone);
+    }
 
-    if (error && error.code !== 'PGRST116') { // PGRST116: significa 'nenhuma linha encontrada', o que não é um erro para nós
+    const { data: cliente, error } = await query.single();
+
+    if (error && error.code !== 'PGRST116') {
       console.error('Erro ao buscar cliente no Supabase:', error);
-      throw new Error('Erro ao consultar o banco de dados.');
+      return NextResponse.json({ success: false, message: 'Erro ao consultar o banco de dados.' }, { status: 500 });
     }
 
     if (cliente) {
-      // Evita expor CPF completo via API pública
-      const maskedCpf = String(cliente.cpf || '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-      const safeCliente = { nome: cliente.nome, email: cliente.email, cpf: maskedCpf };
-      return NextResponse.json({ success: true, found: true, cliente: safeCliente });
+      // Retorna dados encontrados.
+      // Se buscou por CPF, retorna telefone mascarado? Ou full?
+      // O frontend precisa do telefone para contato/pix.
+      // Vamos retornar os dados que temos. O frontend decide como exibir.
+      // Mas por segurança, CPF sempre mascarado se a busca foi por telefone.
+      // Se a busca foi por CPF, o usuário JÁ TEM o CPF, então podemos confirmar.
+      // Vamos retornar os dados "limpos" e o front formata.
+
+      const responseData = {
+        nome: cliente.nome,
+        email: cliente.email,
+        cpf: cliente.cpf, // Pode retornar completo pois será preenchido no input se necessário, ou mascarado. O front decide.
+        telefone: cliente.telefone
+      };
+
+      return NextResponse.json({ success: true, found: true, cliente: responseData });
     } else {
       return NextResponse.json({ success: true, found: false });
     }

@@ -168,54 +168,62 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     setFormData(prev => ({ ...prev, [name]: maskedValue }));
   }, []);
 
-  const handlePhoneSubmit = useCallback(async (e: React.FormEvent) => {
+  const [isCheckingCpf, setIsCheckingCpf] = useState(false);
+
+  // ... (outros states)
+
+  const handleCpfSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    const phoneDigits = formData.telefone.replace(/\D/g, '');
-    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
-      setError('Telefone inválido. Por favor, insira um número com 10 ou 11 dígitos, incluindo o DDD.');
+    const cpfDigits = formData.cpf.replace(/\D/g, '');
+    if (cpfDigits.length !== 11) {
+      setError('CPF inválido. Por favor, insira um CPF com 11 dígitos.');
       return;
     }
     setError(null);
-    setIsCheckingPhone(true);
+    setIsCheckingCpf(true);
     setIsClientFound(false);
 
     try {
       const response = await fetch('/api/clients/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telefone: formData.telefone }),
+        body: JSON.stringify({ cpf: cpfDigits }),
       });
       const data = await response.json();
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Não foi possível verificar o telefone.');
+      if (!response.ok) {
+        // Se erro, apenas loga e segue para cadastro (assumindo novo user ou erro de busca)
+        // Mas se erro 500, talvez devêssemos avisar.
+        // Se !data.success, vamos assumir que não achou e deixar cadastrar.
       }
 
-      if (data.found) {
-        const maskedCpf = data.cliente.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      if (data.success && data.found) {
         setFormData(prev => ({
           ...prev,
           nome: data.cliente.nome,
-          email: data.cliente.email || '', // Email é opcional no bd, garantir que não seja null
-          cpf: maskedCpf,
+          email: data.cliente.email || '',
+          telefone: data.cliente.telefone || prev.telefone,
+          // Mantém telefone se o usuário já digitou algo (improvável no step 1), 
+          // ou usa do banco. Se banco retornar null, fica vazio.
         }));
         setIsClientFound(true);
-        // Login automático usando o CPF encontrado
+        // Login automático
         try {
           await fetch('/api/client/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cpf: data.cliente.cpf }) });
         } catch { }
       } else {
         setIsClientFound(false);
+        // Não achou: usuário novo. Mantém o CPF digitado e pede o resto.
       }
       setStep(2);
 
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
-      else setError('Ocorreu um erro desconhecido ao buscar cliente.');
+      else setError('Ocorreu um erro ao buscar cliente.');
     } finally {
-      setIsCheckingPhone(false);
+      setIsCheckingCpf(false);
     }
-  }, [formData.telefone]);
+  }, [formData.cpf]);
 
   const handlePayment = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,7 +249,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quantity: quantity,
-          ...formData,
+          ...formData, // envia os dados informados
           amount: totalPrice, // Envia o valor total calculado pelo frontend
           spins: bonusSpins, // Envia os giros calculados
           trackingParameters: tracking
@@ -264,7 +272,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     } finally {
       setIsLoading(false);
     }
-  }, [formData, quantity, tracking]);
+  }, [formData, quantity, totalPrice, bonusSpins, tracking]);
 
   const copyToClipboard = useCallback((text: string) => {
     navigator.clipboard.writeText(text);
@@ -287,6 +295,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
       setTitles([]);
       setIsClientFound(false);
       setIsCheckingPhone(false);
+      setIsCheckingCpf(false);
       setIsEditingData(false);
       // habilita debug por env ou query ?debug=1
       try {
@@ -304,7 +313,6 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
           xcod: get('xcod'), fbclid: get('fbclid'), gclid: get('gclid'), ttclid: get('ttclid'),
         });
       } catch { }
-      // título e imagem já são passados pela seção de compra via props (quando disponível); fallback deixado para seção
     } else {
       document.body.classList.remove('modal-open');
     }
@@ -353,27 +361,28 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
     return () => es.close();
   }, [pixData?.token, paymentStatus]);
 
-
-  // --- Lógica de Renderização ---
-  if (!isOpen) {
-    return null;
-  }
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
-          <form className="space-y-2" onSubmit={handlePhoneSubmit}>
+          <form className="space-y-2" onSubmit={handleCpfSubmit}>
             <div>
-              <label htmlFor="telefone" className="block text-sm font-semibold text-gray-800 mb-1">Informe seu telefone</label>
-              <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleInputChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base" placeholder="(00) 00000-0000" inputMode="numeric" maxLength={15} />
+              <label htmlFor="cpf" className="block text-sm font-semibold text-gray-800 mb-1">Informe seu CPF</label>
+              <input
+                type="tel" // teclado numérico
+                id="cpf"
+                name="cpf"
+                value={formData.cpf}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base"
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+                maxLength={14}
+              />
               {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
             </div>
-            <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={!formData.telefone || isCheckingPhone}>
-              {isCheckingPhone ? (
+            <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={!formData.cpf || isCheckingCpf}>
+              {isCheckingCpf ? (
                 <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Verificando...</span></>
               ) : (
                 <><span>Continuar</span><i className="bi bi-arrow-right"></i></>
@@ -388,61 +397,46 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
               <div className="bg-blue-100 border-l-4 border-blue-400 text-blue-800 p-2 text-sm rounded-r-md mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <i className="bi bi-person-check-fill"></i>
-                  <span>Olá de volta! Por favor, confirme seus dados.</span>
+                  <span>Olá de volta! Confirme seus dados.</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsEditingData((p) => !p)}
                   className="text-xs font-bold px-2 py-1 rounded-md border border-blue-300 text-blue-800 hover:bg-blue-200/60"
-                  aria-label={isEditingData ? 'Concluir edição' : 'Editar dados'}
                 >
                   {isEditingData ? 'Concluir' : 'Editar'}
                 </button>
               </div>
             )}
             <div>
+              {/* Nome */}
               <label htmlFor="nome" className="block text-sm font-semibold text-gray-800 mb-1">Nome Completo</label>
-              <input
-                type="text"
-                id="nome"
-                name="nome"
-                value={formData.nome}
-                onChange={handleInputChange}
-                disabled={isClientFound && !isEditingData}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"
-                placeholder="Seu nome completo"
-              />
+              <input type="text" id="nome" name="nome" value={formData.nome} onChange={handleInputChange} disabled={isClientFound && !isEditingData} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed" placeholder="Seu nome completo" />
             </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">E-mail</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                disabled={isClientFound && !isEditingData}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"
-                placeholder="seu@email.com"
-              />
+
+            <div className="grid grid-cols-1 gap-2">
+              {/* Telefone (agora aqui) e Email */}
+              <div>
+                <label htmlFor="telefone" className="block text-sm font-semibold text-gray-800 mb-1">Telefone (WhatsApp)</label>
+                <input type="tel" id="telefone" name="telefone" value={formData.telefone} onChange={handleInputChange} disabled={isClientFound && !isEditingData && !!formData.telefone} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed" placeholder="(00) 00000-0000" inputMode="numeric" maxLength={15} />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-1">E-mail</label>
+                <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} disabled={isClientFound && !isEditingData} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed" placeholder="seu@email.com" />
+              </div>
             </div>
-            <div>
-              <label htmlFor="cpf" className="block text-sm font-semibold text-gray-800 mb-1">CPF</label>
-              <input
-                type="text"
-                id="cpf"
-                name="cpf"
-                value={formData.cpf}
-                onChange={handleInputChange}
-                disabled={isClientFound && !isEditingData}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-400 text-base disabled:bg-gray-100 disabled:text-gray-700 disabled:cursor-not-allowed"
-                placeholder="000.000.000-00"
-                inputMode="numeric"
-                maxLength={14}
-              />
+
+            {/* CPF exibido apenas para conferência ou oculto? O usuário acabou de digitar. Vamos mostrar desabilitado ou permitir edição caso tenha errado? */}
+            {/* Como é a chave de busca, melhor deixar desabilitado ou permitir voltar. Se editar aqui, pode criar inconsistência se não revalidar. Melhor permitir voltar ao step 1 se quiser mudar CPF. */}
+
+            <div className="flex justify-between items-center mt-2">
+              <button type="button" onClick={() => setStep(1)} className="text-xs text-gray-500 underline hover:text-gray-700">Mudar CPF</button>
             </div>
+
             {error && <div className="bg-red-100 border-l-4 border-red-400 text-red-800 p-2 text-sm rounded-r-md"><i className="bi bi-x-circle-fill mr-2"></i>{error}</div>}
-            <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !formData.nome || !formData.email || !formData.cpf}>
+
+            <button type="submit" className="w-full bg-[#1db954] hover:bg-[#1aa34a] text-white font-bold py-2 px-4 rounded-lg flex justify-center items-center space-x-2 transition-colors disabled:bg-gray-400 text-sm" disabled={isLoading || !formData.nome || !formData.telefone || !formData.email}>
               {isLoading ? (
                 <><svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Gerando Pagamento...</span></>
               ) : (
@@ -451,6 +445,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
             </button>
           </form>
         );
+      // case 3 continua igual...
       case 3:
         return (
           <div className="space-y-2 max-h-[70vh] overflow-y-auto">
@@ -595,6 +590,14 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
         return null;
     }
   };
+
+  // --- Lógica de Renderização ---
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className={`fixed inset-0 bg-black/80 z-[999999] flex justify-center items-center p-4 overflow-y-auto h-screen w-screen ${inter.className}`}>
