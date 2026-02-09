@@ -405,7 +405,7 @@ async function sendConfirmationEmail(
 
   // Buscar nome da campanha (fallback)
   const campaign = await getCampaignSettings();
-  const tracking = compraData?.tracking_parameters as Record<string, any> | null;
+  const tracking = compraData?.tracking_parameters as Record<string, string | null | undefined> | null;
   const campaign_title = tracking?.campaign_title || campaign.title;
 
   // URL base do site

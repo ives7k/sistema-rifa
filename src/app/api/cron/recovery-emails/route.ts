@@ -78,7 +78,7 @@ export async function GET(request: Request) {
                     continue;
                 }
 
-                const tracking = compra.tracking_parameters as Record<string, any> | null;
+                const tracking = compra.tracking_parameters as Record<string, string | null | undefined> | null;
                 const campaign_title = tracking?.campaign_title || campaign.title;
 
                 const html = buildRecoveryHtml({
