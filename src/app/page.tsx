@@ -36,7 +36,7 @@ export default async function Home() {
           ticketPrice={1.99}
           drawLabel={drawLabel}
           campaignTitle={settings.title}
-          campaignImage={settings.imageUrl}
+          campaignImage="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/65/2d31323237383330373331.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
           minQuantity={5}
           defaultQuantity={10}
         />

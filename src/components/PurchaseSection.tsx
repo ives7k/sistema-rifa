@@ -305,8 +305,14 @@ const PurchaseSection = ({
         >
           {/* Banner */}
           <div className="pb-0">
-            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">{currentDayName?.toUpperCase() || 'HOJE'} DOS SONHOS</span>
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
+              <Image
+                src="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
+                alt={`${currentDayName} dos Sonhos`}
+                fill
+                className="object-cover"
+                unoptimized
+              />
             </div>
           </div>
 
@@ -327,7 +333,7 @@ const PurchaseSection = ({
               <span
                 className="px-3 rounded-lg"
                 style={{
-                  backgroundColor: '#22C55E',
+                  backgroundColor: '#212121',
                   color: 'rgb(255, 255, 255)',
                   fontSize: '12px',
                   fontWeight: 700,
@@ -337,9 +343,9 @@ const PurchaseSection = ({
                   alignItems: 'center'
                 }}
               >
-                49% OFF
+                60% OFF
               </span>
-              <button className="w-6 h-6 rounded-full bg-[#212121] flex items-center justify-center text-white text-sm">
+              <button className="w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center text-white text-sm">
                 <i className="bi bi-info"></i>
               </button>
             </div>
@@ -407,8 +413,14 @@ const PurchaseSection = ({
         >
           {/* Banner */}
           <div className="pb-0">
-            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">{nextDayName?.toUpperCase() || 'AMANHÃ'} PREMIADA - R$ 40 MIL</span>
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
+              <Image
+                src="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/62/323532393437313938.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
+                alt={`${nextDayName} Premiada`}
+                fill
+                className="object-cover"
+                unoptimized
+              />
             </div>
           </div>
 
@@ -426,6 +438,21 @@ const PurchaseSection = ({
               <span className="font-medium">Em 1 dia</span>
             </div>
             <div className="flex items-center gap-2">
+              <span
+                className="px-3 rounded-lg"
+                style={{
+                  backgroundColor: '#212121',
+                  color: 'rgb(255, 255, 255)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '1.2px',
+                  height: '26px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                60% OFF
+              </span>
               <button className="w-6 h-6 rounded-full bg-[#22C55E] flex items-center justify-center text-white text-sm">
                 <i className="bi bi-info"></i>
               </button>
