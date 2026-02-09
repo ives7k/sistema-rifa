@@ -85,7 +85,7 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
                       />
                     </div>
                   ) : (
-                    <span className="text-[#1a365d] text-xl leading-[1] select-none block tracking-tight italic font-bold">
+                    <span className="text-[#212121] text-xl leading-[0.85] select-none block tracking-tight italic font-black text-center">
                       <span className="block">PIX DO</span>
                       <span className="block">MILHÃO</span>
                     </span>

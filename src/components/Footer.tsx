@@ -15,7 +15,7 @@ const Footer = () => {
       <div className="container mx-auto max-w-lg">
         {/* Logo */}
         <div className="mb-4 text-center">
-          <h2 className="text-3xl font-bold italic tracking-tight">
+          <h2 className="text-3xl font-black italic tracking-tight leading-[0.85] select-none text-center">
             PIX DO<br />MILHÃO
           </h2>
         </div>

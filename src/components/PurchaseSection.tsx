@@ -240,10 +240,10 @@ const PurchaseSection = ({
                 {btn.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                     <div
-                      className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap"
+                      className="flex items-center gap-0.5 text-white text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full shadow-md whitespace-nowrap"
                       style={{ backgroundColor: '#DC2626' }}
                     >
-                      <i className="bi bi-fire"></i>
+                      <i className="bi bi-fire text-[9px]"></i>
                       <span>POPULAR</span>
                     </div>
                   </div>
@@ -383,8 +383,8 @@ const PurchaseSection = ({
               >
                 {/* Badge POPULAR */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <div className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
-                    <i className="bi bi-fire"></i>
+                  <div className="flex items-center gap-0.5 text-white text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
+                    <i className="bi bi-fire text-[9px]"></i>
                     <span>POPULAR</span>
                   </div>
                 </div>
@@ -497,8 +497,8 @@ const PurchaseSection = ({
               >
                 {/* Badge POPULAR */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                  <div className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
-                    <i className="bi bi-fire"></i>
+                  <div className="flex items-center gap-0.5 text-white text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
+                    <i className="bi bi-fire text-[9px]"></i>
                     <span>POPULAR</span>
                   </div>
                 </div>
