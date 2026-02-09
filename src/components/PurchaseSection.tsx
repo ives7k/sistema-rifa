@@ -33,6 +33,7 @@ const PurchaseSection = ({
   const initialDefaultQtyRaw = typeof defaultQuantityProp === 'number' ? Math.max(1, Math.floor(defaultQuantityProp)) : 10;
   const initialDefaultQty = Math.max(initialMinQty, initialDefaultQtyRaw);
 
+  // Card 1 - Pix do Milhão (R$ 1,99 por cota, min 5)
   const [quantity, setQuantity] = useState(initialDefaultQty);
   const [totalPrice, setTotalPrice] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
@@ -46,6 +47,16 @@ const PurchaseSection = ({
   const [currentDayName, setCurrentDayName] = useState<string>('');
   const [nextDayName, setNextDayName] = useState<string>('');
   const MAX_QUANTITY = 200;
+
+  // Card 2 - Dia dos Sonhos (R$ 0,25 por cota, min 40 = R$ 9,99)
+  const CARD2_PRICE = 0.25;
+  const CARD2_MIN = 40;
+  const [quantity2, setQuantity2] = useState(40);
+
+  // Card 3 - Próximo Dia Premiado (R$ 0,20 por cota, min 50 = R$ 9,99)
+  const CARD3_PRICE = 0.20;
+  const CARD3_MIN = 50;
+  const [quantity3, setQuantity3] = useState(50);
 
   // Nomes dos dias da semana em português
   const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -210,7 +221,7 @@ const PurchaseSection = ({
             {QUANTITY_BUTTONS.map((btn) => (
               <button
                 key={btn.value}
-                onClick={() => handleSetQuantity(btn.value)}
+                onClick={() => handleAddQuantity(btn.value)}
                 className={`relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl
                   bg-gray-100 font-bold text-xl text-gray-700
                   shadow-sm transition-all duration-200 ease-out
@@ -242,7 +253,7 @@ const PurchaseSection = ({
           <div className="flex gap-2 items-stretch">
 
             {/* Seletor Preto/Amarelo - Estilo PDM Original */}
-            <div className="flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
+            <div className="flex-1 flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
               <button
                 onClick={() => handleAddQuantity(-1)}
                 disabled={quantity <= minQuantity}
@@ -354,10 +365,16 @@ const PurchaseSection = ({
           {/* Botões +40, +50, +200 */}
           <div className="pb-3">
             <div className="grid grid-cols-3 gap-2">
-              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+              <button
+                onClick={() => setQuantity2(q => Math.min(q + 40, MAX_QUANTITY))}
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+              >
                 <span className="leading-tight">+ 40</span>
               </button>
-              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500">
+              <button
+                onClick={() => setQuantity2(q => Math.min(q + 50, MAX_QUANTITY))}
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500"
+              >
                 {/* Badge POPULAR */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                   <div className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
@@ -367,7 +384,10 @@ const PurchaseSection = ({
                 </div>
                 <span className="leading-tight">+ 50</span>
               </button>
-              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+              <button
+                onClick={() => setQuantity2(q => Math.min(q + 200, MAX_QUANTITY))}
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+              >
                 <span className="leading-tight">+ 200</span>
               </button>
             </div>
@@ -376,15 +396,27 @@ const PurchaseSection = ({
           {/* Seletor + Comprar */}
           <div className="pb-0">
             <div className="flex gap-2 items-stretch">
-              <div className="flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
-                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>−</button>
-                <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">40</strong>
-                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>+</button>
+              <div className="flex-1 flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
+                <button
+                  onClick={() => setQuantity2(q => Math.max(q - 1, CARD2_MIN))}
+                  disabled={quantity2 <= CARD2_MIN}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-opacity disabled:opacity-50"
+                  style={{ backgroundColor: 'rgb(245, 166, 35)' }}
+                >−</button>
+                <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">{quantity2}</strong>
+                <button
+                  onClick={() => setQuantity2(q => Math.min(q + 1, MAX_QUANTITY))}
+                  disabled={quantity2 >= MAX_QUANTITY}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-opacity disabled:opacity-50"
+                  style={{ backgroundColor: 'rgb(245, 166, 35)' }}
+                >+</button>
               </div>
               <button className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg">
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
                   <span className="text-sm leading-none">Comprar</span>
-                  <span className="leading-none font-bold">R$ 9,99</span>
+                  <span className="leading-none font-bold">
+                    {(quantity2 * CARD2_PRICE).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
                 </div>
               </button>
             </div>
@@ -447,10 +479,16 @@ const PurchaseSection = ({
           {/* Botões +10, +50, +100 */}
           <div className="pb-3">
             <div className="grid grid-cols-3 gap-2">
-              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+              <button
+                onClick={() => setQuantity3(q => Math.min(q + 10, MAX_QUANTITY))}
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+              >
                 <span className="leading-tight">+ 10</span>
               </button>
-              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500">
+              <button
+                onClick={() => setQuantity3(q => Math.min(q + 50, MAX_QUANTITY))}
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500"
+              >
                 {/* Badge POPULAR */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                   <div className="flex items-center gap-1 text-white text-xs font-bold uppercase px-2.5 py-1 rounded-full shadow-md whitespace-nowrap" style={{ backgroundColor: '#DC2626' }}>
@@ -460,7 +498,10 @@ const PurchaseSection = ({
                 </div>
                 <span className="leading-tight">+ 50</span>
               </button>
-              <button className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm">
+              <button
+                onClick={() => setQuantity3(q => Math.min(q + 100, MAX_QUANTITY))}
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+              >
                 <span className="leading-tight">+ 100</span>
               </button>
             </div>
@@ -469,15 +510,27 @@ const PurchaseSection = ({
           {/* Seletor + Comprar */}
           <div className="pb-0">
             <div className="flex gap-2 items-stretch">
-              <div className="flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
-                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>−</button>
-                <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">50</strong>
-                <button className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold" style={{ backgroundColor: 'rgb(245, 166, 35)' }}>+</button>
+              <div className="flex-1 flex items-center justify-center rounded-xl px-3 min-h-[3.7rem]" style={{ backgroundColor: '#212121' }}>
+                <button
+                  onClick={() => setQuantity3(q => Math.max(q - 1, CARD3_MIN))}
+                  disabled={quantity3 <= CARD3_MIN}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-opacity disabled:opacity-50"
+                  style={{ backgroundColor: 'rgb(245, 166, 35)' }}
+                >−</button>
+                <strong className="min-w-[3rem] text-center text-white text-2xl font-bold mx-2">{quantity3}</strong>
+                <button
+                  onClick={() => setQuantity3(q => Math.min(q + 1, MAX_QUANTITY))}
+                  disabled={quantity3 >= MAX_QUANTITY}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-opacity disabled:opacity-50"
+                  style={{ backgroundColor: 'rgb(245, 166, 35)' }}
+                >+</button>
               </div>
               <button className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg">
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
                   <span className="text-sm leading-none">Comprar</span>
-                  <span className="leading-none font-bold">R$ 9,99</span>
+                  <span className="leading-none font-bold">
+                    {(quantity3 * CARD3_PRICE).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </span>
                 </div>
               </button>
             </div>

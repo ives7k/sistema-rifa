@@ -2,6 +2,9 @@ import Header from "@/components/Header";
 import PurchaseSection from "@/components/PurchaseSection";
 import WinnersSection from "@/components/WinnersSection";
 import LastWinnersSection from "@/components/LastWinnersSection";
+import BannersSection from "@/components/BannersSection";
+import BenefitsSection from "@/components/BenefitsSection";
+import Footer from "@/components/Footer";
 import { getCampaignSettings } from "@/lib/campaign";
 
 export const runtime = 'edge';
@@ -49,6 +52,15 @@ export default async function Home() {
 
       {/* Seção Últimos Ganhadores - Confira quem mudou de vida */}
       <LastWinnersSection />
+
+      {/* Seção de Banners */}
+      <BannersSection />
+
+      {/* Seção Conheça nossos benefícios */}
+      <BenefitsSection />
+
+      {/* Rodapé */}
+      <Footer />
     </div>
   );
 }

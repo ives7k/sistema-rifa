@@ -4,10 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import MobileMenu from './MobileMenu';
-import { Oswald } from 'next/font/google';
 import Image from 'next/image';
-
-const oswald = Oswald({ subsets: ['latin'], weight: '700', style: 'normal' });
 
 type HeaderProps = {
   logoMode?: 'text' | 'image';
@@ -88,7 +85,7 @@ const Header = ({ logoMode: logoModeProp, logoText: logoTextProp, logoImageUrl: 
                       />
                     </div>
                   ) : (
-                    <span className={`${oswald.className} text-[#1a365d] text-xl leading-[1] select-none block tracking-tight italic font-bold`}>
+                    <span className="text-[#1a365d] text-xl leading-[1] select-none block tracking-tight italic font-bold">
                       <span className="block">PIX DO</span>
                       <span className="block">MILHÃO</span>
                     </span>
