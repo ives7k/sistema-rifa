@@ -162,16 +162,30 @@ const PurchaseSection = ({
     });
   };
 
-  const handleOpenModal = () => {
-    if (quantity <= 0) {
-      alert("Por favor, selecione pelo menos um título para participar.");
+  // Estado para dados do checkout dinâmico
+  const [checkoutData, setCheckoutData] = useState({
+    quantity: 0,
+    totalPrice: 0,
+    title: '',
+    image: ''
+  });
+
+  const handleOpenCheckout = (qty: number, price: number, title: string, img: string) => {
+    if (qty <= 0) {
+      alert("Por favor, selecione pelo menos um título.");
       return;
     }
-    if (totalPrice > MAX_PIX_TOTAL_BR) {
+    if (price > MAX_PIX_TOTAL_BR) {
       const maxPix = MAX_PIX_TOTAL_BR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      alert(`Valor máximo por Pix é ${maxPix}. Diminua a quantidade ou faça várias compras.`);
+      alert(`Valor máximo por Pix é ${maxPix}. Diminua a quantidade.`);
       return;
     }
+    setCheckoutData({
+      quantity: qty,
+      totalPrice: price,
+      title: title,
+      image: img
+    });
     setIsModalOpen(true);
   };
 
@@ -273,7 +287,6 @@ const PurchaseSection = ({
                   shadow-sm transition-all duration-200 ease-out
                   active:scale-95 active:shadow-inner
                   hover:shadow-md hover:-translate-y-0.5
-                  ${quantity === btn.value ? 'ring-2 ring-orange-400 text-orange-500' : ''}
                 `}
               >
                 {/* Badge POPULAR acima do +10 */}
@@ -323,7 +336,7 @@ const PurchaseSection = ({
 
             {/* Botão Comprar */}
             <button
-              onClick={handleOpenModal}
+              onClick={() => handleOpenCheckout(quantity, totalPrice, campaignTitle, campaignImage)}
               className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium py-0 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md"
             >
               <div className="flex flex-col items-start justify-center h-full gap-0.5">
@@ -435,13 +448,13 @@ const PurchaseSection = ({
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setQuantity2(q => Math.min(q + 40, CARD2_MAX))}
-                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 ease-out active:scale-95 active:shadow-inner hover:-translate-y-0.5"
               >
                 <span className="leading-tight">+ 40</span>
               </button>
               <button
                 onClick={() => setQuantity2(q => Math.min(q + 50, CARD2_MAX))}
-                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500"
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 ease-out active:scale-95 active:shadow-inner hover:-translate-y-0.5"
               >
                 {/* Badge POPULAR */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -454,7 +467,7 @@ const PurchaseSection = ({
               </button>
               <button
                 onClick={() => setQuantity2(q => Math.min(q + 200, CARD2_MAX))}
-                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 ease-out active:scale-95 active:shadow-inner hover:-translate-y-0.5"
               >
                 <span className="leading-tight">+ 200</span>
               </button>
@@ -479,7 +492,10 @@ const PurchaseSection = ({
                   style={{ backgroundColor: 'rgb(245, 166, 35)' }}
                 >+</button>
               </div>
-              <button className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg">
+              <button
+                onClick={() => handleOpenCheckout(quantity2, getCard2Price(quantity2), `${currentDayName || 'Hoje'} dos Sonhos`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482')}
+                className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg"
+              >
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
                   <span className="text-sm leading-none">Comprar</span>
                   <span className="leading-none font-bold">
@@ -549,13 +565,13 @@ const PurchaseSection = ({
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setQuantity3(q => Math.min(q + 10, CARD3_MAX))}
-                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 ease-out active:scale-95 active:shadow-inner hover:-translate-y-0.5"
               >
                 <span className="leading-tight">+ 10</span>
               </button>
               <button
                 onClick={() => setQuantity3(q => Math.min(q + 50, CARD3_MAX))}
-                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm ring-2 ring-orange-400 text-orange-500"
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 ease-out active:scale-95 active:shadow-inner hover:-translate-y-0.5"
               >
                 {/* Badge POPULAR */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
@@ -568,7 +584,7 @@ const PurchaseSection = ({
               </button>
               <button
                 onClick={() => setQuantity3(q => Math.min(q + 100, CARD3_MAX))}
-                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all"
+                className="relative flex flex-col items-center justify-center px-3 py-3 rounded-2xl bg-gray-100 font-bold text-xl text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 ease-out active:scale-95 active:shadow-inner hover:-translate-y-0.5"
               >
                 <span className="leading-tight">+ 100</span>
               </button>
@@ -593,7 +609,10 @@ const PurchaseSection = ({
                   style={{ backgroundColor: 'rgb(245, 166, 35)' }}
                 >+</button>
               </div>
-              <button className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg">
+              <button
+                onClick={() => handleOpenCheckout(quantity3, getCard3Price(quantity3), `${nextDayName || 'Amanhã'} Premiada`, 'https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/62/323532393437313938.png?fm=webp&cs=origin&auto=compress&w=858&h=482')}
+                className="pulse-buy flex-1 min-h-[3.7rem] bg-gradient-to-br from-green-500 to-green-600 text-white font-medium py-0 px-4 rounded-lg shadow-lg"
+              >
                 <div className="flex flex-col items-start justify-center h-full gap-0.5">
                   <span className="text-sm leading-none">Comprar</span>
                   <span className="leading-none font-bold">
@@ -609,9 +628,10 @@ const PurchaseSection = ({
       <CheckoutModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        quantity={quantity}
-        campaignTitle={campaignTitle}
-        campaignImage={campaignImage}
+        quantity={checkoutData.quantity || quantity}
+        totalPrice={checkoutData.totalPrice || totalPrice}
+        campaignTitle={checkoutData.title || campaignTitle}
+        campaignImage={checkoutData.image || campaignImage}
       />
     </>
   );

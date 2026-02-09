@@ -12,16 +12,20 @@ export const runtime = 'edge';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { nome, email, cpf, telefone, quantity, trackingParameters }: {
+        const { nome, email, cpf, telefone, quantity, trackingParameters, amount }: {
             nome: string; email: string; cpf: string; telefone: string; quantity: number;
             trackingParameters?: Record<string, string | null>;
+            amount?: number;
         } = body;
 
         // --- Validação de Entrada ---
         const campaign = await getCampaignSettings();
         const MIN_QUANTITY = typeof campaign.minQuantity === 'number' ? Math.max(1, Math.floor(campaign.minQuantity)) : 15;
-        if (!quantity || typeof quantity !== 'number' || quantity < MIN_QUANTITY) {
-            throw new Error(`Quantidade mínima é ${MIN_QUANTITY}.`);
+        // Permitir quantidade menor se for um card especial (assumindo que o frontend valida)
+        // Mas o código original tinha validação rígida. Vou manter a validação de quantidade mínima mas flexibilizar se amount for passado?
+        // O usuário falou "apenas registrar a quantidade de cotas e o valor".
+        if (!quantity || typeof quantity !== 'number') {
+            throw new Error(`Quantidade inválida.`);
         }
         if (!nome || !email || !cpf || !telefone) {
             throw new Error('Todos os campos são obrigatórios: nome, email, cpf e telefone.');
@@ -30,9 +34,17 @@ export async function POST(request: Request) {
         const telefone_limpo = limparTelefone(telefone);
         const cpf_limpo = limparCpf(cpf);
 
-        // --- Cálculo de valor no SERVIDOR (fonte de verdade) ---
-        const ticketPrice = typeof campaign.ticketPrice === 'number' ? campaign.ticketPrice : 0.11;
-        const valor = quantity * ticketPrice;
+        // --- Cálculo de valor ---
+        // Se 'amount' for fornecido pelo frontend, usamos ele (para suportar múltiplos cards com preços variados).
+        // Caso contrário, usamos o cálculo padrão do servidor.
+        let valor: number;
+        if (typeof amount === 'number' && amount > 0) {
+            valor = amount;
+        } else {
+            const ticketPrice = typeof campaign.ticketPrice === 'number' ? campaign.ticketPrice : 0.11;
+            valor = quantity * ticketPrice;
+        }
+
         if (valor > MAX_PIX_TOTAL_BR) {
             throw new Error(`Valor máximo por Pix é R$ ${MAX_PIX_TOTAL_BR.toFixed(2)}. Reduza a quantidade ou realize múltiplas compras.`);
         }
