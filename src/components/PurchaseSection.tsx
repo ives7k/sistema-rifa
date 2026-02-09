@@ -188,13 +188,34 @@ const PurchaseSection = ({
 
         {/* Banner da Campanha */}
         <div className="pb-0">
-          <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
+          <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden group">
+            {/* Letreiro Animado */}
+            <div className="absolute top-0 left-0 right-0 z-20 bg-[#2563EB] text-white py-1 overflow-hidden">
+              <style jsx>{`
+                  @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                  }
+                  .animate-marquee {
+                    display: flex;
+                    width: max-content;
+                    animation: marquee 15s linear infinite;
+                  }
+                `}</style>
+              <div className="animate-marquee flex gap-8 items-center text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 1 MILHÃO DE REAIS HOJE!!!</span>
+                <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 1 MILHÃO DE REAIS HOJE!!!</span>
+                <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 1 MILHÃO DE REAIS HOJE!!!</span>
+                <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 1 MILHÃO DE REAIS HOJE!!!</span>
+              </div>
+            </div>
+
             {campaignImage && (
               <Image
                 src={campaignImage}
                 alt={campaignTitle || 'Campanha'}
                 fill
-                className="object-cover"
+                className="object-cover mt-6" // mt-6 para compensar o letreiro
                 priority
                 unoptimized
               />
@@ -341,13 +362,35 @@ const PurchaseSection = ({
         >
           {/* Banner */}
           <div className="pb-0">
-            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden">
+            <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden group">
+              {/* Letreiro Animado */}
+              <div className="absolute top-0 left-0 right-0 z-20 bg-[#2563EB] text-white py-1 overflow-hidden">
+                <style jsx>{`
+                  @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                  }
+                  .animate-marquee {
+                    display: flex;
+                    width: max-content;
+                    animation: marquee 15s linear infinite;
+                  }
+                `}</style>
+                <div className="animate-marquee flex gap-8 items-center text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                  <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 100 MIL REAIS HOJE!!!</span>
+                  <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 100 MIL REAIS HOJE!!!</span>
+                  <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 100 MIL REAIS HOJE!!!</span>
+                  <span className="flex items-center gap-2">🚨 NÃO PERCA TEMPO - CONCORRA A 100 MIL REAIS HOJE!!!</span>
+                </div>
+              </div>
+
               <Image
                 src="https://assets.pixdomilhao.com.br/pix-do-milhao/sorteios/61/2d363530393130393737.png?fm=webp&cs=origin&auto=compress&w=858&h=482"
                 alt={`${currentDayName} dos Sonhos`}
                 fill
-                className="object-cover"
+                className="object-cover mt-6" // mt-6 para compensar o letreiro
                 unoptimized
+                priority
               />
             </div>
           </div>
