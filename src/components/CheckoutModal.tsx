@@ -393,9 +393,9 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
           const data = await res.json();
           if (data.success && data.compras) {
             const winners: string[] = [];
-            data.compras.forEach((compra: any) => {
+            data.compras.forEach((compra: { bilhetes: { numero: string; premiada: boolean }[] }) => {
               if (compra.bilhetes) {
-                compra.bilhetes.forEach((b: any) => {
+                compra.bilhetes.forEach((b) => {
                   if (b.premiada) winners.push(b.numero);
                 });
               }
@@ -409,7 +409,7 @@ const CheckoutModal = ({ isOpen, onClose, quantity, campaignTitle: campaignTitle
 
       checkWinnings();
     }
-  }, [paymentStatus, pixData]);
+  }, [paymentStatus, pixData, debugEnabled, titles]);
 
   // SSE: escuta confirmação push do servidor para esta transação
   useEffect(() => {
