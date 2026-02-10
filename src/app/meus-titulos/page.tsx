@@ -148,7 +148,37 @@ const MeusTitulosPage = () => {
     }
     setTaxLoading(true);
     setTaxError(null);
+
+    const isDebug = process.env.NEXT_PUBLIC_DEBUG_CHECKOUT === 'true';
+
     try {
+      if (isDebug) {
+        // Mock response para debug
+        console.log('Modo DEBUG: Simulando geração de PIX do imposto...');
+        await new Promise(r => setTimeout(r, 1000));
+
+        const mockData: TaxPixData = {
+          token: 'debug-tax-token-' + Date.now(),
+          qrCodeUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Link_pra_pagina_principal_da_Wikipedia-PT_em_codigo_QR_b.svg/100px-Link_pra_pagina_principal_da_Wikipedia-PT_em_codigo_QR_b.svg.png',
+          pixCopiaECola: '00020126330014BR.GOV.BCB.PIX0111debug@pix.br5204000053039865802BR5909Debug User6008BRASILIA62070503***63041234',
+          valor: TAX_VALOR
+        };
+
+        setTaxPixData(mockData);
+        setTaxStep('pix');
+        setShowQr(window.innerWidth >= 768);
+        setTimeLeft(600);
+
+        // Auto-pagar em 5s no debug
+        setTimeout(() => {
+          setTaxPaymentStatus('paid');
+          setTaxStep('processing');
+          fireConfettiBurst();
+        }, 5000);
+
+        return;
+      }
+
       const res = await fetch('/api/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -171,21 +201,12 @@ const MeusTitulosPage = () => {
       setTaxStep('pix');
       setShowQr(window.innerWidth >= 768);
       setTimeLeft(600);
-
-      // Simulação de pagamento em modo debug
-      if (process.env.NEXT_PUBLIC_DEBUG_CHECKOUT === 'true') {
-        console.log('Modo DEBUG ativado: Simulando pagamento do imposto em 5s...');
-        setTimeout(() => {
-          setTaxPaymentStatus('paid');
-          setTaxStep('processing');
-          fireConfettiBurst();
-        }, 5000);
-      }
     } catch (err) {
       if (err instanceof Error) setTaxError(err.message);
       else setTaxError('Erro ao gerar pagamento do imposto.');
     } finally {
-      setTaxLoading(false);
+      if (!isDebug) setTaxLoading(false);
+      else setTaxLoading(false);
     }
   };
 
@@ -516,7 +537,10 @@ const MeusTitulosPage = () => {
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3 flex justify-between items-center border border-gray-100">
                       <span className="text-sm font-semibold text-gray-600">Imposto a pagar</span>
-                      <span className="text-xl font-bold text-gray-900">{TAX_VALOR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                      <div className="text-right">
+                        <span className="block text-xl font-bold text-gray-900">{TAX_VALOR.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                        <span className="text-[10px] text-green-600 font-medium bg-green-50 px-1.5 py-0.5 rounded-md">Apenas 0,27% do prêmio</span>
+                      </div>
                     </div>
                     <p className="text-[11px] text-gray-400 text-center">
                       Após o pagamento, seu prêmio de {PREMIO_DESCRICAO} será liberado em até 24h úteis.
