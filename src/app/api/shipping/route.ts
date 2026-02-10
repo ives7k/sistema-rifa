@@ -3,6 +3,7 @@ import { limparCpf, limparTelefone } from '@/utils/formatters';
 import { FREIGHT_OPTIONS_BR } from '@/config/payments';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUtmifySettings, postUtmifyOrder, toUtcSqlDate } from '@/lib/utmify';
+import { getFacebookSettings } from '@/lib/facebook';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -149,6 +150,8 @@ export async function POST(request: Request) {
       }
     } catch { }
 
+    const fb = await getFacebookSettings();
+
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(result.pix.qrcode)}&size=300x300`;
 
     return NextResponse.json({
@@ -159,6 +162,7 @@ export async function POST(request: Request) {
       valor: freight.amount,
       freight: { id: freight.id, label: freight.label },
       address: { cep, endereco, numero, complemento, bairro, cidade, estado },
+      fb: { enabled: fb.enabled, sendPurchase: fb.sendPurchase, pixelId: fb.pixelId }
     });
   } catch {
     return NextResponse.json({ success: false, message: 'Erro interno.' }, { status: 500 });

@@ -4,7 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { FREIGHT_OPTIONS_BR } from '@/config/payments';
 
-type PixData = { token: string; pixCopiaECola: string; qrCodeUrl: string; valor: number };
+type PixData = {
+  token: string;
+  pixCopiaECola: string;
+  qrCodeUrl: string;
+  valor: number;
+  fb?: { enabled: boolean; sendPurchase: boolean; pixelId: string };
+};
 type InitialData = { nome?: string; email?: string; cpf?: string; telefone?: string };
 type Props = { onClose: () => void; onPix?: (data: PixData) => void; bannerImage?: string; prizeLabel?: string; initialData?: InitialData };
 
@@ -127,9 +133,22 @@ export default function FreightCheckoutModal({ onClose, onPix, bannerImage = '/r
       });
       const data = await resp.json();
       if (!resp.ok || !data?.success) throw new Error(data?.message || 'Erro ao gerar Pix do frete.');
-      const payload: PixData = { token: data.token, pixCopiaECola: data.pixCopiaECola, qrCodeUrl: data.qrCodeUrl, valor: data.valor };
+      const payload: PixData = {
+        token: data.token,
+        pixCopiaECola: data.pixCopiaECola,
+        qrCodeUrl: data.qrCodeUrl,
+        valor: data.valor,
+        fb: data.fb
+      };
       setPix(payload);
       onPix?.(payload);
+
+      try {
+        const w = window as unknown as { fbq?: (event: string, name: string, params?: Record<string, unknown>) => void };
+        if ((data.fb?.enabled && data.fb?.pixelId) && w.fbq) {
+          w.fbq('track', 'InitiateCheckout', { value: data.valor, currency: 'BRL' });
+        }
+      } catch { }
       // Mantém na etapa 2, exibindo QR Code e copia-e-cola abaixo das opções
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido.');
@@ -295,6 +314,18 @@ function PixLikeCheckout({ pix, onClose }: { pix: PixData; onClose: () => void }
       if (j?.success && j?.status === 'paid') setStatus('paid');
     } finally { setChecking(false); }
   };
+
+  useEffect(() => {
+    if (status === 'paid' && pix.fb?.enabled && pix.fb?.sendPurchase && pix.fb?.pixelId) {
+      try {
+        const w = window as unknown as { fbq?: (event: string, name: string, params?: Record<string, unknown>) => void };
+        if (w.fbq) {
+          w.fbq('track', 'Purchase', { value: pix.valor, currency: 'BRL' });
+        }
+      } catch { }
+    }
+  }, [status, pix]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(pix.pixCopiaECola);
     setCopied(true);
